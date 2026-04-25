@@ -30,7 +30,7 @@ class ChatbotService:
     ARABIC_DISEASE_HINTS: dict[str, list[str]] = {
         "late blight": ["لفحة متأخرة", "لفحه متاخره", "عفن طماطم", "عفن البطاطس", "عفن متأخر"],
         "early blight": ["لفحة مبكرة", "لفحه مبكره"],
-        "leaf mold": ["عفن ورقي", "عفن الأوراق", "عفن الاوراق"],
+        "plant mold": ["عفن ورقي", "عفن الأوراق", "عفن الاوراق"],
         "gray mold": ["العفن الرمادي", "عفن رمادي", "العفن الرمادى", "عفن الرمادي", "gray mold", "grey mold", "botrytis"],
         "black rot": ["عفن أسود", "عفن اسود"],
         "powdery mildew": ["بياض دقيقي", "البياض الدقيقي"],
@@ -256,7 +256,7 @@ class ChatbotService:
         for disease_hint, aliases in self.ARABIC_DISEASE_HINTS.items():
             target = index.get(self._normalize_lookup_text(disease_hint))
             if not target and disease_hint == "gray mold":
-                target = index.get(self._normalize_lookup_text("leaf mold"))
+                target = index.get(self._normalize_lookup_text("plant mold"))
             if not target:
                 continue
             for alias in aliases:
@@ -453,7 +453,7 @@ class ChatbotService:
 Your roles:
 - Provide accurate and reliable information about plant diseases and agricultural pests
 - Explain disease causes, prevention methods, and treatment options
-- Offer practical advice for improving crop health
+- Offer practical advice for improving plant health
 - Respond clearly and simply, avoiding unnecessary complexity
 - Use proper botanical and agricultural terminology
 
@@ -588,7 +588,7 @@ Always respond in English."""
                 "Closest diagnosis: gray mold or a similar fungal infection.",
                 "Recommended plan:",
                 "Immediate: isolate affected tissue, remove visibly infected leaves or fruit, and disinfect tools after each cut.",
-                "Next 7 days: reduce humidity, avoid prolonged leaf wetness, improve airflow, and use a crop-labeled fungicide if local guidance allows it.",
+                "Next 7 days: reduce humidity, avoid prolonged plant wetness, improve airflow, and use a plant-labeled fungicide if local guidance allows it.",
                 "Monitor: check new growth daily and escalate if fresh gray fuzzy growth appears.",
                 "Send the plant name or a photo and I can narrow it down using the project data."
             ])

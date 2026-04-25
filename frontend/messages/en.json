@@ -15,13 +15,13 @@
   },
   "landing": {
     "eyebrow": "Plantify Platform",
-    "title": "Modern crop health operations, built for real teams.",
+    "title": "Modern plant health operations, built for real teams.",
     "subtitle": "Plantify brings monitoring, analysis, and collaboration into one polished workflow so your team can move from observation to action faster.",
     "ctaPrimary": "Get started",
     "ctaSecondary": "View dashboard",
     "missionEyebrow": "Mission",
-    "missionTitle": "Make high-quality crop decisions accessible to every operation.",
-    "missionPoint1": "Design tools that make crop decisions faster and easier.",
+    "missionTitle": "Make high-quality plant decisions accessible to every operation.",
+    "missionPoint1": "Design tools that make plant decisions faster and easier.",
     "missionPoint2": "Deliver consistent outputs teams can trust in daily operations.",
     "missionPoint3": "Keep workflows simple from onboarding to field execution.",
     "missionItem1Title": "Precision At Scale",
@@ -123,7 +123,7 @@
       "statusProcessing": "AI Processing",
       "statusReady": "Image Ready",
       "statusWaiting": "Awaiting Upload",
-      "dropzoneTitle": "Drag and drop a leaf image",
+      "dropzoneTitle": "Drag and drop a plant image",
       "cta": "Start AI Scan",
       "scanning": "Scanning..."
     },
@@ -174,7 +174,7 @@
         "developer": "Developer"
       },
       "farmer": {
-        "uploadLeaf": "Upload leaf for analysis",
+        "uploadLeaf": "Upload plant for analysis",
         "viewHistory": "View scan history",
         "getAdvice": "Get treatment advice"
       },
@@ -196,22 +196,22 @@
     },
     "errors": {
       "signIn": "Sign in to run diagnostics.",
-      "upload": "Upload a leaf image to continue.",
+      "upload": "Upload a plant image to continue.",
       "scan": "Unable to scan image."
     }
   },
   "chat": {
     "title": "Agricultural Expert Chat",
     "welcome": "Welcome to Agricultural Expert",
-    "subtitle": "Ask questions about crop health, disease treatment, and agronomic practices. I'll respond in your language.",
-    "inputPlaceholder": "Ask a question about your crops...",
+    "subtitle": "Ask questions about plant health, disease treatment, and agronomic practices. I'll respond in your language.",
+    "inputPlaceholder": "Ask a question about your plant...",
     "send": "Send",
     "sending": "Sending...",
     "error": "Error",
     "hint": "Tip: Press Ctrl+Enter to send",
     "agri_expert": "Agri Expert",
     "online": "Always online",
-    "ask_question": "Ask about crop health, diseases, or treatment options",
+    "ask_question": "Ask about plant health, diseases, or treatment options",
     "message": "Type your message..."
   }
 }

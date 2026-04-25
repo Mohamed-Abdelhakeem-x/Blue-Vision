@@ -3,5 +3,5 @@
 fn main() {
     tauri::Builder::default()
         .run(tauri::generate_context!())
-        .expect("error while running Plantify desktop shell");
+        .expect("error while running BlueVision desktop shell");
 }

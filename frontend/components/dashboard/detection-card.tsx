@@ -130,8 +130,8 @@ export function DetectionCard({ token, onDetected }: DetectionCardProps) {
 
   return (
     <Card className="h-full">
-      <h3 className="text-base font-semibold">Leaf Scan Intake</h3>
-      <p className="mb-4 text-sm text-muted-foreground">Upload source and segmented samples for fast crop-health predictions.</p>
+      <h3 className="text-base font-semibold">Plant Scan Intake</h3>
+      <p className="mb-4 text-sm text-muted-foreground">Upload source and segmented samples for fast plant-health predictions.</p>
 
       <div className="grid gap-3">
         <div

@@ -7,7 +7,7 @@ const contentByLocale: Record<string, {title: string; updated: string; sections:
     title: "Terms of Service",
     updated: "Last updated: March 28, 2026",
     sections: [
-      {heading: "Service Scope", body: "Plantify provides AI-assisted crop diagnostics and recommendations. Outputs are decision-support guidance and do not replace professional agronomic judgment."},
+      {heading: "Service Scope", body: "Plantify provides AI-assisted plant diagnostics and recommendations. Outputs are decision-support guidance and do not replace professional agronomic judgment."},
       {heading: "Account Responsibilities", body: "You are responsible for account credentials, lawful usage, and accuracy of submitted data. Unauthorized access attempts are prohibited."},
       {heading: "Acceptable Use", body: "You agree not to abuse API capacity, bypass security controls, or use the service for unlawful or harmful activity."},
       {heading: "Service Availability", body: "We may update, suspend, or modify parts of the service for maintenance, security, or operational needs."},

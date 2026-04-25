@@ -485,7 +485,7 @@ export function RoleDashboard() {
   const navItems = useMemo<DashboardNavItem[]>(() => {
     if (role === "farmer") {
       return [
-        {id: "scan", label: copy.navScan, icon: "leaf"},
+        {id: "scan", label: copy.navScan, icon: "plant"},
         {id: "analyze", label: copy.navAnalyze, icon: "activity"},
         {id: "act", label: copy.navAct, icon: "clipboard"},
         {id: "scan-history", label: t("history.title"), icon: "history", href: "/scan-history"}

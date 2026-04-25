@@ -54,7 +54,7 @@ async def test_detect_rate_limit_enforced(client, monkeypatch):
         "/api/detect",
         headers={"Authorization": f"Bearer {access_token}"},
         data={"domain": "color"},
-        files={"image": ("leaf.png", b"\x89PNGmock", "image/png")},
+        files={"image": ("plant.png", b"\x89PNGmock", "image/png")},
     )
     assert ok.status_code == 200
 
@@ -62,7 +62,7 @@ async def test_detect_rate_limit_enforced(client, monkeypatch):
         "/api/detect",
         headers={"Authorization": f"Bearer {access_token}"},
         data={"domain": "color"},
-        files={"image": ("leaf.png", b"\x89PNGmock2", "image/png")},
+        files={"image": ("plant.png", b"\x89PNGmock2", "image/png")},
     )
     assert blocked.status_code == 429
     assert blocked.headers.get("Retry-After") is not None

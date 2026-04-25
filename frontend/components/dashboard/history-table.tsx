@@ -35,7 +35,7 @@ export function HistoryTable({ rows }: HistoryTableProps) {
             {rows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={3} className="py-8 text-center text-muted-foreground">
-                  No scans yet. Upload your first leaf image.
+                  No scans yet. Upload your first plant image.
                 </TableCell>
               </TableRow>
             ) : null}

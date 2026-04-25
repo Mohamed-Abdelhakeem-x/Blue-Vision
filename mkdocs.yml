@@ -1,5 +1,5 @@
 site_name: Plantify
-site_description: AI-powered plant disease detection
+site_description: AI-powered fish disease detection
 site_author: Plantify Contributors
 site_url: https://plantify.limarise.com  # Update with actual domain
 repo_url: https://github.com/naghdiefallah/plantify
@@ -75,7 +75,7 @@ nav:
     - Kubernetes: deployment/kubernetes.md
     - Cloud Providers: deployment/cloud.md
   - Features:
-    - Plant Detection: features/detection.md
+    - Fish Detection: features/detection.md
     - Disease Identification: features/diseases.md
     - API: features/api.md
     - Web Dashboard: features/dashboard.md

@@ -1,6 +1,6 @@
 DEFAULT_RECOMMENDATION = "\n".join([
     "Immediate: isolate the affected plant or row, remove heavily damaged leaves, and disinfect tools after handling.",
-    "Next 7 days: reduce leaf wetness, improve airflow, and use a crop-approved treatment selected from your local extension guidance.",
+    "Next 7 days: reduce plant wetness, improve airflow, and use a plant-approved treatment selected from your local extension guidance.",
     "Monitor: re-check new growth every 48 to 72 hours and escalate if lesions continue to expand.",
 ])
 
@@ -70,27 +70,27 @@ TREATMENT_MAP: dict[str, str] = {
         "Monitor: track concentric ring lesions on older leaves and any upward movement through the canopy.",
     ]),
     "late_blight": "\n".join([
-        "Immediate: isolate affected plants quickly and remove aggressively infected tissue because late blight can spread fast in cool, wet conditions.",
+        "Immediate: isolate affected plant quickly and remove aggressively infected tissue because late blight can spread fast in cool, wet conditions.",
         "Next 7 days: avoid overhead watering and apply a late-blight-labeled fungicide immediately if local guidance recommends it.",
-        "Monitor: inspect surrounding plants daily for water-soaked lesions, stem infections, and rapid canopy collapse.",
+        "Monitor: inspect surrounding plant daily for water-soaked lesions, stem infections, and rapid canopy collapse.",
     ]),
     "leaf_blight": "\n".join([
         "Immediate: remove heavily blighted leaves and clear infected residue from the growing area.",
-        "Next 7 days: improve airflow, keep foliage dry, and use a crop-labeled fungicide if disease pressure remains active.",
+        "Next 7 days: improve airflow, keep foliage dry, and use a plant-labeled fungicide if disease pressure remains active.",
         "Monitor: check whether lesions are coalescing and reducing photosynthetic area on new leaves.",
     ]),
     "leaf_scorch": "\n".join([
         "Immediate: remove badly scorched leaves only if they are no longer supporting the plant and correct visible water stress.",
         "Next 7 days: stabilize irrigation and review salinity, heat exposure, and root-zone stress.",
-        "Monitor: follow leaf edge necrosis on new growth to distinguish stress from infectious spread.",
+        "Monitor: follow plant edge necrosis on new growth to distinguish stress from infectious spread.",
     ]),
     "leaf_mold": "\n".join([
-        "Immediate: remove infected tomato leaves and lower humidity around the crop canopy.",
+        "Immediate: remove infected tomato leaves and lower humidity around the plant canopy.",
         "Next 7 days: improve greenhouse or field airflow and apply a tomato-labeled fungicide if humidity remains high.",
         "Monitor: watch the undersides of leaves for olive-brown mold and new chlorotic patches.",
     ]),
     "septoria_leaf_spot": "\n".join([
-        "Immediate: prune infected lower tomato leaves and discard debris away from the crop.",
+        "Immediate: prune infected lower tomato leaves and discard debris away from the plant.",
         "Next 7 days: keep irrigation off foliage, mulch bare soil, and maintain a preventive fungicide interval if needed.",
         "Monitor: check for small circular lesions with dark borders moving upward through the canopy.",
     ]),
@@ -100,23 +100,23 @@ TREATMENT_MAP: dict[str, str] = {
         "Monitor: watch for enlarging target-like lesions on leaves and fruit shoulders.",
     ]),
     "bacterial_spot": "\n".join([
-        "Immediate: remove the worst infected tissue and avoid handling plants while foliage is wet.",
+        "Immediate: remove the worst infected tissue and avoid handling plant while foliage is wet.",
         "Next 7 days: reduce splash, sanitize tools, and apply copper-based bactericide only where local label guidance supports it.",
         "Monitor: inspect new leaves and fruit for greasy dark lesions and secondary spread after storms.",
     ]),
     "mosaic_virus": "\n".join([
-        "Immediate: rogue severely affected plants because viral infections do not recover and can spread mechanically.",
+        "Immediate: rogue severely affected plant because viral infections do not recover and can spread mechanically.",
         "Next 7 days: sanitize hands, stakes, and tools frequently and control insect vectors where relevant.",
-        "Monitor: watch nearby plants for mottling, distortion, and stunting on new growth.",
+        "Monitor: watch nearby plant for mottling, distortion, and stunting on new growth.",
     ]),
     "yellow_leaf_curl_virus": "\n".join([
-        "Immediate: remove the most affected tomato plants if infection is widespread and suppress whitefly pressure immediately.",
-        "Next 7 days: deploy vector control, reflective mulch where practical, and protect healthy plants from reinfestation.",
+        "Immediate: remove the most affected tomato plant if infection is widespread and suppress whitefly pressure immediately.",
+        "Next 7 days: deploy vector control, reflective mulch where practical, and protect healthy plant from reinfestation.",
         "Monitor: check upper leaves for curling, chlorosis, and reduced vigor across adjacent rows.",
     ]),
     "spider_mites": "\n".join([
-        "Immediate: isolate hot spots and wash leaf undersides if infestation is still light.",
-        "Next 7 days: raise humidity where crop-safe, reduce dust stress, and use a labeled miticide or biological control strategy.",
+        "Immediate: isolate hot spots and wash plant undersides if infestation is still light.",
+        "Next 7 days: raise humidity where plant-safe, reduce dust stress, and use a labeled miticide or biological control strategy.",
         "Monitor: inspect underside webbing and stippling every 2 to 3 days until pressure drops.",
     ]),
     "haunglongbing": "\n".join([
@@ -125,9 +125,9 @@ TREATMENT_MAP: dict[str, str] = {
         "Monitor: inspect neighboring citrus for blotchy mottle, lopsided fruit, and canopy thinning.",
     ]),
     "common_rust": "\n".join([
-        "Immediate: keep the crop under observation; many corn rust infections are manageable when pressure is low.",
+        "Immediate: keep the plant under observation; many corn rust infections are manageable when pressure is low.",
         "Next 7 days: protect upper canopy leaves with a labeled fungicide only if disease is moving upward and growth stage justifies treatment.",
-        "Monitor: follow pustule density on the ear leaf and leaves above it.",
+        "Monitor: follow pustule density on the ear plant and leaves above it.",
     ]),
     "northern_leaf_blight": "\n".join([
         "Immediate: note affected fields and prioritize scouting in humid blocks with dense canopies.",
@@ -135,8 +135,8 @@ TREATMENT_MAP: dict[str, str] = {
         "Monitor: watch for long cigar-shaped lesions and rapid spread after dew-heavy mornings.",
     ]),
     "cercospora_leaf_spot": "\n".join([
-        "Immediate: remove or mark heavily affected leaves and reduce prolonged leaf wetness where possible.",
-        "Next 7 days: strengthen airflow and apply a crop-labeled fungicide if new lesions continue to appear.",
+        "Immediate: remove or mark heavily affected leaves and reduce prolonged plant wetness where possible.",
+        "Next 7 days: strengthen airflow and apply a plant-labeled fungicide if new lesions continue to appear.",
         "Monitor: track lesion density and any gray-center spotting on recent growth.",
     ]),
     "esca": "\n".join([

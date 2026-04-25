@@ -8,7 +8,7 @@
     "Late Blight": {
       "ar": "اللفحة المتأخرة",
       "ar_description": "مرض فطري خطير يصيب الطماطم والبطاطس ويسبب موت الأوراق والساق",
-      "en_description": "A serious fungal disease of tomato and potato causing leaf and stem death"
+      "en_description": "A serious fungal disease of tomato and potato causing plant and stem death"
     },
     "Powdery Mildew": {
       "ar": "البياض الدقيقي",
@@ -20,7 +20,7 @@
       "ar_description": "مرض بكتيري يسبب تحلل الأنسجة وتحولها للون الأسود",
       "en_description": "A bacterial disease causing tissue decay and darkening"
     },
-    "Leaf Blight": {
+    "Plant Blight": {
       "ar": "لفحة الأوراق",
       "ar_description": "مرض فطري يصيب الأوراق مسبباً موتها وسقوطها",
       "en_description": "A fungal disease affecting leaves causing their death and drop"
@@ -35,15 +35,15 @@
       "ar_description": "مرض فطري خطير يصيب الكروم والعنب ويسبب ذبول النبات",
       "en_description": "A serious fungal disease of grapevines causing plant wilting"
     },
-    "Cercospora Leaf Spot": {
+    "Cercospora Plant Spot": {
       "ar": "بقعة سيركوسبورا",
       "ar_description": "مرض فطري يسبب بقع دائرية رمادية على الأوراق",
       "en_description": "A fungal disease causing circular gray spots on leaves"
     },
-    "Leaf Scorch": {
+    "Plant Scorch": {
       "ar": "احتراق الأوراق",
       "ar_description": "مرض يسبب احمرار وتجفيف حواف الأوراق",
-      "en_description": "A disease causing reddening and drying of leaf margins"
+      "en_description": "A disease causing reddening and drying of plant margins"
     },
     "Healthy": {
       "ar": "سليم",

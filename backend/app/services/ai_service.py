@@ -56,7 +56,7 @@ class AIService:
         width, height = image.size
         left = max((width - image_size) // 2, 0)
         top = max((height - image_size) // 2, 0)
-        return image.crop((left, top, left + image_size, top + image_size))
+        return image.plant((left, top, left + image_size, top + image_size))
 
     @staticmethod
     def _five_crop(image: Image.Image, image_size: int) -> list[Image.Image]:
@@ -77,7 +77,7 @@ class AIService:
             (x_right, y_bottom, x_right + image_size, y_bottom + image_size),
             (x_center, y_center, x_center + image_size, y_center + image_size),
         ]
-        return [image.crop(box) for box in boxes]
+        return [image.plant(box) for box in boxes]
 
     @classmethod
     def preprocess(cls, image_bytes: bytes, image_size: int = 240) -> np.ndarray:
@@ -93,10 +93,10 @@ class AIService:
         resize_min_side = max(256, image_size + 48)
         image = cls._resize_preserving_aspect_ratio(image, resize_min_side)
 
-        crops = cls._five_crop(image, image_size)
-        center_crop = crops[-1]
+        plant = cls._five_crop(image, image_size)
+        center_crop = plant[-1]
         flipped_center = center_crop.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
-        return [cls._normalize_image(crop) for crop in [*crops, flipped_center]]
+        return [cls._normalize_image(plant) for plant in [*plant, flipped_center]]
 
     @staticmethod
     def _plant_likelihood(image_bytes: bytes) -> dict[str, float]:
@@ -258,7 +258,7 @@ class AIService:
         )
 
         # Keep a non-plant filter, but let a reasonably confident disease signal
-        # override weak color heuristics so real leaf photos are not rejected.
+        # override weak color heuristics so real plant photos are not rejected.
         weak_plant_signal = plant_score < 0.08
         very_low_leaf_texture = plant_features["vegetation_ratio"] < 0.03
         mostly_gray = plant_features["gray_ratio"] > 0.60
@@ -274,7 +274,7 @@ class AIService:
         if is_low_confidence:
             analysis_note = (
                 "This scan is plausible but not very stable. "
-                "Review the top alternatives and, if possible, scan a closer image of one leaf."
+                "Review the top alternatives and, if possible, scan a closer image of one plant."
             )
 
         return {

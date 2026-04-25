@@ -72,7 +72,7 @@ async def test_detect_rejects_invalid_mime_type(client):
         "/api/detect",
         headers={"Authorization": f"Bearer {access_token}"},
         data={"domain": "color"},
-        files={"image": ("leaf.txt", b"this-is-not-an-image", "text/plain")},
+        files={"image": ("plant.txt", b"this-is-not-an-image", "text/plain")},
     )
 
     assert response.status_code == 415
@@ -99,7 +99,7 @@ async def test_detect_rejects_oversized_image(client, monkeypatch):
         "/api/detect",
         headers={"Authorization": f"Bearer {access_token}"},
         data={"domain": "color"},
-        files={"image": ("leaf.png", oversized_bytes, "image/png")},
+        files={"image": ("plant.png", oversized_bytes, "image/png")},
     )
 
     assert response.status_code == 413

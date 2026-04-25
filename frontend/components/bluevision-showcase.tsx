@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { SonarPulse } from "@/components/sonar-pulse";
 import { ThemeLanguageSwitcher } from "@/components/theme-language-switcher";
 import { 
-  Leaf, 
+  Plant, 
   Zap, 
   BarChart3, 
 } from "lucide-react";
@@ -44,14 +44,14 @@ export function PlantifyShowcase() {
 
   const diseases = [
     { name: "Apple Scab", confidence: 0.92, status: "critical" },
-    { name: "Leaf Rust", confidence: 0.78, status: "warning" },
+    { name: "Plant Rust", confidence: 0.78, status: "warning" },
     { name: "Powdery Mildew", confidence: 0.65, status: "warning" },
     { name: "Healthy", confidence: 0.95, status: "success" },
   ];
 
   const features = [
     {
-      icon: Leaf,
+      icon: Plant,
       title: isRTL ? "الكشف الدقيق" : "Accurate Detection",
       desc: isRTL ? "تحديد أمراض النبات برقة 92%" : "Identify plant diseases at 92% accuracy",
     },
@@ -63,7 +63,7 @@ export function PlantifyShowcase() {
     {
       icon: BarChart3,
       title: isRTL ? "تحليلات متقدمة" : "Advanced Analytics",
-      desc: isRTL ? "تتبع صحة المحاصيل على مدار الوقت" : "Track crop health over time",
+      desc: isRTL ? "تتبع صحة المحاصيل على مدار الوقت" : "Track plant health over time",
     },
   ];
 

@@ -55,7 +55,7 @@ async def detect(
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=(
-                "The uploaded image does not appear to contain a plant leaf. "
+                "The uploaded image does not appear to contain a plant plant. "
                 f"Plant-likelihood score: {plant_score:.2f}. Please upload a clearer plant image."
             ),
         )
@@ -64,7 +64,7 @@ async def detect(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=(
                 "The model is not confident enough about this image. "
-                "Please upload a clearer close-up of a single affected leaf with better lighting."
+                "Please upload a clearer close-up of a single affected plant with better lighting."
             ),
         )
 

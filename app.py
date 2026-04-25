@@ -245,15 +245,15 @@ class NeuralEngine:
         ])
         tensor = pipeline(img).unsqueeze(0).to(self.device)
         
-        # Test-time augmentation: use multiple crops and average predictions
+        # Test-time augmentation: use multiple plant and average predictions
         # This helps with accuracy when model was trained with RandomCrop
-        crops = [tensor]
+        plant = [tensor]
         for _ in range(2):
             img_aug = transforms.functional.hflip(img)
             tensor_aug = pipeline(img_aug).unsqueeze(0).to(self.device)
-            crops.append(tensor_aug)
+            plant.append(tensor_aug)
         
-        return crops if len(crops) > 1 else tensor
+        return plant if len(plant) > 1 else tensor
 
     def generate_heatmap(self, model, img_tensor, original_image):
         model.zero_grad()
@@ -345,9 +345,9 @@ with tabs[0]:
         st.markdown('<div class="card">', unsafe_allow_html=True)
         st.subheader("Upload Image")
         uploaded_file = st.file_uploader(
-            "Choose a plant leaf image",
+            "Choose a plant plant image",
             type=["jpg", "jpeg", "png"],
-            help="Upload a clear image of a plant leaf for disease detection"
+            help="Upload a clear image of a plant plant for disease detection"
         )
         st.markdown('</div>', unsafe_allow_html=True)
     

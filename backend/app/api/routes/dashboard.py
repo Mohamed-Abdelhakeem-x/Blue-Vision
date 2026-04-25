@@ -80,8 +80,8 @@ async def stats(
 @router.get("/tips", response_model=list[str])
 async def tips() -> list[str]:
     return [
-        "Water in the morning to reduce prolonged leaf moisture.",
-        "Rotate crops seasonally to reduce disease carryover.",
+        "Water in the morning to reduce prolonged plant moisture.",
+        "Rotate plant seasonally to reduce disease carryover.",
         "Prune dense foliage to improve airflow around leaves.",
-        "Inspect leaf undersides weekly for early signs of pests.",
+        "Inspect plant undersides weekly for early signs of pests.",
     ]

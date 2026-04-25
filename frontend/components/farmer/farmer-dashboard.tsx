@@ -248,7 +248,7 @@ export function FarmerDashboard() {
               <>
                 <Image
                   src={previewUrl}
-                  alt="Leaf preview"
+                  alt="Plant preview"
                   width={1200}
                   height={720}
                   unoptimized
