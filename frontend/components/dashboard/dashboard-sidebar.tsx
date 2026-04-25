@@ -177,8 +177,7 @@ function SidePanelContent({
     {id: "community", label: copy.community, href: "/community", icon: Users},
     {id: "notifications", label: copy.notifications, href: "/notifications", icon: Bell},
     {id: "profile", label: copy.profile, href: "/profile", icon: UserRound},
-    {id: "history", label: copy.history, href: "/scan-history", icon: History},
-    {id: "settings", label: copy.settings, href: "/settings", icon: Settings2}
+    {id: "history", label: copy.history, href: "/scan-history", icon: History}
   ];
 
   return (

@@ -331,7 +331,7 @@ function NotificationStack({
 }
 
 function FarmerPanel() {
-  return <FarmerDashboard />;
+  return null;
 }
 
 function ExpertPanel({copy}: {copy: (typeof ROLE_DASHBOARD_COPY)[AppLocale]}) {

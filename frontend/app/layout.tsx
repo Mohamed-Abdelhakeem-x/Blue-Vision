@@ -25,8 +25,8 @@ const ibmPlexArabic = IBM_Plex_Sans_Arabic({
 });
 
 export const metadata: Metadata = {
-  title: "Plantify - AI Plant Disease Detection",
-  description: "Advanced plant disease detection and treatment recommendations powered by AI"
+  title: "BlueVision - AI Fish Health Detection",
+  description: "Advanced fish health detection and treatment recommendations powered by AI"
 };
 
 export const dynamic = "force-dynamic";
@@ -49,7 +49,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html
       lang={locale}
       dir={rtl ? "rtl" : "ltr"}
-      className={`${sora.variable} ${ibmPlexArabic.variable}`}
+      className={`dark ${sora.variable} ${ibmPlexArabic.variable}`}
       suppressHydrationWarning
     >
       <head>

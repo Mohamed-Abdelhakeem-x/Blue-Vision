@@ -142,7 +142,7 @@ const copy: Record<AppLocale, CopyShape> = {
       themeDescription: "Switch between light and dark modes for the desktop and mobile dashboards.",
       themeHint: "Toggle your current color theme",
       languageTitle: "Language",
-      languageDescription: "Choose the language used across the Plantify dashboard and field tools."
+      languageDescription: "Choose the language used across the BlueVision dashboard and aquaculture tools."
     },
     sidebar: {
       dashboard: "Dashboard",
@@ -157,7 +157,7 @@ const copy: Record<AppLocale, CopyShape> = {
       history: "History",
       settings: "Settings",
       historyTitle: "History",
-      historyDescription: "Review prior detections, confidence, and action history without leaving the workflow.",
+      historyDescription: "Review prior fish health detections, confidence scores, and treatment actions.",
       logout: "Logout"
     },
     scanHistory: {
@@ -200,7 +200,7 @@ const copy: Record<AppLocale, CopyShape> = {
       yourPosts: "Your Posts",
       yourPostsDescription: "A profile-style list of the posts you published.",
       noPosts: "No posts yet.",
-      plant: "Plant",
+      plant: "Fish",
       disease: "Disease",
       confidence: "Confidence",
       likes: "likes",
@@ -208,16 +208,16 @@ const copy: Record<AppLocale, CopyShape> = {
     },
     community: {
       emptyTitle: "No posts yet",
-      emptyDescription: "Create the first community post or wait for plant scans to appear here.",
+      emptyDescription: "Create the first community post or wait for fish scans to appear here.",
       newPost: "New Post",
       newPostDescription: "Write the problem, upload the image, then review the AI suggestion before sharing.",
-      chooseImage: "Choose plant image",
+      chooseImage: "Choose fish image",
       problemPlaceholder: "Write the problem here...",
       normalizedLive: "Normalized live",
       normalizedTypingHint: "Text is normalized live while you type.",
       validationBoth: "You need to add both image and problem text first.",
       suggestionTitle: "AI suggestion before share",
-      plant: "Plant",
+      plant: "Fish",
       disease: "Disease",
       confidence: "Confidence",
       normalizedText: "Normalized text",
@@ -225,7 +225,7 @@ const copy: Record<AppLocale, CopyShape> = {
       share: "Share",
       shareValidation: "Run AI Suggestion first before sharing the post.",
       feedTitle: "Feed",
-      feedDescription: "Plant cases shared from scans and manual community posts.",
+      feedDescription: "Fish health cases shared from scans and manual community posts.",
       sortNewest: "Newest",
       sortOldest: "Oldest",
       sortTop: "Top",

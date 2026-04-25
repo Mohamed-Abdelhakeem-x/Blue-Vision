@@ -8,19 +8,19 @@ import {useTranslations} from "next-intl";
 
 const TESTIMONIALS = [
   {
-    quote: "Plantify helped our field team standardize early detection across all sites.",
+    quote: "BlueVision helped our aquaculture team standardize early disease detection across all tanks.",
     author: "Mariam Hassan",
-    role: "Operations Manager"
+    role: "Aquaculture Operations Manager"
   },
   {
-    quote: "The product is fast, clear, and easy to roll out to non-technical staff.",
+    quote: "The AI model is fast, accurate, and easy to roll out to non-technical fish farm staff.",
     author: "Khaled Mostafa",
-    role: "Regional Agronomist"
+    role: "Regional Aquaculture Specialist"
   },
   {
-    quote: "The interface feels modern and focused. We adopted it in one week.",
+    quote: "The interface feels modern and focused on fish health. We adopted it in one week.",
     author: "Nour El Din",
-    role: "Farm Technology Lead"
+    role: "Fish Farm Technology Lead"
   }
 ];
 

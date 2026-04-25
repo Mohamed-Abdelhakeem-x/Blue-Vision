@@ -17,7 +17,7 @@ import { Card } from "@/components/ui/card";
 import { DetectionCard } from "@/components/dashboard/detection-card";
 import { HistoryTable } from "@/components/dashboard/history-table";
 import { UserNav } from "@/components/dashboard/user-nav";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+
 
 export function BentoGrid() {
   const [token, setToken] = useState<string | null>(null);
@@ -65,7 +65,7 @@ export function BentoGrid() {
               setUser(null);
             }}
           />
-          <ThemeToggle />
+
         </div>
       </motion.div>
 

@@ -14,24 +14,24 @@
     "signOut": "Sign out"
   },
   "landing": {
-    "eyebrow": "Plantify Platform",
-    "title": "Modern plant health operations, built for real teams.",
-    "subtitle": "Plantify brings monitoring, analysis, and collaboration into one polished workflow so your team can move from observation to action faster.",
+    "eyebrow": "BlueVision Platform",
+    "title": "Modern fish health operations, built for real aquaculture teams.",
+    "subtitle": "BlueVision brings monitoring, analysis, and collaboration into one polished workflow so your team can move from observation to action faster.",
     "ctaPrimary": "Get started",
     "ctaSecondary": "View dashboard",
     "missionEyebrow": "Mission",
-    "missionTitle": "Make high-quality plant decisions accessible to every operation.",
-    "missionPoint1": "Design tools that make plant decisions faster and easier.",
-    "missionPoint2": "Deliver consistent outputs teams can trust in daily operations.",
-    "missionPoint3": "Keep workflows simple from onboarding to field execution.",
+    "missionTitle": "Make high-quality aquatic health decisions accessible to every operation.",
+    "missionPoint1": "Design tools that make fish health decisions faster and easier.",
+    "missionPoint2": "Deliver consistent outputs teams can trust in daily aquaculture operations.",
+    "missionPoint3": "Keep workflows simple from onboarding to tank-side execution.",
     "missionItem1Title": "Precision At Scale",
-    "missionItem1Body": "Convert raw field imagery into consistent disease signals for every operator in the chain.",
+    "missionItem1Body": "Convert raw tank imagery into consistent disease signals for every operator in the chain.",
     "missionItem2Title": "Operational Clarity",
     "missionItem2Body": "Structure diagnostics, confidence, and treatment actions in one high-density workflow.",
     "missionItem3Title": "Reliable Throughput",
-    "missionItem3Body": "Keep onboarding and scan execution lightweight, with predictable outcomes across regions.",
+    "missionItem3Body": "Keep onboarding and scan execution lightweight, with predictable outcomes across fish farms.",
     "testimonialsEyebrow": "Testimonials",
-    "testimonialsTitle": "What teams say about Plantify",
+    "testimonialsTitle": "What aquaculture teams say about BlueVision",
     "teamEyebrow": "Team",
     "teamTitle": "Small team, focused execution",
     "teamRole1": "Product Lead",
@@ -40,7 +40,7 @@
     "teamRole4": "Security Engineer",
     "teamRole5": "Computer Vision Engineer",
     "teamRole6": "Operations Lead",
-    "footerDescription": "AI-powered botanical diagnostics for production teams.",
+    "footerDescription": "AI-powered aquatic diagnostics for aquaculture production teams.",
     "footerHeadingPlatform": "Platform",
     "footerHeadingLegal": "Legal",
     "footerHeadingSocial": "Social",
@@ -51,8 +51,8 @@
     "footerPrivacy": "Privacy",
     "footerTerms": "Terms",
     "footerContact": "Contact",
-    "copyright": "© 2025 Limarise. All rights reserved.",
-    "tagline": "Rising Beyond Limits"
+    "copyright": "© 2025 BlueVision. All rights reserved.",
+    "tagline": "See Deeper, Act Faster"
   },
   "auth": {
     "common": {
@@ -65,17 +65,17 @@
     },
     "login": {
       "title": "Sign in",
-      "subtitle": "Use your Plantify account credentials.",
+      "subtitle": "Use your BlueVision account credentials.",
       "cta": "Continue",
       "loading": "Signing in...",
       "success": "Success",
       "error": "Unable to sign in",
-      "switchPrompt": "New to Plantify?",
+      "switchPrompt": "New to BlueVision?",
       "switchCta": "Create account"
     },
     "register": {
       "title": "Sign up",
-      "subtitle": "Create your Plantify account.",
+      "subtitle": "Create your BlueVision account.",
       "cta": "Create account",
       "loading": "Creating account...",
       "success": "Account created",
@@ -119,18 +119,18 @@
       "result": "Result"
     },
     "scanIntake": {
-      "title": "Scan Intake",
+      "title": "Fish Scan Intake",
       "statusProcessing": "AI Processing",
       "statusReady": "Image Ready",
       "statusWaiting": "Awaiting Upload",
-      "dropzoneTitle": "Drag and drop a plant image",
+      "dropzoneTitle": "Drag and drop a fish image",
       "cta": "Start AI Scan",
       "scanning": "Scanning..."
     },
     "result": {
       "title": "Result and Treatment",
       "domainLabel": "Domain:",
-      "plantLabel": "Plant",
+      "plantLabel": "Fish",
       "statusLabel": "Condition",
       "detected": "Detected Condition",
       "treatment": "Treatment Plan",
@@ -174,7 +174,7 @@
         "developer": "Developer"
       },
       "farmer": {
-        "uploadLeaf": "Upload plant for analysis",
+        "uploadLeaf": "Upload fish image for analysis",
         "viewHistory": "View scan history",
         "getAdvice": "Get treatment advice"
       },
@@ -196,22 +196,22 @@
     },
     "errors": {
       "signIn": "Sign in to run diagnostics.",
-      "upload": "Upload a plant image to continue.",
+      "upload": "Upload a fish image to continue.",
       "scan": "Unable to scan image."
     }
   },
   "chat": {
-    "title": "Agricultural Expert Chat",
-    "welcome": "Welcome to Agricultural Expert",
-    "subtitle": "Ask questions about plant health, disease treatment, and agronomic practices. I'll respond in your language.",
-    "inputPlaceholder": "Ask a question about your plant...",
+    "title": "Aquaculture Expert Chat",
+    "welcome": "Welcome to Aquaculture Expert",
+    "subtitle": "Ask questions about fish health, disease treatment, and aquaculture practices. I'll respond in your language.",
+    "inputPlaceholder": "Ask a question about your fish...",
     "send": "Send",
     "sending": "Sending...",
     "error": "Error",
     "hint": "Tip: Press Ctrl+Enter to send",
-    "agri_expert": "Agri Expert",
+    "agri_expert": "Aqua Expert",
     "online": "Always online",
-    "ask_question": "Ask about plant health, diseases, or treatment options",
+    "ask_question": "Ask about fish health, diseases, or treatment options",
     "message": "Type your message..."
   }
 }

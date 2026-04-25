@@ -7,7 +7,7 @@ import {useLocale} from "next-intl";
 import {DashboardShell} from "@/components/dashboard/dashboard-shell";
 import {type DashboardNavItem} from "@/components/dashboard/dashboard-sidebar";
 import {LanguageModalButton} from "@/components/ui/language-modal";
-import {ThemeToggle} from "@/components/ui/theme-toggle";
+
 import {getDashboardCopy} from "@/lib/dashboard-copy";
 import type {AppLocale} from "@/i18n/routing";
 
@@ -38,7 +38,7 @@ export default function SettingsPage() {
           <h2 className="text-xl font-semibold text-[var(--text-primary)]">{copy.themeTitle}</h2>
           <p className="mt-2 text-sm text-[var(--text-secondary)]">{copy.themeDescription}</p>
           <div className="mt-5 flex items-center gap-3">
-            <ThemeToggle />
+            <span className="rounded-xl border border-blue-600/20 bg-blue-600/10 px-3 py-1.5 text-xs font-semibold text-blue-400">Always Dark</span>
             <span className="text-sm text-[var(--text-tertiary)]">{copy.themeHint}</span>
           </div>
         </article>

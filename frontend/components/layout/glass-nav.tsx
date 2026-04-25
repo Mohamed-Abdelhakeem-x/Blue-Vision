@@ -4,8 +4,8 @@ import {useTranslations} from "next-intl";
 import {useEffect, useState} from "react";
 import {usePathname} from "next/navigation";
 
-import {LocaleSwitcher} from "@/components/ui/locale-switcher";
-import {ThemeToggle} from "@/components/ui/theme-toggle";
+
+
 import {Link} from "@/i18n/navigation";
 import {AUTH_STATE_CHANGED_EVENT, getStoredAccessToken} from "@/lib/api";
 
@@ -47,7 +47,7 @@ export function GlassNav() {
           href="/"
           className="text-lg font-semibold tracking-tight text-[var(--text-primary)] md:text-xl"
         >
-          Plantify
+          BlueVision
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
@@ -63,8 +63,8 @@ export function GlassNav() {
         </div>
 
         <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <LocaleSwitcher />
+
+
           {isLoggedIn ? (
             <Link
               href="/dashboard"

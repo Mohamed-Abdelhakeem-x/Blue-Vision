@@ -8,8 +8,8 @@ import {useLocale} from "next-intl";
 import {Link, usePathname} from "@/i18n/navigation";
 import {DashboardSidebar, type DashboardNavItem} from "@/components/dashboard/dashboard-sidebar";
 import {DesktopTitleBar} from "@/components/layout/DesktopTitleBar";
-import {LocaleSwitcher} from "@/components/ui/locale-switcher";
-import {ThemeToggle} from "@/components/ui/theme-toggle";
+
+
 import {isDesktopShell} from "@/lib/platform";
 import {cn} from "@/lib/utils";
 
@@ -71,7 +71,7 @@ export function DashboardShell({
 
   return (
     <div className={cn("relative min-h-[100dvh] overflow-hidden bg-[var(--bg-primary)]", desktopShell && "pt-12", shellPaddingClass)}>
-      {desktopShell ? <DesktopTitleBar className="fixed inset-x-0 top-0 z-[80]" title="Plantify" subtitle="Desktop Workspace" /> : null}
+      {desktopShell ? <DesktopTitleBar className="fixed inset-x-0 top-0 z-[80]" title="BlueVision" subtitle="Aquaculture AI Workspace" /> : null}
 
       {rtl ? null : sidebar}
 
@@ -85,22 +85,7 @@ export function DashboardShell({
           >
             <div className="min-w-0">{topBarLead}</div>
 
-            <div className="flex items-center gap-2">
-              <Link
-                href="/settings"
-                className={cn(
-                  "inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold transition",
-                  pathname === "/settings"
-                    ? "border-blue-600/30 bg-blue-600/10 text-[var(--text-primary)]"
-                    : "border-[var(--card-border)] bg-[var(--bg-secondary)] text-[var(--text-primary)] hover:opacity-90"
-                )}
-              >
-                <Settings2 className="h-3.5 w-3.5" />
-                Settings
-              </Link>
-              <ThemeToggle />
-              {showLocaleSwitcher ? <LocaleSwitcher /> : null}
-            </div>
+
           </header>
 
           <div className={cn("min-h-0 flex-1", contentClassName)}>{children}</div>

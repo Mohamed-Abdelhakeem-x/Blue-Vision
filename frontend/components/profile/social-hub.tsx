@@ -34,7 +34,7 @@ function getSocialCopy(locale: AppLocale) {
     return {
       badge: "التواصل",
       title: "الشات وطلبات الصداقة",
-      description: "ابعت طلب صداقة، وابحث عن أصدقاء، وافتح محادثة مباشرة داخل Plantify.",
+      description: "ابعت طلب صداقة، وابحث عن أصدقاء، وافتح محادثة مباشرة داخل BlueVision.",
       discover: "اكتشف المستخدمين",
       received: "طلبات واردة",
       sent: "طلبات مرسلة",
@@ -66,7 +66,7 @@ function getSocialCopy(locale: AppLocale) {
   return {
     badge: "SOCIAL",
     title: "Chat & Friend Requests",
-    description: "Search for people, send friend requests, and message your friends directly inside Plantify.",
+    description: "Search for people, send friend requests, and message your friends directly inside BlueVision.",
     discover: "Discover People",
     received: "Received Requests",
     sent: "Sent Requests",
@@ -207,9 +207,8 @@ export function SocialHub() {
       key={friend.user.id}
       type="button"
       onClick={() => setSelectedFriendId(friend.user.id)}
-      className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition ${
-        selectedFriendId === friend.user.id ? "border-blue-600/30 bg-blue-600/10" : "border-[var(--card-border)] bg-[var(--bg-secondary)]"
-      }`}
+      className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left transition ${selectedFriendId === friend.user.id ? "border-blue-600/30 bg-blue-600/10" : "border-[var(--card-border)] bg-[var(--bg-secondary)]"
+        }`}
     >
       <UserAvatar name={friend.user.full_name} avatarB64={friend.user.avatar_b64} />
       <div className="min-w-0 flex-1">
@@ -382,9 +381,8 @@ export function SocialHub() {
                   conversationQuery.data.messages.map((message) => (
                     <div key={message.id} className={`flex ${message.is_own ? "justify-end" : "justify-start"}`}>
                       <div
-                        className={`max-w-[80%] rounded-[1.4rem] px-4 py-3 text-sm shadow-sm ${
-                          message.is_own ? "bg-blue-700 text-white" : "border border-[var(--card-border)] bg-[var(--card-bg)] text-[var(--text-primary)]"
-                        }`}
+                        className={`max-w-[80%] rounded-[1.4rem] px-4 py-3 text-sm shadow-sm ${message.is_own ? "bg-blue-700 text-white" : "border border-[var(--card-border)] bg-[var(--card-bg)] text-[var(--text-primary)]"
+                          }`}
                       >
                         <p className="whitespace-pre-wrap leading-6">{message.body}</p>
                         <p className={`mt-2 text-[11px] ${message.is_own ? "text-white/80" : "text-[var(--text-tertiary)]"}`}>{formatDate(message.created_at)}</p>

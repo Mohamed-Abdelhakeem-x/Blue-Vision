@@ -1,18 +1,18 @@
 "use client";
 
-import {ArrowRight, Check, Loader2} from "lucide-react";
+import { ArrowRight, Check, Loader2 } from "lucide-react";
 import Link from "next/link";
-import {useTranslations} from "next-intl";
-import {useRouter} from "next/navigation";
-import {FormEvent, useState} from "react";
-import {motion} from "framer-motion";
+import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
+import { motion } from "framer-motion";
 
-import {signup} from "@/lib/api";
-import {Button} from "@/components/ui/button";
-import {Card} from "@/components/ui/card";
-import {FloatingField} from "@/components/auth/floating-field";
-import {ThemeToggle} from "@/components/ui/theme-toggle";
-import {LocaleSwitcher} from "@/components/ui/locale-switcher";
+import { signup } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { FloatingField } from "@/components/auth/floating-field";
+
+
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -55,17 +55,54 @@ export default function RegisterPage() {
 
   return (
     <main className="relative min-h-[calc(100vh-90px)] overflow-hidden bg-[var(--bg-primary)] text-[var(--text-primary)]">
-      <div className="absolute end-4 top-4 z-50 flex items-center gap-2">
-        <ThemeToggle />
-        <LocaleSwitcher />
-      </div>
+
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute right-[-8rem] top-8 h-72 w-72 rounded-full bg-blue-600/10 blur-3xl" />
         <div className="absolute bottom-0 left-[-8rem] h-80 w-80 rounded-full bg-zinc-500/10 blur-3xl" />
       </div>
 
-      <div className="mx-auto flex min-h-[calc(100vh-90px)] w-full max-w-md items-center px-4 py-10">
-        <motion.div initial={{opacity: 0, y: 20}} animate={{opacity: 1, y: 0}} transition={{duration: 0.35}} className="w-full">
+      <div className="mx-auto flex min-h-[calc(100vh-90px)] w-full max-w-md flex-col items-center justify-center px-4 py-10">
+        {/* Oceanic BlueVision Brand */}
+        <motion.div
+          initial={{ opacity: 0, y: -16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8 flex flex-col items-center select-none"
+        >
+          <div className="relative mb-4 flex h-20 w-20 items-center justify-center">
+            {[0, 1, 2].map((i) => (
+              <motion.span
+                key={i}
+                className="absolute inline-flex h-full w-full rounded-full border border-blue-400/30"
+                animate={{ scale: [1, 1.8, 1.8], opacity: [0.6, 0, 0] }}
+                transition={{ duration: 2.4, repeat: Infinity, delay: i * 0.8, ease: "easeOut" }}
+              />
+            ))}
+            <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500/20 via-blue-600/30 to-blue-900/40 ring-2 ring-cyan-400/30 shadow-[0_0_28px_rgba(34,211,238,0.3)]">
+              <svg viewBox="0 0 32 32" className="h-9 w-9" fill="none">
+                <path d="M26 16c0 0-4-6-10-6S4 13 4 16s6 6 12 6c4 0 7-2 10-4l-4-2 4-2z" fill="url(#fg2)" opacity="0.9" />
+                <circle cx="8.5" cy="15" r="1.2" fill="#bfdbfe" />
+                <defs>
+                  <linearGradient id="fg2" x1="4" y1="16" x2="26" y2="16" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#38bdf8" />
+                    <stop offset="1" stopColor="#2563eb" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+          </div>
+          <h1 className="text-4xl font-black tracking-tight">
+            <span className="bg-gradient-to-r from-cyan-300 via-blue-400 to-blue-600 bg-clip-text text-transparent" style={{ filter: "drop-shadow(0 0 18px rgba(34,211,238,0.4))" }}>Blue</span>
+            <span className="text-white/90" style={{ filter: "drop-shadow(0 0 10px rgba(147,197,253,0.5))" }}>Vision</span>
+          </h1>
+          <p className="mt-1.5 flex items-center gap-2 text-[11px] font-semibold tracking-[0.22em] uppercase text-cyan-400/60">
+            <motion.span animate={{ scaleX: [1, 1.6, 1] }} transition={{ duration: 2, repeat: Infinity }} className="inline-block h-px w-5 bg-gradient-to-r from-transparent to-cyan-400/50" />
+            See Deeper · Act Faster
+            <motion.span animate={{ scaleX: [1, 1.6, 1] }} transition={{ duration: 2, repeat: Infinity }} className="inline-block h-px w-5 bg-gradient-to-l from-transparent to-cyan-400/50" />
+          </p>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.15 }} className="w-full">
           <Card className="w-full rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-7 shadow-[var(--shadow-md)]">
             <h2 className="text-xl font-semibold text-[var(--text-primary)]">{t("register.title")}</h2>
             <p className="mt-1 text-sm text-[var(--text-secondary)]">{t("register.subtitle")}</p>
