@@ -183,7 +183,7 @@ function CreatePostComposer({
         </div>
         <div>
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">{copy.newPost}</h2>
-          <p className="text-sm text-[var(--text-secondary)]">{copy.newPostDescription}</p>
+          <p className="text-sm text-[var(--text-secondary)]">Write the problem and upload a fish image to share with the community.</p>
         </div>
       </div>
 
@@ -225,70 +225,32 @@ function CreatePostComposer({
         </div>
       ) : null}
 
-      {suggestion ? (
-        <div className="mt-4 rounded-[1.5rem] border border-blue-600/20 bg-blue-600/10 p-4">
-          <p className="text-sm font-semibold text-blue-800 dark:text-blue-200">{copy.suggestionTitle}</p>
-          <div className="mt-3 grid gap-3 md:grid-cols-3">
-            <div className="rounded-2xl bg-white/70 px-4 py-3 text-sm text-[var(--text-primary)] dark:bg-black/10">
-              <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-tertiary)]">{copy.plant}</p>
-              <p className="mt-1 font-semibold">{suggestion.predicted_plant_name}</p>
-            </div>
-            <div className="rounded-2xl bg-white/70 px-4 py-3 text-sm text-[var(--text-primary)] dark:bg-black/10">
-              <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-tertiary)]">{copy.disease}</p>
-              <p className="mt-1 font-semibold">{suggestion.predicted_disease}</p>
-            </div>
-            <div className="rounded-2xl bg-white/70 px-4 py-3 text-sm text-[var(--text-primary)] dark:bg-black/10">
-              <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-tertiary)]">{copy.confidence}</p>
-              <p className="mt-1 font-semibold">{formatBoostedConfidence(suggestion.confidence_score)}</p>
-            </div>
-          </div>
-          <div className="mt-3 rounded-2xl bg-white/70 px-4 py-3 text-sm text-[var(--text-primary)] dark:bg-black/10">
-            <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-tertiary)]">{copy.normalizedText}</p>
-            <p className="mt-1">{suggestion.normalized_problem}</p>
-          </div>
-          <div className="mt-3 rounded-2xl bg-white/70 px-4 py-3 text-sm text-[var(--text-primary)] dark:bg-black/10">
-            <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-tertiary)]">{treatmentLabel}</p>
-            <p className="mt-1 whitespace-pre-line">{suggestion.treatment_recommendation}</p>
-          </div>
-        </div>
-      ) : null}
-
       <div className="mt-4 flex flex-wrap justify-end gap-3">
         <Button
           type="button"
-          variant="secondary"
           className="rounded-2xl"
-          disabled={suggestBusy}
+          disabled={busy || suggestBusy}
           onClick={async () => {
             if (!image || !validateInputs()) return;
-            try {
-              const nextSuggestion = await onSuggest({problem: normalizedProblem.trim() || normalizeUserText(problem.trim(), "body"), image});
-              setSuggestion(nextSuggestion);
-              setValidationError(null);
-            } catch (error) {
-              setValidationError((error as Error).message);
-            }
-          }}
-        >
-          {suggestBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sprout className="h-4 w-4" />}
-          {copy.aiSuggestion}
-        </Button>
-        <Button
-          type="button"
-          className="rounded-2xl"
-          disabled={busy}
-          onClick={async () => {
-            if (!image || !validateInputs()) return;
-            if (!suggestion) {
-              setValidationError(copy.shareValidation);
-              return;
+            let currentSuggestion = suggestion;
+            if (!currentSuggestion) {
+              try {
+                currentSuggestion = await onSuggest({
+                  problem: normalizedProblem.trim() || normalizeUserText(problem.trim(), "body"),
+                  image
+                });
+                setSuggestion(currentSuggestion);
+              } catch (error) {
+                setValidationError((error as Error).message);
+                return;
+              }
             }
             try {
               await onSubmit({
-                plantName: suggestion.predicted_plant_name,
-                problem: normalizedProblem.trim() || suggestion.normalized_problem,
-                aiDisease: suggestion.predicted_disease,
-                aiConfidenceScore: suggestion.confidence_score,
+                plantName: currentSuggestion.predicted_plant_name,
+                problem: normalizedProblem.trim() || currentSuggestion.normalized_problem,
+                aiDisease: currentSuggestion.predicted_disease,
+                aiConfidenceScore: currentSuggestion.confidence_score,
                 image
               });
               setProblem("");
