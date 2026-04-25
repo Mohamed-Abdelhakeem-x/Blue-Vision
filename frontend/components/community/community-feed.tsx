@@ -152,13 +152,14 @@ function CreatePostComposer({
   token,
   copy
 }: {
-  onSubmit: (payload: {plantName: string; problem: string; aiDisease: string; aiConfidenceScore: number; image: File}) => Promise<void>;
+  onSubmit: (payload: {plantName: string; problem: string; title: string; aiDisease: string; aiConfidenceScore: number; image: File}) => Promise<void>;
   onSuggest: (payload: {problem: string; image: File}) => Promise<CommunityPostSuggestion>;
   busy: boolean;
   suggestBusy: boolean;
   token: string | null;
   copy: ReturnType<typeof getDashboardCopy>["community"];
 }) {
+  const [title, setTitle] = useState("");
   const [problem, setProblem] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -183,11 +184,19 @@ function CreatePostComposer({
         </div>
         <div>
           <h2 className="text-lg font-semibold text-[var(--text-primary)]">{copy.newPost}</h2>
-          <p className="text-sm text-[var(--text-secondary)]">Write the problem and upload a fish image to share with the community.</p>
+          <p className="text-sm text-[var(--text-secondary)]">{copy.newPostDescription}</p>
         </div>
       </div>
 
-      <div className="mt-5">
+      <div className="mt-5 space-y-4">
+        <input
+          type="text"
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder={copy.titlePlaceholder}
+          className="w-full rounded-2xl border border-[var(--card-border)] bg-[var(--bg-secondary)] px-4 py-3 text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-blue-600/40"
+        />
+
         <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--card-border)] bg-[var(--bg-secondary)] px-4 py-3 text-sm text-[var(--text-secondary)]">
           <ImagePlus className="h-4 w-4" />
           {image ? image.name : copy.chooseImage}
@@ -249,10 +258,12 @@ function CreatePostComposer({
               await onSubmit({
                 plantName: currentSuggestion.predicted_plant_name,
                 problem: normalizedProblem.trim() || currentSuggestion.normalized_problem,
+                title: title.trim(),
                 aiDisease: currentSuggestion.predicted_disease,
                 aiConfidenceScore: currentSuggestion.confidence_score,
                 image
               });
+              setTitle("");
               setProblem("");
               setImage(null);
               setSuggestion(null);
@@ -304,26 +315,12 @@ function FeedCard({
               {post.entry_kind === "community" ? copy.manual : copy.scan}
             </span>
           </div>
-          <h3 className="mt-2 text-2xl font-semibold">{post.ai_plant_name}</h3>
-          <p className="mt-1 text-sm text-white/90">{post.post_text}</p>
+          <h3 className="mt-2 text-2xl font-semibold">{post.title || post.ai_plant_name}</h3>
         </div>
       </div>
 
       <div className="space-y-4 p-5">
-        <div className="grid gap-3 md:grid-cols-3">
-          <div className="rounded-2xl bg-[var(--bg-secondary)] px-3 py-2 text-sm">
-            <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--text-tertiary)]">AI Plant</p>
-            <p className="mt-1 font-semibold text-[var(--text-primary)]">{post.ai_plant_name}</p>
-          </div>
-          <div className="rounded-2xl bg-[var(--bg-secondary)] px-3 py-2 text-sm">
-            <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--text-tertiary)]">AI Disease</p>
-            <p className="mt-1 font-semibold text-[var(--text-primary)]">{post.ai_disease}</p>
-          </div>
-          <div className="rounded-2xl bg-[var(--bg-secondary)] px-3 py-2 text-sm">
-            <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--text-tertiary)]">Confidence</p>
-            <p className="mt-1 font-semibold text-[var(--text-primary)]">{formatBoostedConfidence(post.ai_confidence_score)}</p>
-          </div>
-        </div>
+
 
         <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--text-secondary)]">
           <span className="inline-flex items-center gap-2 rounded-full bg-[var(--bg-secondary)] px-3 py-1.5">
@@ -340,9 +337,7 @@ function FeedCard({
           <span className="font-semibold">{copy.textLabel}:</span> {post.post_text}
         </p>
 
-        <p className="line-clamp-3 text-sm leading-6 text-[var(--text-secondary)]">
-          <span className="font-semibold text-[var(--text-primary)]">{treatmentLabel}:</span> {post.ai_treatment_recommendation}
-        </p>
+
 
         <div className="flex flex-wrap gap-3">
           <Button type="button" variant={post.liked_by_current_user ? "success" : "secondary"} className="rounded-2xl" onClick={() => onLike(post.id)} disabled={busy}>
@@ -559,7 +554,7 @@ function DetailsPanel({
         <div className="flex items-center justify-between border-b border-[var(--card-border)] px-5 py-4">
           <div>
             <p className="text-sm text-[var(--text-secondary)]">{post ? post.user_name : copy.loadingPostDetails}</p>
-            <h2 className="text-xl font-semibold text-[var(--text-primary)]">{post ? `${post.ai_plant_name} - ${post.post_text}` : copy.details}</h2>
+            <h2 className="text-xl font-semibold text-[var(--text-primary)]">{post ? (post.title || post.ai_plant_name) : copy.details}</h2>
           </div>
           <button type="button" onClick={onClose} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--card-border)] bg-[var(--bg-secondary)] text-[var(--text-primary)]">
             <X className="h-5 w-5" />
@@ -596,25 +591,7 @@ function DetailsPanel({
                   <p className="mt-2 text-sm leading-6 text-[var(--text-primary)]">{post.post_text}</p>
                 </div>
 
-                <div className="grid gap-3 md:grid-cols-3">
-                  <div className="rounded-[1.5rem] border border-[var(--card-border)] bg-[var(--bg-secondary)] p-4">
-                    <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-tertiary)]">{copy.plant}</p>
-                    <p className="mt-2 font-semibold text-[var(--text-primary)]">{post.ai_plant_name}</p>
-                  </div>
-                  <div className="rounded-[1.5rem] border border-[var(--card-border)] bg-[var(--bg-secondary)] p-4">
-                    <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-tertiary)]">{copy.disease}</p>
-                    <p className="mt-2 font-semibold text-[var(--text-primary)]">{post.ai_disease}</p>
-                  </div>
-                  <div className="rounded-[1.5rem] border border-[var(--card-border)] bg-[var(--bg-secondary)] p-4">
-                    <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-tertiary)]">{copy.confidence}</p>
-                    <p className="mt-2 font-semibold text-[var(--text-primary)]">{formatBoostedConfidence(post.ai_confidence_score)}</p>
-                  </div>
-                </div>
 
-                <div className="rounded-[1.5rem] border border-[var(--card-border)] bg-[var(--bg-secondary)] p-4">
-                  <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-tertiary)]">{treatmentLabel}</p>
-                  <p className="mt-2 whitespace-pre-line text-sm leading-6 text-[var(--text-primary)]">{post.ai_treatment_recommendation}</p>
-                </div>
               </div>
             </div>
 
@@ -747,7 +724,7 @@ export function CommunityFeed() {
   });
 
   const createPostMutation = useMutation({
-    mutationFn: async (payload: {plantName: string; problem: string; aiDisease: string; aiConfidenceScore: number; image: File}) =>
+    mutationFn: async (payload: {plantName: string; problem: string; title: string; aiDisease: string; aiConfidenceScore: number; image: File}) =>
       createCommunityPost({token: token ?? "", ...payload}),
     onSuccess: async () => {
       await queryClient.invalidateQueries({queryKey: ["community-posts"]});

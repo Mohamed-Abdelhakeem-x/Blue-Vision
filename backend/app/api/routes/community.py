@@ -75,7 +75,7 @@ def _post_base_stmt(current_user_id: str) -> Select:
         .outerjoin(likes_subquery, likes_subquery.c.scan_id == ScanHistory.id)
         .outerjoin(comments_subquery, comments_subquery.c.scan_id == ScanHistory.id)
         .outerjoin(liked_subquery, liked_subquery.c.scan_id == ScanHistory.id)
-        .where(ScanHistory.entry_kind.in_(("scan", "community")))
+        .where(ScanHistory.entry_kind == "community")
     )
 
 
@@ -102,6 +102,7 @@ def _serialize_post(row) -> CommunityPostResponse:
         likes_count=int(likes_count or 0),
         comments_count=int(comments_count or 0),
         liked_by_current_user=bool(liked_by_current_user),
+        title=scan.title,
     )
 
 
@@ -184,6 +185,7 @@ async def create_post(
     problem: Annotated[str, Form(...)],
     ai_disease: Annotated[str, Form(...)],
     ai_confidence_score: Annotated[float, Form(...)],
+    title: Annotated[str | None, Form(...)] = None,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ) -> CommunityPostResponse:
@@ -192,6 +194,7 @@ async def create_post(
 
     normalized_plant = normalize_user_text(plant_name, field="plant_name")
     normalized_problem = normalize_user_text(problem, field="body")
+    normalized_title = normalize_user_text(title, field="body") if title else None
     normalized_ai_disease = normalize_user_text(ai_disease, field="body")
     if not normalized_plant or not normalized_problem or not normalized_ai_disease:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Plant name and problem are required")
@@ -208,6 +211,7 @@ async def create_post(
         domain="color",
         image_sha256=digest,
         entry_kind="community",
+        title=normalized_title,
     )
     session.add(post)
     await session.commit()

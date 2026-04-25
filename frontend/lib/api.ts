@@ -877,6 +877,7 @@ export async function createCommunityPost(input: {
   token: string;
   plantName: string;
   problem: string;
+  title?: string;
   aiDisease: string;
   aiConfidenceScore: number;
   image: File;
@@ -884,6 +885,9 @@ export async function createCommunityPost(input: {
   const formData = new FormData();
   formData.append("plant_name", input.plantName);
   formData.append("problem", input.problem);
+  if (input.title) {
+    formData.append("title", input.title);
+  }
   formData.append("ai_disease", input.aiDisease);
   formData.append("ai_confidence_score", String(input.aiConfidenceScore));
   formData.append("image", input.image);

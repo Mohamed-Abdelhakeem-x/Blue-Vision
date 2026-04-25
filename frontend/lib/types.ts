@@ -101,6 +101,7 @@ export interface CommunityPost {
   likes_count: number;
   comments_count: number;
   liked_by_current_user: boolean;
+  title?: string | null;
 }
 
 export interface CommunityPostDetail extends CommunityPost {

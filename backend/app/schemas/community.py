@@ -44,6 +44,7 @@ class CommunityPostResponse(BaseModel):
     likes_count: int
     comments_count: int
     liked_by_current_user: bool
+    title: str | None = None
 
 
 class CommunityPostSuggestionResponse(BaseModel):

@@ -15,6 +15,7 @@ class ScanHistory(Base):
     disease_type: Mapped[str] = mapped_column(String(180), index=True)
     confidence_score: Mapped[float] = mapped_column(Float)
     recommendation: Mapped[str] = mapped_column(Text)
+    title: Mapped[str | None] = mapped_column(Text, nullable=True)
     domain: Mapped[str] = mapped_column(String(50), default="color")
     image_sha256: Mapped[str] = mapped_column(String(64), index=True)
     entry_kind: Mapped[str] = mapped_column(String(20), default="scan", index=True)
