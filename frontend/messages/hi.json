@@ -1,0 +1,213 @@
+{
+  "nav": {
+    "visitor": "आगंतुक",
+    "farmer": "किसान",
+    "expert": "विशेषज्ञ",
+    "admin": "एडमिन",
+    "login": "लॉग इन",
+    "register": "खाता बनाएं",
+    "home": "होम",
+    "mission": "मिशन",
+    "testimonials": "प्रशंसापत्र",
+    "team": "टीम",
+    "dashboard": "डैशबोर्ड",
+    "signOut": "साइन आउट"
+  },
+  "landing": {
+    "eyebrow": "Plantify प्लेटफ़ॉर्म",
+    "title": "आधुनिक फसल स्वास्थ्य संचालन, वास्तविक टीमों के लिए।",
+    "subtitle": "Plantify मॉनिटरिंग, विश्लेषण और सहयोग को एक प्रवाह में जोड़ता है ताकि आपकी टीम तेजी से निर्णय ले सके।",
+    "ctaPrimary": "शुरू करें",
+    "ctaSecondary": "डैशबोर्ड देखें",
+    "missionEyebrow": "मिशन",
+    "missionTitle": "हर ऑपरेशन के लिए उच्च-गुणवत्ता फसल निर्णय सुलभ बनाना।",
+    "missionPoint1": "ऐसे टूल बनाना जो फसल निर्णय तेज और आसान करें।",
+    "missionPoint2": "दैनिक कार्य में भरोसेमंद और सुसंगत परिणाम देना।",
+    "missionPoint3": "ऑनबोर्डिंग से फील्ड तक कार्यप्रवाह को सरल रखना।",
+    "missionItem1Title": "स्केल पर सटीकता",
+    "missionItem1Body": "कच्ची फील्ड इमेजरी को हर ऑपरेटर के लिए भरोसेमंद रोग संकेतों में बदलना।",
+    "missionItem2Title": "ऑपरेशनल स्पष्टता",
+    "missionItem2Body": "डायग्नोस्टिक्स, कॉन्फिडेंस और ट्रीटमेंट एक्शन को एक ही वर्कफ़्लो में व्यवस्थित करना।",
+    "missionItem3Title": "विश्वसनीय थ्रूपुट",
+    "missionItem3Body": "ऑनबोर्डिंग और स्कैन निष्पादन को हल्का और पूर्वानुमेय रखना।",
+    "testimonialsEyebrow": "प्रशंसापत्र",
+    "testimonialsTitle": "Plantify के बारे में टीमों की राय",
+    "teamEyebrow": "टीम",
+    "teamTitle": "छोटी टीम, केंद्रित निष्पादन",
+    "teamRole1": "प्रोडक्ट लीड",
+    "teamRole2": "डिज़ाइन लीड",
+    "teamRole3": "प्लेटफ़ॉर्म इंजीनियर",
+    "teamRole4": "सिक्योरिटी इंजीनियर",
+    "teamRole5": "कंप्यूटर विज़न इंजीनियर",
+    "teamRole6": "ऑपरेशंस लीड",
+    "footerDescription": "ऑपरेशंस टीमों के लिए एआई-संचालित बॉटैनिकल डायग्नोस्टिक्स।",
+    "footerHeadingPlatform": "प्लेटफ़ॉर्म",
+    "footerHeadingLegal": "कानूनी",
+    "footerHeadingSocial": "सोशल",
+    "footerHome": "होम",
+    "footerDashboard": "डैशबोर्ड",
+    "footerX": "एक्स",
+    "footerLinkedIn": "लिंक्डइन",
+    "footerPrivacy": "गोपनीयता",
+    "footerTerms": "शर्तें",
+    "footerContact": "संपर्क",
+    "copyright": "© 2025 Limarise. सर्वाधिकार सुरक्षित।",
+    "tagline": "Rising Beyond Limits"
+  },
+  "auth": {
+    "common": {
+      "username": "यूज़रनेम",
+      "email": "ईमेल",
+      "password": "पासवर्ड",
+      "confirmPassword": "पासवर्ड की पुष्टि करें",
+      "emailHint": "मान्य ईमेल प्रारूप उपयोग करें, जैसे name@domain.com।",
+      "passwordHint": "पासवर्ड केस-सेंसिटिव होते हैं।"
+    },
+    "login": {
+      "title": "लॉग इन",
+      "subtitle": "अपने Plantify खाते की जानकारी का उपयोग करें।",
+      "cta": "जारी रखें",
+      "loading": "लॉग इन हो रहा है...",
+      "success": "सफल",
+      "error": "लॉग इन नहीं हो सका",
+      "switchPrompt": "Plantify पर नए हैं?",
+      "switchCta": "खाता बनाएं"
+    },
+    "register": {
+      "title": "साइन अप",
+      "subtitle": "अपना Plantify खाता बनाएं।",
+      "cta": "खाता बनाएं",
+      "loading": "खाता बनाया जा रहा है...",
+      "success": "खाता बन गया",
+      "error": "रजिस्टर नहीं हो सका",
+      "passwordMismatch": "पासवर्ड मेल नहीं खाते",
+      "passwordRule": "कम से कम 8 अक्षर और दोनों पासवर्ड समान होने चाहिए।",
+      "switchPrompt": "क्या आपका खाता पहले से है?",
+      "switchCta": "साइन इन"
+    }
+  },
+  "authCode": {
+    "badge": "अधिकार प्राधिकरण कंसोल",
+    "title": "प्राधिकरण कोड दर्ज करें",
+    "subtitle": "अपने वर्तमान खाते के लिए भूमिका चयन अनलॉक करने हेतु निजी कोड का उपयोग करें।",
+    "codeLabel": "प्राधिकरण कोड",
+    "codePlaceholder": "प्राधिकरण कोड दर्ज करें",
+    "unlock": "अनलॉक करें",
+    "roleLabel": "भूमिका",
+    "apply": "भूमिका लागू करें",
+    "applying": "भूमिका लागू की जा रही है...",
+    "helper": "भूमिका परिवर्तन वर्तमान प्रमाणित खाते पर लागू होगा।",
+    "roles": {
+      "farmer": "किसान",
+      "expert": "विशेषज्ञ",
+      "admin": "एडमिन",
+      "developer": "डेवलपर"
+    },
+    "errors": {
+      "missingCode": "जारी रखने के लिए प्राधिकरण कोड दर्ज करें।",
+      "invalidCode": "अमान्य प्राधिकरण कोड।",
+      "disabled": "भूमिका उन्नयन अभी अक्षम है।",
+      "signInFirst": "पहले साइन इन करना होगा।",
+      "applyFailed": "भूमिका अपडेट नहीं की जा सकी।"
+    }
+  },
+  "dashboard": {
+    "eyebrow": "डायग्नोस्टिक हब",
+    "title": "स्कैन करें, विश्लेषण करें और कार्रवाई करें",
+    "tabs": {
+      "scan": "स्कैन",
+      "result": "परिणाम"
+    },
+    "scanIntake": {
+      "title": "स्कैन इनटेक",
+      "statusProcessing": "एआई प्रोसेसिंग",
+      "statusReady": "इमेज तैयार",
+      "statusWaiting": "अपलोड की प्रतीक्षा",
+      "dropzoneTitle": "पत्ती की तस्वीर ड्रैग और ड्रॉप करें",
+      "cta": "एआई स्कैन शुरू करें",
+      "scanning": "स्कैन हो रहा है..."
+    },
+    "result": {
+      "title": "परिणाम और उपचार",
+      "domainLabel": "डोमेन:",
+      "plantLabel": "पौधा",
+      "statusLabel": "स्थिति",
+      "detected": "पता चली स्थिति",
+      "treatment": "उपचार योजना",
+      "statusHealthy": "स्वस्थ संकेत",
+      "statusAttention": "ध्यान आवश्यक",
+      "immediate": "तुरंत कार्रवाई",
+      "next": "अगले 7 दिन",
+      "monitor": "निगरानी करें",
+      "empty": "विश्वसनीयता विश्लेषण और उपचार मार्गदर्शन देखने के लिए स्कैन चलाएँ।",
+      "metrics": {
+        "modelConfidence": "मॉडल विश्वसनीयता",
+        "diseaseLikelihood": "रोग संभावना",
+        "actionPriority": "कार्रवाई प्राथमिकता"
+      }
+    },
+    "history": {
+      "title": "स्कैन इतिहास",
+      "searchPlaceholder": "रोग या डोमेन से खोजें",
+      "loading": "इतिहास लोड हो रहा है...",
+      "empty": "कोई मेल खाते स्कैन नहीं मिले।"
+    },
+    "snapshot": {
+      "title": "ऑपरेशंस स्नैपशॉट",
+      "totalScans": "कुल स्कैन",
+      "healthyRatio": "स्वस्थ अनुपात",
+      "topDisease": "शीर्ष रोग",
+      "noDominantDisease": "कोई प्रमुख रोग नहीं"
+    },
+    "sidebar": {
+      "account": "खाता",
+      "quickActions": "त्वरित कार्य",
+      "logout": "लॉग आउट",
+      "role": {
+        "farmer": "किसान",
+        "expert": "विशेषज्ञ",
+        "admin": "प्रशासक",
+        "developer": "डेवलपर"
+      },
+      "farmer": {
+        "uploadLeaf": "विश्लेषण हेतु पत्ती अपलोड करें",
+        "viewHistory": "स्कैन इतिहास देखें",
+        "getAdvice": "उपचार सलाह प्राप्त करें"
+      },
+      "expert": {
+        "reviewQueue": "लंबित मामलों की समीक्षा करें",
+        "validateResults": "मॉडल परिणाम सत्यापित करें",
+        "viewStats": "सटीकता आँकड़े देखें"
+      },
+      "admin": {
+        "manageUsers": "उपयोगकर्ता खाते प्रबंधित करें",
+        "viewMetrics": "सिस्टम मेट्रिक्स देखें",
+        "systemHealth": "सिस्टम स्वास्थ्य स्थिति"
+      },
+      "developer": {
+        "diagnostics": "इंटीग्रेशन डायग्नोस्टिक्स",
+        "apiPayload": "API पेलोड जांच",
+        "releases": "रिलीज सत्यापन"
+      }
+    },
+    "errors": {
+      "signIn": "डायग्नोस्टिक्स चलाने के लिए साइन इन करें।",
+      "upload": "जारी रखने के लिए पत्ती की छवि अपलोड करें।",
+      "scan": "छवि स्कैन नहीं हो सकी।"
+    }
+  },
+  "chat": {
+    "title": "कृषि विशेषज्ञ चैट",
+    "welcome": "कृषि विशेषज्ञ में आपका स्वागत है",
+    "subtitle": "फसल स्वास्थ्य, रोग उपचार और कृषि पद्धतियों पर प्रश्न पूछें। मैं आपकी भाषा में उत्तर दूँगा।",
+    "inputPlaceholder": "अपनी फसलों के बारे में प्रश्न पूछें...",
+    "send": "भेजें",
+    "sending": "भेजा जा रहा है...",
+    "error": "त्रुटि",
+    "hint": "संकेत: भेजने के लिए Ctrl+Enter दबाएँ",
+    "agri_expert": "कृषि विशेषज्ञ",
+    "online": "हमेशा ऑनलाइन",
+    "ask_question": "फसल स्वास्थ्य, रोग या उपचार विकल्पों के बारे में पूछें",
+    "message": "अपना संदेश लिखें..."
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "samples_evaluated": 0,
+  "top1_accuracy": 0.0,
+  "drift_proxy": {
+    "sample_count": 0,
+    "mean_confidence": 0.0,
+    "p05_confidence": 0.0,
+    "p95_confidence": 0.0,
+    "low_confidence_rate": 0.0,
+    "prediction_entropy": 0.0
+  },
+  "dataset_root": "C:/Users/Radwan/Documents/plantify-clean-main/plantify-clean-main/backend/model",
+  "samples_requested": 10,
+  "samples_used": 0
+}

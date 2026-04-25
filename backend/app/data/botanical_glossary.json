@@ -1,0 +1,136 @@
+{
+  "diseases": {
+    "Early Blight": {
+      "ar": "اللفحة المبكرة",
+      "ar_description": "مرض فطري يصيب أوراق الطماطم ويسبب ظهور بقع دائرية بنية",
+      "en_description": "A fungal disease on tomato leaves causing brown circular spots"
+    },
+    "Late Blight": {
+      "ar": "اللفحة المتأخرة",
+      "ar_description": "مرض فطري خطير يصيب الطماطم والبطاطس ويسبب موت الأوراق والساق",
+      "en_description": "A serious fungal disease of tomato and potato causing leaf and stem death"
+    },
+    "Powdery Mildew": {
+      "ar": "البياض الدقيقي",
+      "ar_description": "مرض فطري يظهر على شكل طبقة بيضاء على الأوراق والسيقان",
+      "en_description": "A fungal disease appearing as white powder-like coating on leaves and stems"
+    },
+    "Black Rot": {
+      "ar": "التعفن الأسود",
+      "ar_description": "مرض بكتيري يسبب تحلل الأنسجة وتحولها للون الأسود",
+      "en_description": "A bacterial disease causing tissue decay and darkening"
+    },
+    "Leaf Blight": {
+      "ar": "لفحة الأوراق",
+      "ar_description": "مرض فطري يصيب الأوراق مسبباً موتها وسقوطها",
+      "en_description": "A fungal disease affecting leaves causing their death and drop"
+    },
+    "Bacterial Spot": {
+      "ar": "البقعة البكتيرية",
+      "ar_description": "مرض بكتيري يسبب ظهور بقع مائية على الأوراق والثمار",
+      "en_description": "A bacterial disease causing water-soaked spots on leaves and fruit"
+    },
+    "Esca": {
+      "ar": "مرض إسكا",
+      "ar_description": "مرض فطري خطير يصيب الكروم والعنب ويسبب ذبول النبات",
+      "en_description": "A serious fungal disease of grapevines causing plant wilting"
+    },
+    "Cercospora Leaf Spot": {
+      "ar": "بقعة سيركوسبورا",
+      "ar_description": "مرض فطري يسبب بقع دائرية رمادية على الأوراق",
+      "en_description": "A fungal disease causing circular gray spots on leaves"
+    },
+    "Leaf Scorch": {
+      "ar": "احتراق الأوراق",
+      "ar_description": "مرض يسبب احمرار وتجفيف حواف الأوراق",
+      "en_description": "A disease causing reddening and drying of leaf margins"
+    },
+    "Healthy": {
+      "ar": "سليم",
+      "ar_description": "النبات بحالة صحية جيدة بدون أمراض",
+      "en_description": "The plant is in good health with no diseases"
+    }
+  },
+  "treatments": {
+    "fungicide": {
+      "ar": "مبيد فطري",
+      "tips": ["استخدم مبيدات نحاسية", "رش في الصباح أو المساء", "كرر كل 7-10 أيام"]
+    },
+    "bactericide": {
+      "ar": "مضاد بكتيري",
+      "tips": ["استخدم محاليل بوردو", "أزل الأجزاء المصابة", "حسّن التهوية"]
+    },
+    "pruning": {
+      "ar": "التقليم",
+      "tips": ["أزل الأوراق والأفرع المصابة", "استخدم أدوات معقمة", "سماد متوازن"]
+    },
+    "irrigation": {
+      "ar": "الري",
+      "tips": ["تجنب رطوبة الأوراق", "اري في الصباح", "تجنب الإفراط في الري"]
+    }
+  },
+  "agronomic_terms": {
+    "photosynthesis": {
+      "ar": "التمثيل الضوئي",
+      "description": "عملية تحويل الضوء إلى طاقة كيميائية"
+    },
+    "chlorophyll": {
+      "ar": "الكلوروفيل",
+      "description": "الصبغة الخضراء في النبات"
+    },
+    "nitrogen": {
+      "ar": "النيتروجين",
+      "description": "عنصر غذائي أساسي لنمو النبات"
+    },
+    "phosphorus": {
+      "ar": "الفوسفور",
+      "description": "عنصر غذائي يحفز نمو الجذور"
+    },
+    "potassium": {
+      "ar": "البوتاسيوم",
+      "description": "عنصر غذائي يقوي مقاومة النبات"
+    },
+    "pest": {
+      "ar": "آفة",
+      "description": "كائن حي يضر بالنبات"
+    },
+    "yield": {
+      "ar": "الإنتاجية",
+      "description": "كمية الإنتاج من المحصول"
+    },
+    "organic": {
+      "ar": "عضوي",
+      "description": "خالي من المواد الكيميائية الصناعية"
+    },
+    "crop_rotation": {
+      "ar": "تدوير المحاصيل",
+      "description": "تغيير نوع المحصول في نفس الأرض كل موسم"
+    },
+    "mulch": {
+      "ar": "تغطية التربة",
+      "description": "مادة توضع على سطح التربة للحفاظ على الرطوبة"
+    }
+  },
+  "severity_levels": {
+    "healthy": {
+      "ar": "سليم",
+      "description_en": "No disease detected",
+      "description_ar": "لم يتم الكشف عن أي مرض"
+    },
+    "mild": {
+      "ar": "خفيف",
+      "description_en": "Early stage disease, easy to manage",
+      "description_ar": "مرض في مراحله الأولى، يسهل التحكم فيه"
+    },
+    "moderate": {
+      "ar": "متوسط",
+      "description_en": "Established disease, requires treatment",
+      "description_ar": "مرض متطور يتطلب علاجاً"
+    },
+    "severe": {
+      "ar": "شديد",
+      "description_en": "Advanced disease, immediate action needed",
+      "description_ar": "مرض متقدم، يتطلب إجراء فوري"
+    }
+  }
+}

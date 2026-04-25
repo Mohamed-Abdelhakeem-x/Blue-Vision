@@ -1,0 +1,217 @@
+{
+  "nav": {
+    "visitor": "زائر",
+    "farmer": "مزارع",
+    "expert": "خبير",
+    "admin": "الإدارة",
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "home": "الرئيسية",
+    "mission": "المهمة",
+    "testimonials": "آراء العملاء",
+    "team": "الفريق",
+    "dashboard": "لوحة التحكم",
+    "signOut": "تسجيل الخروج"
+  },
+  "landing": {
+    "eyebrow": "منصة بلانتيفاي",
+    "title": "إدارة حديثة لصحة المحاصيل، مصممة لفرق العمل الحقيقية.",
+    "subtitle": "تجمع بلانتيفاي بين المراقبة والتحليل والتعاون في سير عمل متكامل حتى تتمكن فرقك من التحرك من المشاهدة إلى العمل بشكل أسرع.",
+    "ctaPrimary": "ابدأ الآن",
+    "ctaSecondary": "عرض لوحة التحكم",
+    "missionEyebrow": "المهمة",
+    "missionTitle": "جعل قرارات المحاصيل عالية الجودة متاحة لكل عملية.",
+    "missionPoint1": "تصميم أدوات تجعل قرارات المحاصيل أسرع وأسهل.",
+    "missionPoint2": "تقديم مخرجات متسقة تثق بها الفرق في العمل اليومي.",
+    "missionPoint3": "الحفاظ على بساطة سير العمل من الإعداد إلى التنفيذ الميداني.",
+    "missionItem1Title": "دقة على نطاق واسع",
+    "missionItem1Body": "تحويل صور الحقول الخام إلى إشارات مرضية متسقة لكل مشغل ضمن سلسلة التشغيل.",
+    "missionItem2Title": "وضوح تشغيلي",
+    "missionItem2Body": "تنظيم التشخيص والثقة وإجراءات العلاج ضمن مسار عمل واحد عالي الكفاءة.",
+    "missionItem3Title": "إنتاجية موثوقة",
+    "missionItem3Body": "الحفاظ على الإعداد والتنفيذ بخفة وبنتائج يمكن التنبؤ بها عبر المناطق.",
+    "testimonialsEyebrow": "آراء العملاء",
+    "testimonialsTitle": "ما تقوله الفرق عن بلانتيفاي",
+    "teamEyebrow": "الفريق",
+    "teamTitle": "فريق صغير، تنفيذ محكم",
+    "teamRole1": "قائد المنتج",
+    "teamRole2": "قائد التصميم",
+    "teamRole3": "مهندس المنصة",
+    "teamRole4": "مهندس الأمن",
+    "teamRole5": "مهندس الرؤية الحاسوبية",
+    "teamRole6": "قائد العمليات",
+    "footerDescription": "تشخيصات نباتية مدعومة بالذكاء الاصطناعي لفرق التشغيل.",
+    "footerHeadingPlatform": "المنصة",
+    "footerHeadingLegal": "القانونية",
+    "footerHeadingSocial": "اجتماعي",
+    "footerHome": "الرئيسية",
+    "footerDashboard": "لوحة التحكم",
+    "footerX": "إكس",
+    "footerLinkedIn": "لينكدإن",
+    "footerPrivacy": "الخصوصية",
+    "footerTerms": "الشروط",
+    "footerContact": "تواصل معنا",
+    "copyright": "© 2025 ليمارايس. جميع الحقوق محفوظة.",
+    "tagline": "تجاوز الحدود"
+  },
+  "auth": {
+    "common": {
+      "username": "اسم المستخدم",
+      "email": "البريد الإلكتروني",
+      "password": "كلمة المرور",
+      "confirmPassword": "تأكيد كلمة المرور",
+      "emailHint": "استخدم صيغة بريد صحيحة مثل name@domain.com.",
+      "passwordHint": "كلمات المرور حساسة لحالة الأحرف."
+    },
+    "login": {
+      "title": "تسجيل الدخول",
+      "subtitle": "استخدم بيانات حساب Plantify الخاصة بك.",
+      "cta": "متابعة",
+      "loading": "جاري تسجيل الدخول...",
+      "success": "تم بنجاح",
+      "error": "تعذر تسجيل الدخول",
+      "switchPrompt": "جديد على Plantify؟",
+      "switchCta": "أنشئ حساباً"
+    },
+    "register": {
+      "title": "إنشاء حساب",
+      "subtitle": "أنشئ حسابك في Plantify.",
+      "cta": "إنشاء حساب",
+      "loading": "جاري إنشاء الحساب...",
+      "success": "تم إنشاء الحساب",
+      "error": "تعذر إنشاء الحساب",
+      "passwordMismatch": "كلمتا المرور غير متطابقتين",
+      "passwordRule": "الحد الأدنى 8 أحرف ويجب أن تتطابق كلمتا المرور.",
+      "switchPrompt": "لديك حساب بالفعل؟",
+      "switchCta": "سجل الدخول"
+    }
+  },
+  "authCode": {
+    "badge": "لوحة التفويض",
+    "title": "أدخل رمز التفويض",
+    "subtitle": "استخدم الرمز الخاص لفتح اختيار الدور للحساب الحالي.",
+    "codeLabel": "رمز التفويض",
+    "codePlaceholder": "أدخل رمز التفويض",
+    "unlock": "فتح",
+    "roleLabel": "الدور",
+    "apply": "تطبيق الدور",
+    "applying": "جارٍ تطبيق الدور...",
+    "helper": "سيتم تطبيق تغيير الدور على الحساب المصادق عليه حالياً.",
+    "roles": {
+      "farmer": "مزارع",
+      "expert": "خبير",
+      "admin": "الإدارة",
+      "developer": "المطور"
+    },
+    "errors": {
+      "missingCode": "أدخل رمز التفويض للمتابعة.",
+      "invalidCode": "رمز التفويض غير صالح.",
+      "disabled": "ترقية الدور معطلة حالياً.",
+      "signInFirst": "يجب تسجيل الدخول أولاً.",
+      "applyFailed": "تعذر تحديث الدور."
+    }
+  },
+  "dashboard": {
+    "eyebrow": "مركز التشخيص",
+    "title": "افحص، حلّل، ثم نفّذ",
+    "tabs": {
+      "scan": "فحص",
+      "result": "النتيجة"
+    },
+    "scanIntake": {
+      "title": "إدخال الفحص",
+      "statusProcessing": "معالجة بالذكاء الاصطناعي",
+      "statusReady": "الصورة جاهزة",
+      "statusWaiting": "بانتظار الرفع",
+      "dropzoneTitle": "اسحب وأسقط صورة ورقة نبات",
+      "cta": "ابدأ الفحص بالذكاء الاصطناعي",
+      "scanning": "جارٍ الفحص..."
+    },
+    "result": {
+      "title": "النتيجة والعلاج",
+      "domainLabel": "النطاق:",
+      "plantLabel": "النبات",
+      "statusLabel": "الحالة",
+      "detected": "الحالة المكتشفة",
+      "treatment": "خطة العلاج",
+      "statusHealthy": "إشارة سليمة",
+      "statusAttention": "تحتاج متابعة",
+      "immediate": "إجراءات فورية",
+      "next": "الأيام السبعة القادمة",
+      "monitor": "راقب",
+      "empty": "شغّل فحصاً لعرض تحليلات الثقة وتوجيهات العلاج.",
+      "metrics": {
+        "modelConfidence": "ثقة النموذج",
+        "diseaseLikelihood": "احتمالية المرض",
+        "actionPriority": "أولوية الإجراء"
+      }
+    },
+    "history": {
+      "title": "سجل الفحوصات",
+      "searchPlaceholder": "ابحث حسب المرض أو النطاق",
+      "loading": "جارٍ تحميل السجل...",
+      "empty": "لا توجد فحوصات مطابقة."
+    },
+    "snapshot": {
+      "title": "ملخص العمليات",
+      "totalScans": "إجمالي الفحوصات",
+      "healthyRatio": "نسبة السليم",
+      "topDisease": "أعلى مرض",
+      "noDominantDisease": "لا يوجد مرض مهيمن"
+    },
+    "sidebar": {
+      "account": "الحساب",
+      "menu": "القائمة",
+      "home": "الرئيسية",
+      "chatbot": "المساعد",
+      "community": "المجتمع",
+      "communitySoon": "قسم المجتمع قريباً.",
+      "logout": "تسجيل الخروج",
+      "role": {
+        "farmer": "مزارع",
+        "expert": "خبير",
+        "admin": "مسؤول",
+        "developer": "مطوّر"
+      },
+      "farmer": {
+        "uploadLeaf": "ارفع ورقة للتحليل",
+        "viewHistory": "عرض سجل الفحوصات",
+        "getAdvice": "الحصول على نصائح العلاج"
+      },
+      "expert": {
+        "reviewQueue": "مراجعة الحالات المعلقة",
+        "validateResults": "التحقق من نتائج النموذج",
+        "viewStats": "عرض إحصاءات الدقة"
+      },
+      "admin": {
+        "manageUsers": "إدارة حسابات المستخدمين",
+        "viewMetrics": "عرض مؤشرات النظام",
+        "systemHealth": "حالة النظام"
+      },
+      "developer": {
+        "diagnostics": "تشخيصات التكامل",
+        "apiPayload": "فحص حمولة API",
+        "releases": "التحقق من الإصدارات"
+      }
+    },
+    "errors": {
+      "signIn": "سجّل الدخول لتشغيل التشخيص.",
+      "upload": "ارفع صورة ورقة للمتابعة.",
+      "scan": "تعذر فحص الصورة."
+    }
+  },
+  "chat": {
+    "title": "خبير الزراعة - الدردشة",
+    "welcome": "أهلاً بك في خبير الزراعة",
+    "subtitle": "اطرح أسئلة حول صحة المحاصيل وعلاج الأمراض والممارسات الزراعية. سأرد عليك في لغتك.",
+    "inputPlaceholder": "اطرح سؤال حول محاصيلك...",
+    "send": "إرسال",
+    "sending": "جاري الإرسال...",
+    "error": "خطأ",
+    "hint": "نصيحة: اضغط Ctrl+Enter للإرسال",
+    "agri_expert": "خبير الزراعة",
+    "online": "متصل دائماً",
+    "ask_question": "اسأل عن صحة المحاصيل أو الأمراض أو خيارات العلاج",
+    "message": "اكتب رسالتك..."
+  }
+}

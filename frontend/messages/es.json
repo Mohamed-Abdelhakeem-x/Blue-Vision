@@ -1,0 +1,213 @@
+{
+  "nav": {
+    "visitor": "Visitante",
+    "farmer": "Agricultor",
+    "expert": "Experto",
+    "admin": "Admin",
+    "login": "Iniciar sesión",
+    "register": "Crear cuenta",
+    "home": "Inicio",
+    "mission": "Misión",
+    "testimonials": "Testimonios",
+    "team": "Equipo",
+    "dashboard": "Panel",
+    "signOut": "Cerrar sesión"
+  },
+  "landing": {
+    "eyebrow": "Plataforma Plantify",
+    "title": "Operaciones modernas de salud de cultivos para equipos reales.",
+    "subtitle": "Plantify integra monitoreo, análisis y colaboración en un flujo de trabajo profesional para pasar de observación a acción más rápido.",
+    "ctaPrimary": "Comenzar",
+    "ctaSecondary": "Ver panel",
+    "missionEyebrow": "Misión",
+    "missionTitle": "Hacer accesibles decisiones de cultivo de alta calidad para cada operación.",
+    "missionPoint1": "Diseñar herramientas que aceleren y simplifiquen decisiones de cultivo.",
+    "missionPoint2": "Entregar resultados consistentes en los que los equipos confíen.",
+    "missionPoint3": "Mantener flujos simples desde incorporación hasta ejecución en campo.",
+    "missionItem1Title": "Precisión a escala",
+    "missionItem1Body": "Convertir imágenes de campo en señales de enfermedad consistentes para cada operador.",
+    "missionItem2Title": "Claridad operativa",
+    "missionItem2Body": "Estructurar diagnósticos, confianza y acciones de tratamiento en un solo flujo de trabajo.",
+    "missionItem3Title": "Rendimiento confiable",
+    "missionItem3Body": "Mantener incorporación y ejecución de escaneo ligeras y predecibles entre regiones.",
+    "testimonialsEyebrow": "Testimonios",
+    "testimonialsTitle": "Lo que dicen los equipos sobre Plantify",
+    "teamEyebrow": "Equipo",
+    "teamTitle": "Equipo pequeño, ejecución enfocada",
+    "teamRole1": "Líder de producto",
+    "teamRole2": "Líder de diseño",
+    "teamRole3": "Ingeniero de plataforma",
+    "teamRole4": "Ingeniero de seguridad",
+    "teamRole5": "Ingeniero de visión por computador",
+    "teamRole6": "Líder de operaciones",
+    "footerDescription": "Diagnóstico botánico con IA para equipos de operación.",
+    "footerHeadingPlatform": "Plataforma",
+    "footerHeadingLegal": "Legal",
+    "footerHeadingSocial": "Social",
+    "footerHome": "Inicio",
+    "footerDashboard": "Panel",
+    "footerX": "X",
+    "footerLinkedIn": "LinkedIn",
+    "footerPrivacy": "Privacidad",
+    "footerTerms": "Términos",
+    "footerContact": "Contacto",
+    "copyright": "© 2025 Limarise. Todos los derechos reservados.",
+    "tagline": "Superando limites"
+  },
+  "auth": {
+    "common": {
+      "username": "Nombre de usuario",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "emailHint": "Usa un formato válido, por ejemplo nombre@dominio.com.",
+      "passwordHint": "Las contraseñas distinguen mayúsculas y minúsculas."
+    },
+    "login": {
+      "title": "Iniciar sesión",
+      "subtitle": "Usa tus credenciales de Plantify.",
+      "cta": "Continuar",
+      "loading": "Iniciando sesión...",
+      "success": "Éxito",
+      "error": "No se pudo iniciar sesión",
+      "switchPrompt": "¿Nuevo en Plantify?",
+      "switchCta": "Crear cuenta"
+    },
+    "register": {
+      "title": "Crear cuenta",
+      "subtitle": "Crea tu cuenta de Plantify.",
+      "cta": "Crear cuenta",
+      "loading": "Creando cuenta...",
+      "success": "Cuenta creada",
+      "error": "No se pudo registrar",
+      "passwordMismatch": "Las contraseñas no coinciden",
+      "passwordRule": "Mínimo 8 caracteres y ambas contraseñas deben coincidir.",
+      "switchPrompt": "¿Ya tienes una cuenta?",
+      "switchCta": "Iniciar sesión"
+    }
+  },
+  "authCode": {
+    "badge": "Consola de autorización",
+    "title": "Introduce el código de autorización",
+    "subtitle": "Usa el código privado para desbloquear la selección de rol para tu cuenta actual.",
+    "codeLabel": "Código de autorización",
+    "codePlaceholder": "Introduce el código de autorización",
+    "unlock": "Desbloquear",
+    "roleLabel": "Rol",
+    "apply": "Aplicar rol",
+    "applying": "Aplicando rol...",
+    "helper": "El cambio de rol se aplica a la cuenta autenticada actual.",
+    "roles": {
+      "farmer": "Agricultor",
+      "expert": "Experto",
+      "admin": "Admin",
+      "developer": "Desarrollador"
+    },
+    "errors": {
+      "missingCode": "Introduce un código de autorización para continuar.",
+      "invalidCode": "Código de autorización no válido.",
+      "disabled": "La elevación de rol está deshabilitada actualmente.",
+      "signInFirst": "Primero debes iniciar sesión.",
+      "applyFailed": "No se pudo actualizar el rol."
+    }
+  },
+  "dashboard": {
+    "eyebrow": "Centro de diagnóstico",
+    "title": "Escanear, analizar y actuar",
+    "tabs": {
+      "scan": "Escaneo",
+      "result": "Resultado"
+    },
+    "scanIntake": {
+      "title": "Entrada de escaneo",
+      "statusProcessing": "Procesando con IA",
+      "statusReady": "Imagen lista",
+      "statusWaiting": "Esperando carga",
+      "dropzoneTitle": "Arrastra y suelta una imagen de hoja",
+      "cta": "Iniciar escaneo IA",
+      "scanning": "Escaneando..."
+    },
+    "result": {
+      "title": "Resultado y tratamiento",
+      "domainLabel": "Dominio:",
+      "plantLabel": "Planta",
+      "statusLabel": "Estado",
+      "detected": "Condición detectada",
+      "treatment": "Plan de tratamiento",
+      "statusHealthy": "Señal saludable",
+      "statusAttention": "Requiere atención",
+      "immediate": "Acciones inmediatas",
+      "next": "Próximos 7 días",
+      "monitor": "Monitorear",
+      "empty": "Ejecuta un escaneo para ver análisis de confianza y guía de tratamiento.",
+      "metrics": {
+        "modelConfidence": "Confianza del modelo",
+        "diseaseLikelihood": "Probabilidad de enfermedad",
+        "actionPriority": "Prioridad de acción"
+      }
+    },
+    "history": {
+      "title": "Historial de escaneos",
+      "searchPlaceholder": "Buscar por enfermedad o dominio",
+      "loading": "Cargando historial...",
+      "empty": "No se encontraron escaneos coincidentes."
+    },
+    "snapshot": {
+      "title": "Resumen operativo",
+      "totalScans": "Escaneos totales",
+      "healthyRatio": "Proporción saludable",
+      "topDisease": "Enfermedad principal",
+      "noDominantDisease": "Sin enfermedad dominante"
+    },
+    "sidebar": {
+      "account": "Cuenta",
+      "quickActions": "Acciones rápidas",
+      "logout": "Cerrar sesión",
+      "role": {
+        "farmer": "Agricultor",
+        "expert": "Experto",
+        "admin": "Administrador",
+        "developer": "Desarrollador"
+      },
+      "farmer": {
+        "uploadLeaf": "Subir hoja para análisis",
+        "viewHistory": "Ver historial de escaneos",
+        "getAdvice": "Obtener recomendaciones"
+      },
+      "expert": {
+        "reviewQueue": "Revisar casos pendientes",
+        "validateResults": "Validar resultados del modelo",
+        "viewStats": "Ver estadísticas de precisión"
+      },
+      "admin": {
+        "manageUsers": "Gestionar cuentas de usuarios",
+        "viewMetrics": "Ver métricas del sistema",
+        "systemHealth": "Estado del sistema"
+      },
+      "developer": {
+        "diagnostics": "Diagnósticos de integración",
+        "apiPayload": "Revisión de payload API",
+        "releases": "Verificación de versiones"
+      }
+    },
+    "errors": {
+      "signIn": "Inicia sesión para ejecutar diagnósticos.",
+      "upload": "Sube una imagen de hoja para continuar.",
+      "scan": "No se pudo escanear la imagen."
+    }
+  },
+  "chat": {
+    "title": "Chat de Experto Agrícola",
+    "welcome": "Bienvenido al Experto Agrícola",
+    "subtitle": "Haz preguntas sobre salud del cultivo, tratamiento de enfermedades y prácticas agronómicas. Responderé en tu idioma.",
+    "inputPlaceholder": "Haz una pregunta sobre tus cultivos...",
+    "send": "Enviar",
+    "sending": "Enviando...",
+    "error": "Error",
+    "hint": "Consejo: presiona Ctrl+Enter para enviar",
+    "agri_expert": "Experto Agrícola",
+    "online": "Siempre en línea",
+    "ask_question": "Pregunta sobre salud de cultivos, enfermedades o tratamientos",
+    "message": "Escribe tu mensaje..."
+  }
+}

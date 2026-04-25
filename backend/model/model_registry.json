@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "active_version": "bootstrap-20260328",
+  "versions": [
+    {
+      "version": "bootstrap-20260328",
+      "created_at": "2026-03-28T00:00:00+00:00",
+      "updated_at": "2026-03-28T00:00:00+00:00",
+      "source": {
+        "type": "bootstrap",
+        "commit_sha": "local-workspace"
+      },
+      "artifacts": {
+        "checkpoint": {
+          "path": "plantify_model.pth",
+          "sha256": "fd03b705b0ec67517d2d87829138d83f073d33b3f8ca7176034d38b94c9de281",
+          "size_bytes": 122495102
+        },
+        "onnx": {
+          "path": "backend/model/plantify_model.onnx",
+          "sha256": "4739644d5cb0fc8e35a393f03da1fdd659f00e66552b94ad8410a92012288d55",
+          "size_bytes": 35899718
+        },
+        "labels": {
+          "path": "backend/model/classes.json",
+          "sha256": "f8988b3e341acb2e461ea8dd1caf9d3492a925405a32bcc57a79113237842aa4",
+          "size_bytes": 1223
+        }
+      }
+    }
+  ]
+}

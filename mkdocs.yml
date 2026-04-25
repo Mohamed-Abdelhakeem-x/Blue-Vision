@@ -1,0 +1,94 @@
+site_name: Plantify
+site_description: AI-powered plant disease detection
+site_author: Plantify Contributors
+site_url: https://plantify.limarise.com  # Update with actual domain
+repo_url: https://github.com/naghdiefallah/plantify
+repo_name: plantify
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  icon:
+    repo: fontawesome/brands/github
+  logo: assets/logo.png
+  favicon: assets/favicon.ico
+  palette:
+    - scheme: light
+      primary: green
+      accent: light-green
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to dark mode
+    - scheme: dark
+      primary: green
+      accent: light-green
+      toggle:
+        icon: material/lightbulb
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.top
+    - toc.integrate
+    - content.code.copy
+    - content.action.edit
+
+plugins:
+  - search
+  - social
+  - charts
+
+markdown_extensions:
+  - admonition
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - toc:
+      permalink: true
+  - tables
+  - attr_list
+
+extra:
+  version:
+    provider: mike
+    default: latest
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/naghdiefallah/plantify
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/r/naghdiefalla/plantify
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/plantify
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Quick Start: quickstart.md
+    - Installation: installation.md
+    - Configuration: configuration.md
+  - Deployment:
+    - Docker: deployment/docker.md
+    - Kubernetes: deployment/kubernetes.md
+    - Cloud Providers: deployment/cloud.md
+  - Features:
+    - Plant Detection: features/detection.md
+    - Disease Identification: features/diseases.md
+    - API: features/api.md
+    - Web Dashboard: features/dashboard.md
+  - Releases:
+    - All Releases: releases/index.md
+    - Release Process: releases/process.md
+    - Changelog: releases/changelog.md
+  - Security:
+    - Security Policy: ../SECURITY.md
+    - Verification Guide: security/verification.md
+  - Contributing:
+    - Contributing Guide: contributing/guide.md
+    - Development Setup: contributing/setup.md
+    - Architecture: contributing/architecture.md
+  - API Reference: api.md
+  - FAQ: faq.md

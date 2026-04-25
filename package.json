@@ -1,0 +1,12 @@
+{
+  "name": "plantify",
+  "private": true,
+  "scripts": {
+    "dev": "bunx concurrently -k -n backend,frontend -c cyan,green \"powershell -ExecutionPolicy Bypass -File ./scripts/dev-backend.ps1\" \"powershell -ExecutionPolicy Bypass -File ./scripts/dev-frontend.ps1\"",
+    "dev:backend": "powershell -ExecutionPolicy Bypass -File ./scripts/dev-backend.ps1",
+    "dev:frontend": "powershell -ExecutionPolicy Bypass -File ./scripts/dev-frontend.ps1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

@@ -1,0 +1,19 @@
+# Cosign Public Key
+# 
+# This key is used to verify the signatures on Plantify Docker images.
+# 
+# Generated: 2024-01-01
+# Expires: 2025-01-01
+# Key ID: TODO - Replace with actual key ID after generation
+# 
+# To verify an image signature:
+# 
+#   cosign verify --key cosign.pub ghcr.io/naghdiefallah/plantify:v1.2.0
+# 
+# This is a placeholder. Replace with your actual Cosign public key.
+# 
+# For setup instructions, see: config/GITHUB_SECRETS_SIGNING.md
+
+# -----BEGIN PUBLIC KEY-----
+# TODO: Generate Cosign key pair and paste public key here
+# -----END PUBLIC KEY-----

@@ -1,0 +1,213 @@
+{
+  "nav": {
+    "visitor": "访客",
+    "farmer": "农户",
+    "expert": "专家",
+    "admin": "管理员",
+    "login": "登录",
+    "register": "注册",
+    "home": "首页",
+    "mission": "使命",
+    "testimonials": "评价",
+    "team": "团队",
+    "dashboard": "控制台",
+    "signOut": "退出登录"
+  },
+  "landing": {
+    "eyebrow": "Plantify 平台",
+    "title": "为真实团队打造的现代化作物健康运营。",
+    "subtitle": "Plantify 将监测、分析与协作整合到一个高效工作流中，让团队更快从观察走向行动。",
+    "ctaPrimary": "开始使用",
+    "ctaSecondary": "查看控制台",
+    "missionEyebrow": "使命",
+    "missionTitle": "让每个农业团队都能获得高质量作物决策能力。",
+    "missionPoint1": "打造让作物决策更快、更简单的工具。",
+    "missionPoint2": "提供团队在日常运营中可持续信任的结果。",
+    "missionPoint3": "从上手到田间执行，保持工作流简洁。",
+    "missionItem1Title": "规模化精准",
+    "missionItem1Body": "将原始田间图像转化为每位操作人员都可复用的一致病害信号。",
+    "missionItem2Title": "运营清晰",
+    "missionItem2Body": "将诊断结果、置信度与处理动作整合到同一高效流程中。",
+    "missionItem3Title": "稳定吞吐",
+    "missionItem3Body": "让上手与扫描执行保持轻量，并在不同地区获得可预测结果。",
+    "testimonialsEyebrow": "评价",
+    "testimonialsTitle": "团队如何评价 Plantify",
+    "teamEyebrow": "团队",
+    "teamTitle": "小团队，强执行",
+    "teamRole1": "产品负责人",
+    "teamRole2": "设计负责人",
+    "teamRole3": "平台工程师",
+    "teamRole4": "安全工程师",
+    "teamRole5": "计算机视觉工程师",
+    "teamRole6": "运营负责人",
+    "footerDescription": "面向运营团队的 AI 植物诊断平台。",
+    "footerHeadingPlatform": "平台",
+    "footerHeadingLegal": "法律",
+    "footerHeadingSocial": "社交",
+    "footerHome": "首页",
+    "footerDashboard": "控制台",
+    "footerX": "X",
+    "footerLinkedIn": "LinkedIn",
+    "footerPrivacy": "隐私",
+    "footerTerms": "条款",
+    "footerContact": "联系",
+    "copyright": "© 2025 Limarise. 保留所有权利。",
+    "tagline": "突破边界"
+  },
+  "auth": {
+    "common": {
+      "username": "用户名",
+      "email": "邮箱",
+      "password": "密码",
+      "confirmPassword": "确认密码",
+      "emailHint": "请输入有效邮箱格式，例如 name@domain.com。",
+      "passwordHint": "密码区分大小写。"
+    },
+    "login": {
+      "title": "登录",
+      "subtitle": "使用你的 Plantify 账户凭据。",
+      "cta": "继续",
+      "loading": "登录中...",
+      "success": "成功",
+      "error": "无法登录",
+      "switchPrompt": "第一次使用 Plantify？",
+      "switchCta": "创建账户"
+    },
+    "register": {
+      "title": "注册",
+      "subtitle": "创建你的 Plantify 账户。",
+      "cta": "创建账户",
+      "loading": "账户创建中...",
+      "success": "账户已创建",
+      "error": "无法注册",
+      "passwordMismatch": "两次输入的密码不一致",
+      "passwordRule": "至少 8 个字符，且两次密码必须一致。",
+      "switchPrompt": "已有账户？",
+      "switchCta": "登录"
+    }
+  },
+  "authCode": {
+    "badge": "授权控制台",
+    "title": "输入授权码",
+    "subtitle": "使用私密授权码为当前账户解锁角色选择。",
+    "codeLabel": "授权码",
+    "codePlaceholder": "请输入授权码",
+    "unlock": "解锁",
+    "roleLabel": "角色",
+    "apply": "应用角色",
+    "applying": "正在应用角色...",
+    "helper": "角色变更将应用到当前已认证账户。",
+    "roles": {
+      "farmer": "农户",
+      "expert": "专家",
+      "admin": "管理员",
+      "developer": "开发者"
+    },
+    "errors": {
+      "missingCode": "请输入授权码后继续。",
+      "invalidCode": "授权码无效。",
+      "disabled": "角色提升当前已禁用。",
+      "signInFirst": "请先登录。",
+      "applyFailed": "无法更新角色。"
+    }
+  },
+  "dashboard": {
+    "eyebrow": "诊断中心",
+    "title": "扫描、分析并执行",
+    "tabs": {
+      "scan": "扫描",
+      "result": "结果"
+    },
+    "scanIntake": {
+      "title": "扫描输入",
+      "statusProcessing": "AI 处理中",
+      "statusReady": "图片已就绪",
+      "statusWaiting": "等待上传",
+      "dropzoneTitle": "拖放叶片图片到此处",
+      "cta": "开始 AI 扫描",
+      "scanning": "扫描中..."
+    },
+    "result": {
+      "title": "结果与处理",
+      "domainLabel": "域：",
+      "plantLabel": "植物",
+      "statusLabel": "状态",
+      "detected": "检测到的状态",
+      "treatment": "处理方案",
+      "statusHealthy": "健康信号",
+      "statusAttention": "需要关注",
+      "immediate": "立即处理",
+      "next": "未来 7 天",
+      "monitor": "重点监测",
+      "empty": "请先执行扫描以查看置信度分析和处理建议。",
+      "metrics": {
+        "modelConfidence": "模型置信度",
+        "diseaseLikelihood": "病害可能性",
+        "actionPriority": "行动优先级"
+      }
+    },
+    "history": {
+      "title": "扫描历史",
+      "searchPlaceholder": "按病害或域搜索",
+      "loading": "历史加载中...",
+      "empty": "未找到匹配扫描记录。"
+    },
+    "snapshot": {
+      "title": "运营快照",
+      "totalScans": "总扫描次数",
+      "healthyRatio": "健康占比",
+      "topDisease": "高频病害",
+      "noDominantDisease": "无主导病害"
+    },
+    "sidebar": {
+      "account": "账户",
+      "quickActions": "快捷操作",
+      "logout": "退出登录",
+      "role": {
+        "farmer": "农户",
+        "expert": "专家",
+        "admin": "管理员",
+        "developer": "开发者"
+      },
+      "farmer": {
+        "uploadLeaf": "上传叶片进行分析",
+        "viewHistory": "查看扫描历史",
+        "getAdvice": "获取处理建议"
+      },
+      "expert": {
+        "reviewQueue": "审核待处理案例",
+        "validateResults": "校验模型结果",
+        "viewStats": "查看准确率统计"
+      },
+      "admin": {
+        "manageUsers": "管理用户账户",
+        "viewMetrics": "查看系统指标",
+        "systemHealth": "系统健康状态"
+      },
+      "developer": {
+        "diagnostics": "集成诊断",
+        "apiPayload": "API 负载检查",
+        "releases": "发布验证"
+      }
+    },
+    "errors": {
+      "signIn": "请先登录以运行诊断。",
+      "upload": "请上传叶片图片后继续。",
+      "scan": "无法扫描该图片。"
+    }
+  },
+  "chat": {
+    "title": "农业专家聊天",
+    "welcome": "欢迎使用农业专家",
+    "subtitle": "可咨询作物健康、病害处理与农艺实践问题。我会用你的语言回复。",
+    "inputPlaceholder": "请输入关于作物的问题...",
+    "send": "发送",
+    "sending": "发送中...",
+    "error": "错误",
+    "hint": "提示：按 Ctrl+Enter 发送",
+    "agri_expert": "农业专家",
+    "online": "始终在线",
+    "ask_question": "咨询作物健康、病害或处理建议",
+    "message": "输入你的消息..."
+  }
+}
