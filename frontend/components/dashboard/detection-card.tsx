@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { UploadCloud, XCircle } from "lucide-react";
+import { CheckCircle2, Fish, Loader2, Sparkles, UploadCloud, Video, X, XCircle } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 
@@ -10,8 +10,7 @@ import { detectPlant, getStoredAccessToken } from "@/lib/api";
 import { formatBoostedConfidence } from "@/lib/confidence";
 import type { DetectionResult } from "@/lib/types";
 import { compressImage } from "@/hooks/use-image-compression";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface DetectionCardProps {
   token: string | null;
@@ -19,247 +18,336 @@ interface DetectionCardProps {
 }
 
 export function DetectionCard({ token, onDetected }: DetectionCardProps) {
-  const maxSize = 5 * 1024 * 1024;
+  const maxSize = 50 * 1024 * 1024;
   const [file, setFile] = useState<File | null>(null);
-  const [segmented, setSegmented] = useState<File | null>(null);
   const [domain, setDomain] = useState("color");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DetectionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  const validateCandidate = (candidate: File): string | null => {
-    if (!candidate.type.startsWith("image/")) {
-      return "Only image files are allowed.";
-    }
-    if (candidate.size > maxSize) {
-      return "File exceeds 5MB limit.";
-    }
-    return null;
-  };
-
-  const onDropOriginal = (accepted: File[]) => {
-    const candidate = accepted[0];
-    if (!candidate) {
-      return;
-    }
-    const validationError = validateCandidate(candidate);
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-    setError(null);
-    setFile(candidate);
-  };
-
-  const onDropSegmented = (accepted: File[]) => {
-    const candidate = accepted[0];
-    if (!candidate) {
-      return;
-    }
-    const validationError = validateCandidate(candidate);
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-    setError(null);
-    setSegmented(candidate);
-  };
-
-  const originalZone = useDropzone({
-    onDrop: onDropOriginal,
-    maxFiles: 1,
-    maxSize,
-    multiple: false,
-    accept: {
-      "image/jpeg": [".jpg", ".jpeg"],
-      "image/png": [".png"],
-      "image/webp": [".webp"]
-    }
-  });
-
-  const segmentedZone = useDropzone({
-    onDrop: onDropSegmented,
-    maxFiles: 1,
-    maxSize,
-    multiple: false,
-    accept: {
-      "image/jpeg": [".jpg", ".jpeg"],
-      "image/png": [".png"],
-      "image/webp": [".webp"]
-    }
-  });
+  const isVideo = file?.type.startsWith("video/") ?? false;
 
   const preview = useMemo(() => {
-    if (!file) {
-      return null;
-    }
+    if (!file) return null;
     return URL.createObjectURL(file);
   }, [file]);
 
+  const { getRootProps, getInputProps, isDragActive, fileRejections } = useDropzone({
+    onDrop: (accepted) => {
+      const candidate = accepted[0];
+      if (!candidate) return;
+      setError(null);
+      setResult(null);
+      setFile(candidate);
+    },
+    maxFiles: 1,
+    maxSize,
+    multiple: false,
+    accept: {
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/png": [".png"],
+      "image/webp": [".webp"],
+      "video/mp4": [".mp4"],
+      "video/webm": [".webm"],
+      "video/quicktime": [".mov"],
+    },
+  });
+
+  const captureVideoFrame = (): Promise<File> =>
+    new Promise((resolve, reject) => {
+      const video = videoRef.current;
+      if (!video) { reject(new Error("Video element not ready")); return; }
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { reject(new Error("Canvas context failed")); return; }
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob((blob) => {
+        if (!blob) { reject(new Error("Frame capture failed")); return; }
+        resolve(new File([blob], "captured-frame.jpg", { type: "image/jpeg" }));
+      }, "image/jpeg", 0.92);
+    });
+
   const onSubmit = async () => {
     const activeToken = token ?? getStoredAccessToken();
-    if (!activeToken) {
-      setError("Please sign in first.");
-      return;
-    }
-    if (!file) {
-      setError("Please upload an image first.");
-      return;
-    }
+    if (!activeToken) { setError("Please sign in first."); return; }
+    if (!file) { setError("Please upload a fish photo or video first."); return; }
 
     setLoading(true);
     setError(null);
 
     try {
-      const compressed = await compressImage(file);
-      const compressedSegmented = segmented ? await compressImage(segmented) : undefined;
-      const response = await detectPlant({
-        token: activeToken,
-        image: compressed,
-        segmented: compressedSegmented,
-        domain
-      });
+      const imageToAnalyze = isVideo ? await captureVideoFrame() : file;
+      const compressed = await compressImage(imageToAnalyze);
+      const response = await detectPlant({ token: activeToken, image: compressed, domain });
       setResult(response);
       onDetected();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Detection failed");
+      setError(err instanceof Error ? err.message : "Analysis failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  const clearFile = () => { setFile(null); setResult(null); setError(null); };
+
   return (
-    <Card className="h-full">
-      <h3 className="text-base font-semibold">Plant Scan Intake</h3>
-      <p className="mb-4 text-sm text-muted-foreground">Upload source and segmented samples for fast plant-health predictions.</p>
-
-      <div className="grid gap-3">
-        <div
-          {...originalZone.getRootProps()}
-          className="rounded-2xl border border-dashed border-border/70 bg-muted/40 p-4 text-sm transition hover:border-primary/80 dark:bg-muted/20"
-        >
-          <input {...originalZone.getInputProps()} />
-          <div className="flex items-center gap-2">
-            <UploadCloud className="h-4 w-4" />
-            <p>Original image: drag & drop or click to browse</p>
-          </div>
-          <p className="mt-1 text-xs text-muted-foreground">JPG, PNG, WEBP, max 5MB</p>
-          {file ? (
-            <p className="mt-2 text-xs text-blue-300">Selected: {file.name}</p>
-          ) : null}
+    <div className="w-full rounded-[1.75rem] border border-[var(--card-border)] bg-[var(--card-bg)] overflow-hidden shadow-[0_4px_32px_rgba(15,23,42,0.08)]">
+      {/* Header */}
+      <div className="flex items-center gap-3 border-b border-[var(--card-border)] bg-gradient-to-r from-blue-600/8 to-transparent px-6 py-4">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600/15">
+          <Fish className="h-5 w-5 text-blue-500" />
         </div>
-
-        <div
-          {...segmentedZone.getRootProps()}
-          className="rounded-2xl border border-dashed border-border/70 bg-muted/40 p-4 text-sm transition hover:border-primary/80 dark:bg-muted/20"
-        >
-          <input {...segmentedZone.getInputProps()} />
-          <div className="flex items-center gap-2">
-            <UploadCloud className="h-4 w-4" />
-            <p>Segmented image (optional): drag & drop or click</p>
-          </div>
-          <p className="mt-1 text-xs text-muted-foreground">Used for before/after visualization</p>
-          {segmented ? (
-            <p className="mt-2 text-xs text-blue-300">Selected: {segmented.name}</p>
-          ) : null}
+        <div>
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">Fish Health Analysis</h3>
+          <p className="text-xs text-[var(--text-tertiary)]">Upload a photo or video — AI will analyze fish health instantly</p>
         </div>
-
-        <label className="text-sm text-muted-foreground">
-          Domain
-          <select
-            value={domain}
-            onChange={(e) => setDomain(e.target.value)}
-            className="mt-2 h-11 w-full rounded-2xl border border-border bg-card px-3 text-foreground"
+        {file ? (
+          <button
+            type="button"
+            onClick={clearFile}
+            className="ml-auto rounded-lg p-1.5 text-[var(--text-tertiary)] transition hover:bg-red-500/10 hover:text-red-400"
+            aria-label="Clear file"
           >
-            <option value="color">Color</option>
-            <option value="grayscale">Grayscale</option>
-            <option value="segmented">Segmented</option>
-          </select>
-        </label>
-
-        <Button onClick={onSubmit} disabled={loading}>
-          {loading ? "Detecting..." : "Run Detection"}
-        </Button>
+            <X className="h-4 w-4" />
+          </button>
+        ) : null}
       </div>
 
-      {preview ? (
-        <Image
-          src={preview}
-          alt="Preview"
-          width={800}
-          height={320}
-          unoptimized
-          className="mt-4 h-40 w-full rounded-2xl object-cover"
-        />
-      ) : null}
-
-      <AnimatePresence>
-        {result ? (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
-            className="mt-4 rounded-2xl border border-border bg-muted/40 p-4 dark:bg-muted/20"
-          >
-            <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Prediction</p>
-            <h4 className="mt-1 text-lg font-semibold">{result.disease_type}</h4>
-            <p className="text-sm">Confidence: {formatBoostedConfidence(result.confidence_score, 2)}</p>
-            {result.analysis_note ? (
-              <p className={`mt-2 rounded-xl border px-3 py-2 text-sm ${result.is_low_confidence ? "border-amber-500/30 bg-amber-500/10 text-amber-200" : "border-border bg-background/60 text-muted-foreground"}`}>
-                {result.analysis_note}
+      <div className="grid gap-6 p-6 lg:grid-cols-2">
+        {/* Left column – upload + controls */}
+        <div className="flex flex-col gap-4">
+          {/* Dropzone / Preview */}
+          {!file ? (
+            <div
+              {...getRootProps()}
+              className={cn(
+                "relative flex min-h-[220px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed transition-all duration-200",
+                isDragActive
+                  ? "border-blue-500 bg-blue-500/8 scale-[1.01]"
+                  : "border-[var(--card-border)] hover:border-blue-400/60 hover:bg-blue-500/4"
+              )}
+            >
+              <input {...getInputProps()} />
+              <motion.div
+                animate={isDragActive ? { scale: 1.1 } : { scale: 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="flex flex-col items-center gap-3 text-center"
+              >
+                <div className={cn(
+                  "flex h-14 w-14 items-center justify-center rounded-2xl transition-colors",
+                  isDragActive ? "bg-blue-500/20" : "bg-[var(--bg-secondary)]"
+                )}>
+                  <UploadCloud className={cn("h-7 w-7", isDragActive ? "text-blue-400" : "text-[var(--text-tertiary)]")} />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">
+                    {isDragActive ? "Drop your file here" : "Drag & drop or click to upload"}
+                  </p>
+                  <p className="mt-1 text-xs text-[var(--text-tertiary)]">
+                    JPG, PNG, WEBP, MP4, WebM, MOV · max 50 MB
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <span className="flex items-center gap-1 rounded-full border border-[var(--card-border)] bg-[var(--bg-secondary)] px-2.5 py-1 text-[11px] text-[var(--text-tertiary)]">
+                    <Fish className="h-3 w-3" /> Photo
+                  </span>
+                  <span className="flex items-center gap-1 rounded-full border border-[var(--card-border)] bg-[var(--bg-secondary)] px-2.5 py-1 text-[11px] text-[var(--text-tertiary)]">
+                    <Video className="h-3 w-3" /> Video
+                  </span>
+                </div>
+              </motion.div>
+            </div>
+          ) : isVideo ? (
+            <div className="overflow-hidden rounded-2xl bg-black ring-1 ring-[var(--card-border)]">
+              <video
+                ref={videoRef}
+                src={preview ?? undefined}
+                controls
+                crossOrigin="anonymous"
+                className="max-h-56 w-full object-contain"
+              />
+              <p className="bg-zinc-950 px-4 py-2 text-center text-xs text-zinc-400">
+                Pause on the best frame, then click <strong className="text-zinc-200">Analyze</strong>
               </p>
-            ) : null}
-            <p className="mt-2 text-sm text-muted-foreground">{result.treatment_recommendations}</p>
+            </div>
+          ) : (
+            <div className="relative overflow-hidden rounded-2xl">
+              <Image
+                src={preview ?? ""}
+                alt="Fish preview"
+                width={800}
+                height={320}
+                unoptimized
+                className="h-[220px] w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+              <p className="absolute bottom-3 left-3 rounded-lg bg-black/60 px-2.5 py-1 text-xs text-white backdrop-blur-sm">
+                {file.name}
+              </p>
+            </div>
+          )}
 
-            {result.top_predictions && result.top_predictions.length > 1 ? (
-              <div className="mt-3 rounded-xl border border-border bg-background/50 p-3">
-                <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Top Alternatives</p>
-                <div className="mt-2 space-y-2">
-                  {result.top_predictions.map((candidate) => (
-                    <div key={`${candidate.index}-${candidate.label}`} className="flex items-center justify-between gap-3 text-sm">
-                      <span className="line-clamp-1 text-foreground">{candidate.label}</span>
-                      <span className="shrink-0 text-muted-foreground">{formatBoostedConfidence(candidate.confidence, 2)}</span>
-                    </div>
-                  ))}
+          {/* Domain selector */}
+          <div className="flex items-center gap-3">
+            <label className="shrink-0 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-[0.12em]">Mode</label>
+            <div className="flex flex-1 gap-1 rounded-xl border border-[var(--card-border)] bg-[var(--bg-secondary)] p-1">
+              {["color", "grayscale", "segmented"].map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => setDomain(d)}
+                  className={cn(
+                    "flex-1 rounded-lg py-1.5 text-xs font-semibold capitalize transition-all",
+                    domain === d
+                      ? "bg-blue-600 text-white shadow-sm"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  )}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Analyze button */}
+          <motion.button
+            type="button"
+            onClick={onSubmit}
+            disabled={loading || !file}
+            whileTap={{ scale: 0.98 }}
+            className={cn(
+              "flex h-11 w-full items-center justify-center gap-2 rounded-2xl text-sm font-semibold transition-all",
+              loading || !file
+                ? "cursor-not-allowed bg-blue-600/40 text-white/60"
+                : "bg-blue-600 text-white shadow-[0_4px_14px_rgba(37,99,235,0.4)] hover:bg-blue-700 hover:shadow-[0_6px_20px_rgba(37,99,235,0.5)]"
+            )}
+          >
+            {loading ? (
+              <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing…</>
+            ) : (
+              <><Sparkles className="h-4 w-4" /> Analyze Fish</>
+            )}
+          </motion.button>
+
+          {/* Errors */}
+          <AnimatePresence>
+            {(error ?? fileRejections.length > 0) ? (
+              <motion.p
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/8 px-3 py-2 text-xs text-red-400"
+              >
+                <XCircle className="h-3.5 w-3.5 shrink-0" />
+                {error ?? "File rejected — use JPG/PNG/WEBP/MP4/WebM/MOV, max 50 MB."}
+              </motion.p>
+            ) : null}
+          </AnimatePresence>
+        </div>
+
+        {/* Right column – results */}
+        <AnimatePresence mode="wait">
+          {result ? (
+            <motion.div
+              key="result"
+              initial={{ opacity: 0, x: 12 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 12 }}
+              className="flex flex-col gap-3"
+            >
+              {/* Status badge */}
+              <div className={cn(
+                "flex items-center gap-2 rounded-2xl border px-4 py-3",
+                result.disease_type.toLowerCase().includes("healthy")
+                  ? "border-blue-500/20 bg-blue-500/8"
+                  : "border-amber-500/20 bg-amber-500/8"
+              )}>
+                <CheckCircle2 className={cn("h-5 w-5", result.disease_type.toLowerCase().includes("healthy") ? "text-blue-400" : "text-amber-400")} />
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-tertiary)]">Diagnosis</p>
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">{result.disease_type}</p>
+                </div>
+                <span className="ml-auto text-lg font-bold text-[var(--text-primary)]">
+                  {formatBoostedConfidence(result.confidence_score, 1)}
+                </span>
+              </div>
+
+              {/* Confidence bar */}
+              <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--bg-secondary)] px-4 py-3">
+                <div className="mb-2 flex items-center justify-between text-xs text-[var(--text-tertiary)]">
+                  <span>Model confidence</span>
+                  <span>{formatBoostedConfidence(result.confidence_score, 1)}</span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-zinc-300/30 dark:bg-zinc-700/50">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: formatBoostedConfidence(result.confidence_score, 1) }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="h-full rounded-full bg-blue-500"
+                  />
                 </div>
               </div>
-            ) : null}
 
-            {(result.before_image_b64 || result.after_image_b64) ? (
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                {result.before_image_b64 ? (
-                  <Image
-                    src={`data:image/jpeg;base64,${result.before_image_b64}`}
-                    alt="Before"
-                    width={240}
-                    height={96}
-                    unoptimized
-                    className="h-24 w-full rounded-lg object-cover"
-                  />
-                ) : null}
-                {result.after_image_b64 ? (
-                  <Image
-                    src={`data:image/jpeg;base64,${result.after_image_b64}`}
-                    alt="After"
-                    width={240}
-                    height={96}
-                    unoptimized
-                    className="h-24 w-full rounded-lg object-cover"
-                  />
-                ) : null}
+              {/* Treatment */}
+              {result.treatment_recommendations ? (
+                <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--bg-secondary)] px-4 py-3">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-tertiary)]">Recommendation</p>
+                  <p className="text-sm leading-relaxed text-[var(--text-secondary)]">{result.treatment_recommendations}</p>
+                </div>
+              ) : null}
+
+              {/* Analysis note */}
+              {result.analysis_note ? (
+                <p className={cn(
+                  "rounded-xl border px-3 py-2 text-xs leading-relaxed",
+                  result.is_low_confidence
+                    ? "border-amber-500/20 bg-amber-500/8 text-amber-300"
+                    : "border-[var(--card-border)] bg-[var(--bg-secondary)] text-[var(--text-tertiary)]"
+                )}>
+                  {result.analysis_note}
+                </p>
+              ) : null}
+
+              {/* Before/after images */}
+              {(result.before_image_b64 || result.after_image_b64) ? (
+                <div className="grid grid-cols-2 gap-2">
+                  {result.before_image_b64 ? (
+                    <div className="overflow-hidden rounded-xl">
+                      <p className="mb-1 text-[10px] text-[var(--text-tertiary)]">Before</p>
+                      <Image src={`data:image/jpeg;base64,${result.before_image_b64}`} alt="Before" width={240} height={96} unoptimized className="h-24 w-full rounded-lg object-cover" />
+                    </div>
+                  ) : null}
+                  {result.after_image_b64 ? (
+                    <div className="overflow-hidden rounded-xl">
+                      <p className="mb-1 text-[10px] text-[var(--text-tertiary)]">After</p>
+                      <Image src={`data:image/jpeg;base64,${result.after_image_b64}`} alt="After" width={240} height={96} unoptimized className="h-24 w-full rounded-lg object-cover" />
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="empty"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex min-h-[220px] flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[var(--card-border)] text-center"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600/10">
+                <Fish className="h-6 w-6 text-blue-400" />
               </div>
-            ) : null}
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
-
-      {error ? <p className="mt-3 text-sm text-red-400">{error}</p> : null}
-      {(originalZone.fileRejections.length > 0 || segmentedZone.fileRejections.length > 0) ? (
-        <p className="mt-2 flex items-center gap-2 text-xs text-red-400">
-          <XCircle className="h-3.5 w-3.5" />
-          One or more files were rejected. Ensure image format and 5MB max size.
-        </p>
-      ) : null}
-    </Card>
+              <div>
+                <p className="text-sm font-semibold text-[var(--text-primary)]">Analysis results</p>
+                <p className="mt-1 text-xs text-[var(--text-tertiary)]">Upload a fish photo or video and click Analyze</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
   );
 }

@@ -19,6 +19,7 @@ import {
 } from "@/lib/api";
 import {Button} from "@/components/ui/button";
 import {DashboardShell} from "@/components/dashboard/dashboard-shell";
+import {DetectionCard} from "@/components/dashboard/detection-card";
 import {FarmerDashboard} from "@/components/farmer/farmer-dashboard";
 import {type DashboardNavItem} from "@/components/dashboard/dashboard-sidebar";
 import {cn} from "@/lib/utils";
@@ -493,11 +494,7 @@ export function RoleDashboard() {
     }
 
     if (role === "expert") {
-      return [
-        {id: "expert-review", label: copy.reviewQueue, icon: "clipboard"},
-        {id: "expert-accuracy", label: copy.accuracySnapshot, icon: "shield"},
-        {id: "expert-notes", label: copy.notes, icon: "message"}
-      ];
+      return [];
     }
 
     if (role === "admin") {
@@ -740,7 +737,10 @@ export function RoleDashboard() {
         }
         contentClassName="overflow-y-auto pb-4"
       >
-        {role === "expert" ? <ExpertPanel copy={copy} /> : null}
+        <section className="mx-auto w-full max-w-7xl px-4 pb-2 pt-4">
+          <DetectionCard token={token} onDetected={() => void 0} />
+        </section>
+
         {role === "admin" ? <AdminPanel copy={copy} /> : null}
         {role === "developer" ? <DeveloperPanel user={user} copy={copy} /> : null}
         {role === "farmer" ? <FarmerPanel /> : null}
