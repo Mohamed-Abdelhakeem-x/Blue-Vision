@@ -4,7 +4,7 @@ import type {CSSProperties, ReactNode} from "react";
 import {useEffect, useState} from "react";
 
 import {cn} from "@/lib/utils";
-import {getPlatform, type PlantifyPlatform} from "@/lib/platform";
+import {getPlatform, type BlueVisionPlatform} from "@/lib/platform";
 
 const MOBILE_SAFE_AREA_STYLE: CSSProperties = {
   paddingTop: "max(env(safe-area-inset-top, 0px), 0px)",
@@ -14,7 +14,7 @@ const MOBILE_SAFE_AREA_STYLE: CSSProperties = {
 };
 
 export function MobileWrapper({children}: {children: ReactNode}) {
-  const [platform, setPlatform] = useState<PlantifyPlatform>("web");
+  const [platform, setPlatform] = useState<BlueVisionPlatform>("web");
 
   useEffect(() => {
     setPlatform(getPlatform());

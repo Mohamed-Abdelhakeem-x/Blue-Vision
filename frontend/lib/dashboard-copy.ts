@@ -270,7 +270,7 @@ const copy: Record<AppLocale, CopyShape> = {
       themeDescription: "بدّل بين الوضع الفاتح والداكن في الويب والموبايل.",
       themeHint: "غيّر ألوان الواجهة الحالية",
       languageTitle: "اللغة",
-      languageDescription: "اختر اللغة المستخدمة في لوحة Plantify وأدوات الحقل."
+      languageDescription: "اختر اللغة المستخدمة في لوحة BlueVision وأدوات الحقل."
     },
     sidebar: {
       dashboard: "لوحة التحكم",
@@ -397,7 +397,7 @@ const copy: Record<AppLocale, CopyShape> = {
       themeDescription: "Cambia entre modo claro y oscuro en paneles web y móviles.",
       themeHint: "Cambiar el tema actual",
       languageTitle: "Idioma",
-      languageDescription: "Elige el idioma usado en el panel de Plantify y las herramientas de campo."
+      languageDescription: "Elige el idioma usado en el panel de BlueVision y las herramientas de campo."
     },
     sidebar: {
       dashboard: "Panel",
@@ -524,7 +524,7 @@ const copy: Record<AppLocale, CopyShape> = {
       themeDescription: "वेब और मोबाइल डैशबोर्ड के लिए लाइट और डार्क मोड के बीच बदलें।",
       themeHint: "अपनी वर्तमान थीम बदलें",
       languageTitle: "भाषा",
-      languageDescription: "Plantify डैशबोर्ड और फील्ड टूल्स में उपयोग की जाने वाली भाषा चुनें।"
+      languageDescription: "BlueVision डैशबोर्ड और फील्ड टूल्स में उपयोग की जाने वाली भाषा चुनें।"
     },
     sidebar: {
       dashboard: "डैशबोर्ड",
@@ -651,7 +651,7 @@ const copy: Record<AppLocale, CopyShape> = {
       themeDescription: "在桌面和移动端仪表板之间切换浅色与深色模式。",
       themeHint: "切换当前颜色主题",
       languageTitle: "语言",
-      languageDescription: "选择 Plantify 仪表板和田间工具使用的语言。"
+      languageDescription: "选择 BlueVision 仪表板和田间工具使用的语言。"
     },
     sidebar: {
       dashboard: "仪表板",

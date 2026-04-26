@@ -19,7 +19,7 @@ echo "Generating checksums for artifacts in: $ARTIFACT_DIR"
 
 # Header metadata
 cat >>"$OUTPUT_FILE" <<EOF
-# Plantify Release Checksums
+# BlueVision Release Checksums
 # Generated: $(date -u '+%Y-%m-%dT%H:%M:%SZ')
 # 
 # Format: sha256:filename (size bytes)

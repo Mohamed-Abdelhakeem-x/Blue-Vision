@@ -81,7 +81,7 @@ def evaluate(*, onnx_path: Path, labels_path: Path, dataset_root: Path, max_samp
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Offline model baseline evaluation with drift proxy metrics")
-    parser.add_argument("--onnx", default="backend/model/plantify_model.onnx")
+    parser.add_argument("--onnx", default="backend/model/bluevision_model.onnx")
     parser.add_argument("--labels", default="backend/model/classes.json")
     parser.add_argument("--dataset", default="dataset/color")
     parser.add_argument("--max-samples", type=int, default=300)

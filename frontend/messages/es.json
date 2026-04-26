@@ -14,9 +14,9 @@
     "signOut": "Cerrar sesión"
   },
   "landing": {
-    "eyebrow": "Plataforma Plantify",
+    "eyebrow": "Plataforma BlueVision",
     "title": "Operaciones modernas de salud de cultivos para equipos reales.",
-    "subtitle": "Plantify integra monitoreo, análisis y colaboración en un flujo de trabajo profesional para pasar de observación a acción más rápido.",
+    "subtitle": "BlueVision integra monitoreo, análisis y colaboración en un flujo de trabajo profesional para pasar de observación a acción más rápido.",
     "ctaPrimary": "Comenzar",
     "ctaSecondary": "Ver panel",
     "missionEyebrow": "Misión",
@@ -31,7 +31,7 @@
     "missionItem3Title": "Rendimiento confiable",
     "missionItem3Body": "Mantener incorporación y ejecución de escaneo ligeras y predecibles entre regiones.",
     "testimonialsEyebrow": "Testimonios",
-    "testimonialsTitle": "Lo que dicen los equipos sobre Plantify",
+    "testimonialsTitle": "Lo que dicen los equipos sobre BlueVision",
     "teamEyebrow": "Equipo",
     "teamTitle": "Equipo pequeño, ejecución enfocada",
     "teamRole1": "Líder de producto",
@@ -65,17 +65,17 @@
     },
     "login": {
       "title": "Iniciar sesión",
-      "subtitle": "Usa tus credenciales de Plantify.",
+      "subtitle": "Usa tus credenciales de BlueVision.",
       "cta": "Continuar",
       "loading": "Iniciando sesión...",
       "success": "Éxito",
       "error": "No se pudo iniciar sesión",
-      "switchPrompt": "¿Nuevo en Plantify?",
+      "switchPrompt": "¿Nuevo en BlueVision?",
       "switchCta": "Crear cuenta"
     },
     "register": {
       "title": "Crear cuenta",
-      "subtitle": "Crea tu cuenta de Plantify.",
+      "subtitle": "Crea tu cuenta de BlueVision.",
       "cta": "Crear cuenta",
       "loading": "Creando cuenta...",
       "success": "Cuenta creada",

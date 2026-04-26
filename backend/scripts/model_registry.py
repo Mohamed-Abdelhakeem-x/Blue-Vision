@@ -76,8 +76,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     register = sub.add_parser("register")
     register.add_argument("--version", required=True)
-    register.add_argument("--checkpoint", default="plantify_model.pth")
-    register.add_argument("--onnx", default="backend/model/plantify_model.onnx")
+    register.add_argument("--checkpoint", default="bluevision_model.pth")
+    register.add_argument("--onnx", default="backend/model/bluevision_model.onnx")
     register.add_argument("--labels", default="backend/model/classes.json")
     register.add_argument("--source-type", default="manual")
     register.add_argument("--commit-sha", default="")

@@ -9,7 +9,7 @@
     "low_confidence_rate": 0.0,
     "prediction_entropy": 0.0
   },
-  "dataset_root": "C:/Users/Radwan/Documents/plantify-clean-main/plantify-clean-main/backend/model",
+  "dataset_root": "C:/Users/Radwan/Documents/bluevision-clean-main/bluevision-clean-main/backend/model",
   "samples_requested": 10,
   "samples_used": 0
 }

@@ -27,7 +27,7 @@ def test_production_accepts_secure_settings() -> None:
         app_env="production",
         secret_key="this-is-a-production-secret-key-with-32-chars",
         role_elevation_code="this-is-a-valid-role-elevation-code",
-        cors_origins="https://plantify.example.com",
+        cors_origins="https://bluevision.example.com",
     )
 
     assert settings.app_env == "production"

@@ -1,8 +1,8 @@
 [package]
-name = "plantify-desktop"
+name = "bluevision-desktop"
 version = "0.1.0"
-description = "Plantify desktop shell"
-authors = ["Plantify"]
+description = "BlueVision desktop shell"
+authors = ["BlueVision"]
 edition = "2021"
 
 [build-dependencies]

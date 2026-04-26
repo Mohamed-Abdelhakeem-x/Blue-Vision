@@ -12,12 +12,12 @@
       },
       "artifacts": {
         "checkpoint": {
-          "path": "plantify_model.pth",
+          "path": "bluevision_model.pth",
           "sha256": "fd03b705b0ec67517d2d87829138d83f073d33b3f8ca7176034d38b94c9de281",
           "size_bytes": 122495102
         },
         "onnx": {
-          "path": "backend/model/plantify_model.onnx",
+          "path": "backend/model/bluevision_model.onnx",
           "sha256": "4739644d5cb0fc8e35a393f03da1fdd659f00e66552b94ad8410a92012288d55",
           "size_bytes": 35899718
         },

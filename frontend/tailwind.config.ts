@@ -11,7 +11,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        /** ===== PLANTIFY NATURE-TECH DESIGN SYSTEM ===== */
+        /** ===== BLUEVISION NATURE-TECH DESIGN SYSTEM ===== */
         /** Accent Colors — Cobalt Blue as primary */
         cobalt: {
           50:  "#eff6ff",
@@ -45,11 +45,11 @@ const config: Config = {
           secondary: "#262626"
         },
         // Light mode defaults
-        "plantify-bg": "light-dark(#F9FAFB, #0F0F0F)",
-        "plantify-text": "light-dark(#1A1A1A, #E2E8F0)",
-        "plantify-card": "light-dark(#FFFFFF, #1A1A1A)",
-        "plantify-border": "light-dark(#E5E7EB, #2D2D2D)",
-        "plantify-secondary": "light-dark(#F3F4F6, #262626)",
+        "bluevision-bg": "light-dark(#F9FAFB, #0F0F0F)",
+        "bluevision-text": "light-dark(#1A1A1A, #E2E8F0)",
+        "bluevision-card": "light-dark(#FFFFFF, #1A1A1A)",
+        "bluevision-border": "light-dark(#E5E7EB, #2D2D2D)",
+        "bluevision-secondary": "light-dark(#F3F4F6, #262626)",
         
         // Semantic colors
         bg: {

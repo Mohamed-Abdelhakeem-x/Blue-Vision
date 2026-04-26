@@ -14,7 +14,7 @@ from collections import OrderedDict
 import time
 
 st.set_page_config(
-    page_title="Plantify AI",
+    page_title="BlueVision AI",
     page_icon="🌿",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -196,7 +196,7 @@ class NeuralEngine:
     def __init__(self):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
-        self.model_path = os.path.join(self.base_dir, 'plantify_model.pth')
+        self.model_path = os.path.join(self.base_dir, 'bluevision_model.pth')
         self.report_path = os.path.join(self.base_dir, 'system_audit_master.csv')
         self.model_arch = None
 
@@ -319,7 +319,7 @@ if 'history' not in st.session_state:
 engine = NeuralEngine()
 model, class_names = engine.load_model()
 
-st.markdown('<div class="hero-title">🌿 Plantify AI</div>', unsafe_allow_html=True)
+st.markdown('<div class="hero-title">🌿 BlueVision AI</div>', unsafe_allow_html=True)
 st.markdown('<div class="hero-subtitle">Advanced Plant Disease Detection with Neural Intelligence</div>', unsafe_allow_html=True)
 
 col_status1, col_status2, col_status3 = st.columns(3)
@@ -434,7 +434,7 @@ with tabs[0]:
         
         elif not model:
             st.markdown('<div class="card">', unsafe_allow_html=True)
-            st.warning("⚠️ Model not loaded. Please ensure 'plantify_model.pth' exists in the root directory.")
+            st.warning("⚠️ Model not loaded. Please ensure 'bluevision_model.pth' exists in the root directory.")
             st.markdown('</div>', unsafe_allow_html=True)
 
 with tabs[1]:
@@ -453,7 +453,7 @@ with tabs[1]:
             st.download_button(
                 "Download CSV",
                 csv,
-                "plantify_history.csv",
+                "bluevision_history.csv",
                 "text/csv",
                 use_container_width=True
             )
@@ -535,4 +535,4 @@ with st.sidebar:
     st.metric("Model Status", "✓ Loaded" if model else "✗ Not Loaded")
     
     st.markdown("---")
-    st.caption("Plantify AI")
+    st.caption("BlueVision AI")

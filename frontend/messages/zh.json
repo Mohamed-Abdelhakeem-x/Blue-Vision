@@ -14,9 +14,9 @@
     "signOut": "退出登录"
   },
   "landing": {
-    "eyebrow": "Plantify 平台",
+    "eyebrow": "BlueVision 平台",
     "title": "为真实团队打造的现代化作物健康运营。",
-    "subtitle": "Plantify 将监测、分析与协作整合到一个高效工作流中，让团队更快从观察走向行动。",
+    "subtitle": "BlueVision 将监测、分析与协作整合到一个高效工作流中，让团队更快从观察走向行动。",
     "ctaPrimary": "开始使用",
     "ctaSecondary": "查看控制台",
     "missionEyebrow": "使命",
@@ -31,7 +31,7 @@
     "missionItem3Title": "稳定吞吐",
     "missionItem3Body": "让上手与扫描执行保持轻量，并在不同地区获得可预测结果。",
     "testimonialsEyebrow": "评价",
-    "testimonialsTitle": "团队如何评价 Plantify",
+    "testimonialsTitle": "团队如何评价 BlueVision",
     "teamEyebrow": "团队",
     "teamTitle": "小团队，强执行",
     "teamRole1": "产品负责人",
@@ -65,17 +65,17 @@
     },
     "login": {
       "title": "登录",
-      "subtitle": "使用你的 Plantify 账户凭据。",
+      "subtitle": "使用你的 BlueVision 账户凭据。",
       "cta": "继续",
       "loading": "登录中...",
       "success": "成功",
       "error": "无法登录",
-      "switchPrompt": "第一次使用 Plantify？",
+      "switchPrompt": "第一次使用 BlueVision？",
       "switchCta": "创建账户"
     },
     "register": {
       "title": "注册",
-      "subtitle": "创建你的 Plantify 账户。",
+      "subtitle": "创建你的 BlueVision 账户。",
       "cta": "创建账户",
       "loading": "账户创建中...",
       "success": "账户已创建",

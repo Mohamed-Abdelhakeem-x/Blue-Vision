@@ -1,4 +1,4 @@
-export type PlantifyPlatform = "web" | "ios" | "android" | "desktop";
+export type BlueVisionPlatform = "web" | "ios" | "android" | "desktop";
 
 declare global {
   interface Window {
@@ -13,7 +13,7 @@ declare global {
 
 const LOCALHOST_API_URL = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "http://localhost:8000/api";
 const MOBILE_DEV_API_URL = process.env.NEXT_PUBLIC_MOBILE_DEV_API_URL?.trim() || "http://192.168.1.50:8000/api";
-const PRODUCTION_API_URL = process.env.NEXT_PUBLIC_PRODUCTION_API_URL?.trim() || process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "https://plantify.limarise.com/api";
+const PRODUCTION_API_URL = process.env.NEXT_PUBLIC_PRODUCTION_API_URL?.trim() || process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || "https://bluevision.limarise.com/api";
 
 function resolveCapacitorPlatform(): string | null {
   if (typeof window === "undefined") {
@@ -28,7 +28,7 @@ function resolveCapacitorPlatform(): string | null {
   return null;
 }
 
-function resolveUserAgentPlatform(): PlantifyPlatform {
+function resolveUserAgentPlatform(): BlueVisionPlatform {
   if (typeof navigator === "undefined") {
     return "web";
   }
@@ -49,7 +49,7 @@ function resolveUserAgentPlatform(): PlantifyPlatform {
   return "web";
 }
 
-export function getPlatform(): PlantifyPlatform {
+export function getPlatform(): BlueVisionPlatform {
   const capacitorPlatform = resolveCapacitorPlatform();
   if (capacitorPlatform === "ios" || capacitorPlatform === "android") {
     return capacitorPlatform;

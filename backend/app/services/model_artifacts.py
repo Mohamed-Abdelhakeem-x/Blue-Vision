@@ -43,7 +43,7 @@ def resolve_checkpoint_path(explicit_path: str | Path) -> Path:
         return path
 
     backend_dir = Path(__file__).resolve().parents[2]
-    fallback = backend_dir / "model" / "plantify_model.pth"
+    fallback = backend_dir / "model" / "bluevision_model.pth"
     if fallback.exists():
         return fallback
 

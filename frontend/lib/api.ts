@@ -21,12 +21,12 @@ import type {
 import {getApiUrl, getPlatform, isNativeMobilePlatform} from "@/lib/platform";
 
 const API_BASE = getApiUrl();
-const API_BASE_STORAGE_KEY = "plantify_api_base";
-const ACCESS_TOKEN_KEY = "plantify_access_token";
-const REFRESH_TOKEN_KEY = "plantify_refresh_token";
-const ROLE_KEY = "plantify_user_role";
-const PROFILE_KEY = "plantify_user_profile";
-export const AUTH_STATE_CHANGED_EVENT = "plantify-auth-state-changed";
+const API_BASE_STORAGE_KEY = "bluevision_api_base";
+const ACCESS_TOKEN_KEY = "bluevision_access_token";
+const REFRESH_TOKEN_KEY = "bluevision_refresh_token";
+const ROLE_KEY = "bluevision_user_role";
+const PROFILE_KEY = "bluevision_user_profile";
+export const AUTH_STATE_CHANGED_EVENT = "bluevision-auth-state-changed";
 
 const REQUEST_TIMEOUT_MS = 15000;
 const RETRYABLE_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
@@ -353,14 +353,14 @@ async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Promise<R
 
 function resolveBackendUnavailableMessage(): string {
   if (typeof window !== "undefined" && isNativeMobilePlatform()) {
-    return "Unable to reach Plantify backend. Verify the phone and API server are on the same network and the mobile API URL is correct.";
+    return "Unable to reach BlueVision backend. Verify the phone and API server are on the same network and the mobile API URL is correct.";
   }
 
   if (typeof window !== "undefined" && isLocalHostname(window.location.hostname)) {
-    return "Unable to reach Plantify backend. Please start backend server on port 8000 or 8001.";
+    return "Unable to reach BlueVision backend. Please start backend server on port 8000 or 8001.";
   }
 
-  return "Unable to reach Plantify backend. Please verify the deployed API is reachable.";
+  return "Unable to reach BlueVision backend. Please verify the deployed API is reachable.";
 }
 
 export function logApiError(context: {

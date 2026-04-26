@@ -3,8 +3,8 @@ import type {CapacitorConfig} from "@capacitor/cli";
 const isReleaseBuild = (process.env.NEXT_PUBLIC_APP_STAGE?.trim() || process.env.NODE_ENV) === "production";
 
 const config: CapacitorConfig = {
-  appId: "com.plantify.app",
-  appName: "Plantify",
+  appId: "com.bluevision.app",
+  appName: "BlueVision",
   webDir: "out",
   backgroundColor: "#0a0a0a",
   loggingBehavior: isReleaseBuild ? "none" : "debug",

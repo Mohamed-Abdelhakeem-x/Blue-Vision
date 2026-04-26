@@ -133,34 +133,34 @@ def render_metrics_snapshot() -> dict[str, dict[str, float | int]]:
 def render_prometheus_metrics() -> str:
     snapshot = _METRICS_STORE.snapshot()
     lines: list[str] = [
-        "# HELP plantify_http_requests_total Total HTTP requests by route",
-        "# TYPE plantify_http_requests_total counter",
-        "# HELP plantify_http_errors_total Total HTTP errors (status>=400) by route",
-        "# TYPE plantify_http_errors_total counter",
-        "# HELP plantify_http_latency_seconds_sum Cumulative request latency by route in seconds",
-        "# TYPE plantify_http_latency_seconds_sum counter",
-        "# HELP plantify_http_latency_seconds_avg Average request latency by route in seconds",
-        "# TYPE plantify_http_latency_seconds_avg gauge",
-        "# HELP plantify_http_latency_seconds_p95 Approximate p95 request latency by route in seconds",
-        "# TYPE plantify_http_latency_seconds_p95 gauge",
+        "# HELP bluevision_http_requests_total Total HTTP requests by route",
+        "# TYPE bluevision_http_requests_total counter",
+        "# HELP bluevision_http_errors_total Total HTTP errors (status>=400) by route",
+        "# TYPE bluevision_http_errors_total counter",
+        "# HELP bluevision_http_latency_seconds_sum Cumulative request latency by route in seconds",
+        "# TYPE bluevision_http_latency_seconds_sum counter",
+        "# HELP bluevision_http_latency_seconds_avg Average request latency by route in seconds",
+        "# TYPE bluevision_http_latency_seconds_avg gauge",
+        "# HELP bluevision_http_latency_seconds_p95 Approximate p95 request latency by route in seconds",
+        "# TYPE bluevision_http_latency_seconds_p95 gauge",
     ]
 
     for route, values in snapshot.items():
         route_label = route.replace('\\', '\\\\').replace('"', '\\"')
         lines.append(
-            f'plantify_http_requests_total{{route="{route_label}"}} {values["requests_total"]}'
+            f'bluevision_http_requests_total{{route="{route_label}"}} {values["requests_total"]}'
         )
         lines.append(
-            f'plantify_http_errors_total{{route="{route_label}"}} {values["errors_total"]}'
+            f'bluevision_http_errors_total{{route="{route_label}"}} {values["errors_total"]}'
         )
         lines.append(
-            f'plantify_http_latency_seconds_sum{{route="{route_label}"}} {values["latency_seconds_sum"]}'
+            f'bluevision_http_latency_seconds_sum{{route="{route_label}"}} {values["latency_seconds_sum"]}'
         )
         lines.append(
-            f'plantify_http_latency_seconds_avg{{route="{route_label}"}} {values["latency_seconds_avg"]}'
+            f'bluevision_http_latency_seconds_avg{{route="{route_label}"}} {values["latency_seconds_avg"]}'
         )
         lines.append(
-            f'plantify_http_latency_seconds_p95{{route="{route_label}"}} {values["latency_seconds_p95"]}'
+            f'bluevision_http_latency_seconds_p95{{route="{route_label}"}} {values["latency_seconds_p95"]}'
         )
 
     return "\n".join(lines) + "\n"

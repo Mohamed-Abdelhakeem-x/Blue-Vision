@@ -160,5 +160,5 @@ async def test_prometheus_endpoint_contains_route_metrics(metrics_client: AsyncC
     assert prom_res.headers["content-type"].startswith("text/plain")
 
     body = prom_res.text
-    assert "# HELP plantify_http_requests_total" in body
-    assert 'plantify_http_requests_total{route="/ok"} 1' in body
+    assert "# HELP bluevision_http_requests_total" in body
+    assert 'bluevision_http_requests_total{route="/ok"} 1' in body

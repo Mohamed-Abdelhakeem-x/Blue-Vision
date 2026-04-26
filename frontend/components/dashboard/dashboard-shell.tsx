@@ -6,9 +6,8 @@ import {Settings2} from "lucide-react";
 import {useLocale} from "next-intl";
 
 import {Link, usePathname} from "@/i18n/navigation";
-import {DashboardSidebar, type DashboardNavItem} from "@/components/dashboard/dashboard-sidebar";
+import {DashboardTopNav, type DashboardNavItem} from "@/components/dashboard/dashboard-topnav";
 import {DesktopTitleBar} from "@/components/layout/DesktopTitleBar";
-
 
 import {isDesktopShell} from "@/lib/platform";
 import {cn} from "@/lib/utils";
@@ -38,44 +37,23 @@ export function DashboardShell({
 }: DashboardShellProps) {
   const locale = useLocale();
   const pathname = usePathname();
-  const rtl = locale === "ar";
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [desktopShell, setDesktopShell] = useState(false);
 
   useEffect(() => {
-    setSidebarCollapsed(window.localStorage.getItem("plantify-dashboard-sidebar-collapsed") === "true");
     setDesktopShell(isDesktopShell());
   }, []);
 
-  useEffect(() => {
-    window.localStorage.setItem("plantify-dashboard-sidebar-collapsed", String(sidebarCollapsed));
-  }, [sidebarCollapsed]);
-
-  const shellPaddingClass = rtl
-    ? sidebarCollapsed
-      ? "lg:pr-24"
-      : "lg:pr-[22rem]"
-    : sidebarCollapsed
-      ? "lg:pl-24"
-      : "lg:pl-[22rem]";
-
-  const sidebar = (
-    <DashboardSidebar
-      collapsed={sidebarCollapsed}
-      onCollapsedChange={setSidebarCollapsed}
-      navItems={navItems}
-      activeSection={activeSection}
-      onSectionNavigate={onSectionNavigate}
-    />
-  );
-
   return (
-    <div className={cn("relative min-h-[100dvh] overflow-hidden bg-[var(--bg-primary)]", desktopShell && "pt-12", shellPaddingClass)}>
+    <div className={cn("relative min-h-[100dvh] overflow-hidden bg-[var(--bg-primary)] pt-16", desktopShell && "pt-[5.5rem]")}>
       {desktopShell ? <DesktopTitleBar className="fixed inset-x-0 top-0 z-[80]" title="BlueVision" subtitle="Aquaculture AI Workspace" /> : null}
 
-      {rtl ? null : sidebar}
+      <DashboardTopNav
+        navItems={navItems}
+        activeSection={activeSection}
+        onSectionNavigate={onSectionNavigate}
+      />
 
-      <main className={cn("min-w-0 px-4 pb-4 pt-4 md:px-6", desktopShell ? "h-[calc(100dvh-3rem)]" : "min-h-[100dvh]", pageClassName)}>
+      <main className={cn("min-w-0 px-4 pb-4 pt-4 md:px-6", desktopShell ? "h-[calc(100dvh-5.5rem)]" : "min-h-[calc(100dvh-4rem)]", pageClassName)}>
         <div className="mx-auto flex h-full w-full max-w-7xl flex-col">
           <header
             className={cn(
@@ -84,15 +62,11 @@ export function DashboardShell({
             )}
           >
             <div className="min-w-0">{topBarLead}</div>
-
-
           </header>
 
           <div className={cn("min-h-0 flex-1", contentClassName)}>{children}</div>
         </div>
       </main>
-
-      {rtl ? sidebar : null}
     </div>
   );
 }

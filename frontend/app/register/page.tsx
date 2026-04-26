@@ -69,28 +69,7 @@ export default function RegisterPage() {
           transition={{ duration: 0.5 }}
           className="mb-8 flex flex-col items-center select-none"
         >
-          <div className="relative mb-4 flex h-20 w-20 items-center justify-center">
-            {[0, 1, 2].map((i) => (
-              <motion.span
-                key={i}
-                className="absolute inline-flex h-full w-full rounded-full border border-blue-400/30"
-                animate={{ scale: [1, 1.8, 1.8], opacity: [0.6, 0, 0] }}
-                transition={{ duration: 2.4, repeat: Infinity, delay: i * 0.8, ease: "easeOut" }}
-              />
-            ))}
-            <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500/20 via-blue-600/30 to-blue-900/40 ring-2 ring-cyan-400/30 shadow-[0_0_28px_rgba(34,211,238,0.3)]">
-              <svg viewBox="0 0 32 32" className="h-9 w-9" fill="none">
-                <path d="M26 16c0 0-4-6-10-6S4 13 4 16s6 6 12 6c4 0 7-2 10-4l-4-2 4-2z" fill="url(#fg2)" opacity="0.9" />
-                <circle cx="8.5" cy="15" r="1.2" fill="#bfdbfe" />
-                <defs>
-                  <linearGradient id="fg2" x1="4" y1="16" x2="26" y2="16" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#38bdf8" />
-                    <stop offset="1" stopColor="#2563eb" />
-                  </linearGradient>
-                </defs>
-              </svg>
-            </div>
-          </div>
+
           <h1 className="text-4xl font-black tracking-tight">
             <span className="bg-gradient-to-r from-cyan-300 via-blue-400 to-blue-600 bg-clip-text text-transparent" style={{ filter: "drop-shadow(0 0 18px rgba(34,211,238,0.4))" }}>Blue</span>
             <span className="text-white/90" style={{ filter: "drop-shadow(0 0 10px rgba(147,197,253,0.5))" }}>Vision</span>

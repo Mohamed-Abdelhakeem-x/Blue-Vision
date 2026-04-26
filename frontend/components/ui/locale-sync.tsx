@@ -6,7 +6,7 @@ import {useLocale} from "next-intl";
 import {usePathname} from "@/i18n/navigation";
 import {routing} from "@/i18n/routing";
 
-const LOCALE_STORAGE_KEY = "plantify.locale";
+const LOCALE_STORAGE_KEY = "bluevision.locale";
 
 function persistLocale(nextLocale: string) {
   window.localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale);

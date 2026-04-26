@@ -24,7 +24,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       defaultTheme="dark"
       forcedTheme="dark"
       disableTransitionOnChange={false}
-      storageKey="plantify-theme"
+      storageKey="bluevision-theme"
     >
       <div dir={isRTL ? "rtl" : "ltr"}>
         {children}

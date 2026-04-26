@@ -29,22 +29,22 @@ def test_production_rejects_mixed_cors_origins_with_localhost() -> None:
     with pytest.raises(ValidationError, match="localhost"):
         Settings(
             **_VALID_PROD_KWARGS,
-            cors_origins="https://plantify.example.com,http://localhost:3000",
+            cors_origins="https://bluevision.example.com,http://localhost:3000",
         )
 
 
 def test_production_accepts_https_domain_cors_origins() -> None:
     settings = Settings(
         **_VALID_PROD_KWARGS,
-        cors_origins="https://plantify.example.com,https://api.plantify.example.com",
+        cors_origins="https://bluevision.example.com,https://api.bluevision.example.com",
     )
-    assert "https://plantify.example.com" in settings.cors_origin_list
+    assert "https://bluevision.example.com" in settings.cors_origin_list
 
 
 def test_production_accepts_native_app_origin_regex() -> None:
     settings = Settings(
         **_VALID_PROD_KWARGS,
-        cors_origins="https://plantify.example.com,https://api.plantify.example.com",
+        cors_origins="https://bluevision.example.com,https://api.bluevision.example.com",
         cors_origin_regex=r"^(tauri://localhost|https://localhost|capacitor://localhost)$",
     )
     assert settings.cors_origin_regex == r"^(tauri://localhost|https://localhost|capacitor://localhost)$"

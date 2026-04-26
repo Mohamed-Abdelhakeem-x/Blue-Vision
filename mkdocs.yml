@@ -1,9 +1,9 @@
-site_name: Plantify
+site_name: BlueVision
 site_description: AI-powered fish disease detection
-site_author: Plantify Contributors
-site_url: https://plantify.limarise.com  # Update with actual domain
-repo_url: https://github.com/naghdiefallah/plantify
-repo_name: plantify
+site_author: BlueVision Contributors
+site_url: https://bluevision.limarise.com  # Update with actual domain
+repo_url: https://github.com/naghdiefallah/bluevision
+repo_name: bluevision
 edit_uri: edit/main/docs/
 
 theme:
@@ -58,11 +58,11 @@ extra:
     default: latest
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/naghdiefallah/plantify
+      link: https://github.com/naghdiefallah/bluevision
     - icon: fontawesome/brands/docker
-      link: https://hub.docker.com/r/naghdiefalla/plantify
+      link: https://hub.docker.com/r/naghdiefalla/bluevision
     - icon: fontawesome/brands/twitter
-      link: https://twitter.com/plantify
+      link: https://twitter.com/bluevision
 
 nav:
   - Home: index.md

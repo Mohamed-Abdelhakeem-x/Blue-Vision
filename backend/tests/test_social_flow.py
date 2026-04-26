@@ -66,10 +66,10 @@ async def test_social_friend_request_and_direct_messages_flow(client):
     message_response = await client.post(
         "/api/social/messages",
         headers={"Authorization": f"Bearer {farmer_token}"},
-        json={"receiver_id": expert_id, "body": "Hello from Plantify social!"},
+        json={"receiver_id": expert_id, "body": "Hello from BlueVision social!"},
     )
     assert message_response.status_code == 201
-    assert message_response.json()["body"] == "Hello from Plantify social!"
+    assert message_response.json()["body"] == "Hello from BlueVision social!"
 
     conversation_response = await client.get(
         f"/api/social/conversations/{expert_id}",
@@ -79,4 +79,4 @@ async def test_social_friend_request_and_direct_messages_flow(client):
     conversation_payload = conversation_response.json()
     assert conversation_payload["friend"]["id"] == expert_id
     assert len(conversation_payload["messages"]) == 1
-    assert conversation_payload["messages"][0]["body"] == "Hello from Plantify social!"
+    assert conversation_payload["messages"][0]["body"] == "Hello from BlueVision social!"

@@ -170,7 +170,7 @@ class ChatbotService:
         return index
 
     def _add_project_database_entries(self, index: dict[str, dict[str, str]]) -> None:
-        db_path = Path(__file__).parent.parent.parent / "plantify.db"
+        db_path = Path(__file__).parent.parent.parent / "bluevision.db"
         if not db_path.exists():
             return
 
@@ -286,11 +286,11 @@ class ChatbotService:
     def _fast_path_response(language: Literal["en", "ar"]) -> str:
         if language == "ar":
             return (
-                "مرحباً! أنا خبير Plantify الزراعي. "
+                "مرحباً! أنا خبير BlueVision الزراعي. "
                 "أرسل اسم المرض أو صورة الفحص وسأعطيك خطوات عملية سريعة للعلاج والوقاية."
             )
         return (
-            "Hello! I am your Plantify Agri Expert. "
+            "Hello! I am your BlueVision Agri Expert. "
             "Share a disease name or scan result and I will provide concise treatment and prevention steps."
         )
 
@@ -305,7 +305,7 @@ class ChatbotService:
         if normalized in {"how are you", "عامل ايه", "عامل اي", "اخبارك", "كيف حالك"}:
             return "أنا جاهز أساعدك. قل لي اسم النبات أو المشكلة التي ظهرت عندك." if language == "ar" else "I am ready to help. Tell me the plant name or the problem you see."
         if normalized in {"من انت", "مين انت", "who are you"}:
-            return "أنا مساعد Plantify الزراعي. أساعدك في فهم أمراض النبات والآفات وخطوات العلاج والوقاية." if language == "ar" else "I am the Plantify agriculture assistant. I help with plant diseases, pests, treatment, and prevention."
+            return "أنا مساعد BlueVision الزراعي. أساعدك في فهم أمراض النبات والآفات وخطوات العلاج والوقاية." if language == "ar" else "I am the BlueVision agriculture assistant. I help with plant diseases, pests, treatment, and prevention."
         return None
 
     @staticmethod

@@ -18,7 +18,7 @@ type DesktopTitleBarProps = {
 
 export function DesktopTitleBar({
   className,
-  title = "Plantify",
+  title = "BlueVision",
   subtitle = "Desktop Shell",
   onMinimize,
   onToggleMaximize,

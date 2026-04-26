@@ -34,8 +34,8 @@ def export(checkpoint_path: str | Path | None = None) -> None:
     model_dir = root / "model"
     model_dir.mkdir(parents=True, exist_ok=True)
 
-    pth_path = resolve_checkpoint_path(checkpoint_path or (root.parent / "plantify_model.pth"))
-    onnx_path = model_dir / "plantify_model.onnx"
+    pth_path = resolve_checkpoint_path(checkpoint_path or (root.parent / "bluevision_model.pth"))
+    onnx_path = model_dir / "bluevision_model.onnx"
     labels_path = model_dir / "classes.json"
 
     checkpoint = torch.load(pth_path, map_location="cpu", weights_only=False)

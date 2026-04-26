@@ -15,11 +15,11 @@ if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
 MODEL_DIR = BACKEND_DIR / "model"
-DEFAULT_ONNX = MODEL_DIR / "plantify_model.onnx"
+DEFAULT_ONNX = MODEL_DIR / "bluevision_model.onnx"
 DEFAULT_LABELS = MODEL_DIR / "classes.json"
-DEFAULT_CHECKPOINT = MODEL_DIR / "plantify_model.pth"
+DEFAULT_CHECKPOINT = MODEL_DIR / "bluevision_model.pth"
 DEFAULT_REGISTRY = MODEL_DIR / "model_registry.json"
-ROOT_CHECKPOINT = REPO_ROOT / "plantify_model.pth"
+ROOT_CHECKPOINT = REPO_ROOT / "bluevision_model.pth"
 
 
 def _load_bootstrap_classes(raw: str | None) -> list[str]:

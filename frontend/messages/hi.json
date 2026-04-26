@@ -14,9 +14,9 @@
     "signOut": "साइन आउट"
   },
   "landing": {
-    "eyebrow": "Plantify प्लेटफ़ॉर्म",
+    "eyebrow": "BlueVision प्लेटफ़ॉर्म",
     "title": "आधुनिक फसल स्वास्थ्य संचालन, वास्तविक टीमों के लिए।",
-    "subtitle": "Plantify मॉनिटरिंग, विश्लेषण और सहयोग को एक प्रवाह में जोड़ता है ताकि आपकी टीम तेजी से निर्णय ले सके।",
+    "subtitle": "BlueVision मॉनिटरिंग, विश्लेषण और सहयोग को एक प्रवाह में जोड़ता है ताकि आपकी टीम तेजी से निर्णय ले सके।",
     "ctaPrimary": "शुरू करें",
     "ctaSecondary": "डैशबोर्ड देखें",
     "missionEyebrow": "मिशन",
@@ -31,7 +31,7 @@
     "missionItem3Title": "विश्वसनीय थ्रूपुट",
     "missionItem3Body": "ऑनबोर्डिंग और स्कैन निष्पादन को हल्का और पूर्वानुमेय रखना।",
     "testimonialsEyebrow": "प्रशंसापत्र",
-    "testimonialsTitle": "Plantify के बारे में टीमों की राय",
+    "testimonialsTitle": "BlueVision के बारे में टीमों की राय",
     "teamEyebrow": "टीम",
     "teamTitle": "छोटी टीम, केंद्रित निष्पादन",
     "teamRole1": "प्रोडक्ट लीड",
@@ -65,17 +65,17 @@
     },
     "login": {
       "title": "लॉग इन",
-      "subtitle": "अपने Plantify खाते की जानकारी का उपयोग करें।",
+      "subtitle": "अपने BlueVision खाते की जानकारी का उपयोग करें।",
       "cta": "जारी रखें",
       "loading": "लॉग इन हो रहा है...",
       "success": "सफल",
       "error": "लॉग इन नहीं हो सका",
-      "switchPrompt": "Plantify पर नए हैं?",
+      "switchPrompt": "BlueVision पर नए हैं?",
       "switchCta": "खाता बनाएं"
     },
     "register": {
       "title": "साइन अप",
-      "subtitle": "अपना Plantify खाता बनाएं।",
+      "subtitle": "अपना BlueVision खाता बनाएं।",
       "cta": "खाता बनाएं",
       "loading": "खाता बनाया जा रहा है...",
       "success": "खाता बन गया",

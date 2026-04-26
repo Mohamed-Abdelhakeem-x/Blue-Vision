@@ -1,11 +1,11 @@
 #!/bin/bash
-# Quick start script for setting up Plantify CI/CD deployment
+# Quick start script for setting up BlueVision CI/CD deployment
 # This script helps you generate and setup GitHub Secrets
 # Usage: bash scripts/setup-github-secrets.sh
 
 set -e
 
-echo "🚀 Plantify GitHub Secrets Setup"
+echo "🚀 BlueVision GitHub Secrets Setup"
 echo "=================================="
 echo ""
 echo "This script will help you generate values for GitHub Secrets"
@@ -80,12 +80,12 @@ if [ "$has_ssh_key" = "y" ] || [ "$has_ssh_key" = "Y" ]; then
     fi
 else
     echo "Generating new SSH deploy key..."
-    ssh-keygen -t ed25519 -f ~/.ssh/plantify-deploy -C "plantify-ci@github" -N ""
-    VPS_SSH_KEY=$(cat ~/.ssh/plantify-deploy)
+    ssh-keygen -t ed25519 -f ~/.ssh/bluevision-deploy -C "bluevision-ci@github" -N ""
+    VPS_SSH_KEY=$(cat ~/.ssh/bluevision-deploy)
     echo -e "${GREEN}✓ Generated SSH key${NC}"
     echo ""
     echo "Add this public key to VPS authorized_keys:"
-    echo "  ssh-copy-id -i ~/.ssh/plantify-deploy.pub $VPS_USER@$VPS_HOST"
+    echo "  ssh-copy-id -i ~/.ssh/bluevision-deploy.pub $VPS_USER@$VPS_HOST"
     echo ""
 fi
 echo ""
@@ -93,13 +93,13 @@ echo ""
 # Step 5: Frontend & CORS
 echo -e "${BLUE}Step 5: Frontend API Base URL${NC}"
 echo "──────────────────────────────"
-read -p "Frontend API Base URL (e.g., https://api.plantify.com/api): " FRONTEND_API_BASE_URL
+read -p "Frontend API Base URL (e.g., https://api.bluevision.com/api): " FRONTEND_API_BASE_URL
 echo -e "${GREEN}Frontend API:${NC} $FRONTEND_API_BASE_URL"
 echo ""
 
 echo -e "${BLUE}Step 6: CORS Origins${NC}"
 echo "───────────────────"
-read -p "CORS Origins comma-separated (e.g., https://plantify.com,https://app.plantify.com): " CORS_ORIGINS
+read -p "CORS Origins comma-separated (e.g., https://bluevision.com,https://app.bluevision.com): " CORS_ORIGINS
 echo -e "${GREEN}CORS:${NC} $CORS_ORIGINS"
 echo ""
 
@@ -147,7 +147,7 @@ echo ""
 read -p "Save to secrets.txt for reference? (y/n): " save_file
 if [ "$save_file" = "y" ] || [ "$save_file" = "Y" ]; then
     cat > secrets.txt << EOF
-# GitHub Secrets for Plantify
+# GitHub Secrets for BlueVision
 # ============================
 # Add these to: Settings → Secrets and variables → Actions
 
@@ -159,7 +159,7 @@ FRONTEND_API_BASE_URL=$FRONTEND_API_BASE_URL
 CORS_ORIGINS=$CORS_ORIGINS
 
 # SSH Key (full content):
-VPS_SSH_KEY=(see ~/.ssh/plantify-deploy)
+VPS_SSH_KEY=(see ~/.ssh/bluevision-deploy)
 
 # Generated at: $(date)
 EOF
@@ -172,7 +172,7 @@ echo -e "${GREEN}✓ Setup complete!${NC}"
 echo ""
 echo "Next steps:"
 echo "1. Add secrets to GitHub (one at a time)"
-echo "2. Test SSH connection: ssh -i ~/.ssh/plantify-deploy $VPS_USER@$VPS_HOST"
+echo "2. Test SSH connection: ssh -i ~/.ssh/bluevision-deploy $VPS_USER@$VPS_HOST"
 echo "3. Run workflow: Actions → Deploy .env Files to VPS → Run workflow"
-echo "4. Check VPS: ssh $VPS_USER@$VPS_HOST ls -la /root/plantify/.env"
+echo "4. Check VPS: ssh $VPS_USER@$VPS_HOST ls -la /root/bluevision/.env"
 echo ""

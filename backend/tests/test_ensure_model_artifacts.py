@@ -14,7 +14,7 @@ def test_resolve_checkpoint_prefers_requested_when_present(tmp_path: Path) -> No
 
 def test_resolve_checkpoint_falls_back_to_repo_root(monkeypatch, tmp_path: Path) -> None:
     requested = tmp_path / "missing.pth"
-    root_checkpoint = tmp_path / "plantify_model.pth"
+    root_checkpoint = tmp_path / "bluevision_model.pth"
     root_checkpoint.write_bytes(b"weights")
 
     monkeypatch.setattr(ensure_model_artifacts, "ROOT_CHECKPOINT", root_checkpoint)

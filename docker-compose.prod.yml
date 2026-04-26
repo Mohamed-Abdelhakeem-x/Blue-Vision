@@ -1,14 +1,14 @@
 services:
   backend:
     image: ${GHCR_IMAGE_PREFIX}-backend:${IMAGE_TAG:-latest}
-    container_name: plantify-backend
+    container_name: bluevision-backend
     env_file:
       - path: backend/.env
         required: false
     ports:
       - "127.0.0.1:18000:8000"
     volumes:
-      - plantify_data:/data
+      - bluevision_data:/data
     depends_on:
       ollama:
         condition: service_started
@@ -28,14 +28,14 @@ services:
 
   ollama:
     image: ollama/ollama:latest
-    container_name: plantify-ollama
+    container_name: bluevision-ollama
     volumes:
       - ollama_data:/root/.ollama
     restart: unless-stopped
 
   frontend:
     image: ${GHCR_IMAGE_PREFIX}-frontend:${IMAGE_TAG:-latest}
-    container_name: plantify-frontend
+    container_name: bluevision-frontend
     environment:
       - NEXT_PUBLIC_API_BASE_URL=/api
     ports:
@@ -46,5 +46,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  plantify_data:
+  bluevision_data:
   ollama_data:

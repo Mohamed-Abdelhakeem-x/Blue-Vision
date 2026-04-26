@@ -34,7 +34,7 @@ categorize_commit() {
 
 # Generate header
 cat >"$OUTPUT_FILE" <<EOF
-# Plantify Release Notes
+# BlueVision Release Notes
 
 **Version**: \`${CURRENT_TAG#v}\`  
 **Release Date**: $(date -u '+%Y-%m-%d %H:%M UTC')

@@ -10,19 +10,19 @@ REPO_ROOT = BACKEND_DIR.parent
 
 
 class Settings(BaseSettings):
-    app_name: str = "Plantify API"
+    app_name: str = "BlueVision API"
     app_env: str = "development"
     secret_key: str = Field(default="change-me-in-production", min_length=16)
     access_token_expire_minutes: int = 60 * 24
     refresh_token_expire_days: int = 30
     algorithm: str = "HS256"
-    jwt_issuer: str = "plantify-api"
-    jwt_audience: str = "plantify-clients"
+    jwt_issuer: str = "bluevision-api"
+    jwt_audience: str = "bluevision-clients"
 
-    sqlite_path: str = str(BACKEND_DIR / "plantify.db")
-    model_path: str = str(BACKEND_DIR / "model" / "plantify_model.onnx")
+    sqlite_path: str = str(BACKEND_DIR / "bluevision.db")
+    model_path: str = str(BACKEND_DIR / "model" / "bluevision_model.onnx")
     labels_path: str = str(BACKEND_DIR / "model" / "classes.json")
-    checkpoint_path: str = str(BACKEND_DIR / "model" / "plantify_model.pth")
+    checkpoint_path: str = str(BACKEND_DIR / "model" / "bluevision_model.pth")
     chatbot_model_name: str = "qwen2.5:1.5b"
     chatbot_base_url: str = "http://ollama:11434"
     chatbot_auto_pull_model: bool = True

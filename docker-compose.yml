@@ -6,7 +6,7 @@ services:
     env_file:
       - backend/.env.example
     volumes:
-      - plantify_data:/data
+      - bluevision_data:/data
     depends_on:
       - ollama
     restart: unless-stopped
@@ -43,7 +43,7 @@ services:
     restart: unless-stopped
 
 volumes:
-  plantify_data:
+  bluevision_data:
   caddy_data:
   caddy_config:
   ollama_data:

@@ -8,7 +8,7 @@ import {
   FlaskConical,
   History,
   Home,
-  Plant,
+  Sprout,
   LogOut,
   Menu,
   MessageSquareHeart,
@@ -46,7 +46,7 @@ function iconForNavItem(icon: DashboardNavItem["icon"]) {
     case "history":
       return History;
     case "plant":
-      return Plant;
+      return Sprout;
     case "message":
       return MessageSquareHeart;
     case "shield":

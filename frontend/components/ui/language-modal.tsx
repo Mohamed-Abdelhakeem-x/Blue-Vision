@@ -9,7 +9,7 @@ import {usePathname} from "@/i18n/navigation";
 import {routing, type AppLocale} from "@/i18n/routing";
 import {getDashboardCopy} from "@/lib/dashboard-copy";
 
-const LOCALE_STORAGE_KEY = "plantify.locale";
+const LOCALE_STORAGE_KEY = "bluevision.locale";
 
 function persistLocale(nextLocale: AppLocale) {
   window.localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale);

@@ -123,7 +123,7 @@ class TrainingConfig:
     pin_memory: bool | None = None
 
 
-class PlantifyDataset(Dataset):
+class BlueVisionDataset(Dataset):
     def __init__(self, samples: list[tuple[Path, int]], transform: transforms.Compose) -> None:
         self.samples = samples
         self.transform = transform
@@ -413,8 +413,8 @@ def train_model(config: TrainingConfig) -> None:
     train_samples, val_samples = split_by_class(raw_samples, class_to_idx, config.val_split, config.seed)
     train_tf, val_tf = build_transforms(config)
 
-    train_ds = PlantifyDataset(train_samples, train_tf)
-    val_ds = PlantifyDataset(val_samples, val_tf)
+    train_ds = BlueVisionDataset(train_samples, train_tf)
+    val_ds = BlueVisionDataset(val_samples, val_tf)
     train_loader = DataLoader(
         train_ds,
         batch_size=config.batch_size,
@@ -544,9 +544,9 @@ def train_model(config: TrainingConfig) -> None:
 def resolve_dataset_root(repo_root: Path) -> Path:
     candidates = [
         repo_root / "dataset",
-        Path("/content/drive/MyDrive/plantify/dataset"),
+        Path("/content/drive/MyDrive/bluevision/dataset"),
         Path("/content/dataset"),
-        Path("/content/plantify/dataset"),
+        Path("/content/bluevision/dataset"),
     ]
     for candidate in candidates:
         found = _find_dataset_subroot(candidate)
@@ -577,10 +577,10 @@ def default_worker_count() -> int:
 def parse_args() -> argparse.Namespace:
     repo_root = Path(__file__).resolve().parent if "__file__" in dir() else Path.cwd()
     backend_model_dir = repo_root / "backend" / "model"
-    parser = argparse.ArgumentParser(description="Train Plantify in Google Colab or similar notebook environments.")
+    parser = argparse.ArgumentParser(description="Train BlueVision in Google Colab or similar notebook environments.")
     parser.add_argument("--dataset-root", type=Path, default=resolve_dataset_root(repo_root))
     parser.add_argument("--extra-dataset-root", dest="extra_dataset_roots", action="append", type=Path, default=None)
-    parser.add_argument("--checkpoint-path", type=Path, default=backend_model_dir / "plantify_model.pth")
+    parser.add_argument("--checkpoint-path", type=Path, default=backend_model_dir / "bluevision_model.pth")
     parser.add_argument("--classes-path", type=Path, default=backend_model_dir / "classes.json")
     parser.add_argument("--extra-dataset-tomato-only", action="store_true")
     parser.add_argument("--arch", choices=["efficientnet_b2", "efficientnet_b3", "mobilenet_v3_large"], default="efficientnet_b2")
@@ -594,12 +594,12 @@ def parse_args() -> argparse.Namespace:
 
 def build_config(args: argparse.Namespace) -> TrainingConfig:
     dropout = 0.2 if args.arch == "mobilenet_v3_large" else 0.3
-    env_extra_roots = parse_extra_dataset_roots(os.environ.get("PLANTIFY_EXTRA_DATASETS"))
+    env_extra_roots = parse_extra_dataset_roots(os.environ.get("BLUEVISION_EXTRA_DATASETS"))
     cli_extra_roots = args.extra_dataset_roots or []
     return TrainingConfig(
         dataset_root=args.dataset_root,
         extra_dataset_roots=[*env_extra_roots, *cli_extra_roots],
-        extra_dataset_tomato_only=args.extra_dataset_tomato_only or parse_env_flag(os.environ.get("PLANTIFY_EXTRA_DATASETS_TOMATO_ONLY")),
+        extra_dataset_tomato_only=args.extra_dataset_tomato_only or parse_env_flag(os.environ.get("BLUEVISION_EXTRA_DATASETS_TOMATO_ONLY")),
         checkpoint_path=args.checkpoint_path,
         classes_path=args.classes_path,
         arch=args.arch,

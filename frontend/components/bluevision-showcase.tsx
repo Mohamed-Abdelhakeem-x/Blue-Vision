@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { SonarPulse } from "@/components/sonar-pulse";
 import { ThemeLanguageSwitcher } from "@/components/theme-language-switcher";
 import { 
-  Plant, 
+  Sprout, 
   Zap, 
   BarChart3, 
 } from "lucide-react";
@@ -37,7 +37,7 @@ const itemVariants = {
   },
 };
 
-export function PlantifyShowcase() {
+export function BlueVisionShowcase() {
   const locale = useLocale();
   const isRTL = locale === "ar";
   const [selectedDisease, setSelectedDisease] = useState("Apple Scab");
@@ -51,7 +51,7 @@ export function PlantifyShowcase() {
 
   const features = [
     {
-      icon: Plant,
+      icon: Sprout,
       title: isRTL ? "الكشف الدقيق" : "Accurate Detection",
       desc: isRTL ? "تحديد أمراض النبات برقة 92%" : "Identify plant diseases at 92% accuracy",
     },
@@ -69,18 +69,18 @@ export function PlantifyShowcase() {
 
   return (
     <div 
-      className="min-h-screen bg-plantify-bg text-plantify-text transition-colors duration-300"
+      className="min-h-screen bg-bluevision-bg text-bluevision-text transition-colors duration-300"
       dir={isRTL ? "rtl" : "ltr"}
     >
       {/* Header */}
-      <header className="border-b border-plantify-border sticky top-0 z-40 bg-plantify-bg/80 backdrop-blur-md">
+      <header className="border-b border-bluevision-border sticky top-0 z-40 bg-bluevision-bg/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <motion.h1
             initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
             animate={{ opacity: 1, x: 0 }}
             className="text-3xl font-bold text-accent"
           >
-            Plantify
+            BlueVision
           </motion.h1>
           <ThemeLanguageSwitcher />
         </div>
@@ -101,7 +101,7 @@ export function PlantifyShowcase() {
                 ? "الزراعة الذكية مع تقنية الذكاء الاصطناعي"
                 : "Smart Agriculture Powered by AI"}
             </h2>
-            <p className="text-xl text-plantify-text/70 max-w-2xl">
+            <p className="text-xl text-bluevision-text/70 max-w-2xl">
               {isRTL
                 ? "كشف أمراض النبات وعلاجها باستخدام تقنية الذكاء الاصطناعي المتقدمة والخبراء الزراعيين"
                 : "Detect and treat plant diseases with advanced AI technology and agricultural experts"}
@@ -151,7 +151,7 @@ export function PlantifyShowcase() {
                     <CardTitle className="text-xl">{feature.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-plantify-text/70">{feature.desc}</p>
+                    <p className="text-bluevision-text/70">{feature.desc}</p>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -173,7 +173,7 @@ export function PlantifyShowcase() {
             <h3 className="text-3xl font-bold mb-2">
               {isRTL ? "كشف الأمراض" : "Disease Detection"}
             </h3>
-            <p className="text-plantify-text/70">
+            <p className="text-bluevision-text/70">
               {isRTL
                 ? "استخدم النموذج المتقدم لتحديد أمراض النبات برقة عالية"
                 : "Use our advanced model to identify plant diseases with high accuracy"}
@@ -210,7 +210,7 @@ export function PlantifyShowcase() {
                         className={`p-3 rounded-lg border transition-all cursor-pointer ${
                           selectedDisease === disease.name
                             ? "border-accent bg-accent/10 shadow-cobalt"
-                            : "border-plantify-border hover:border-accent/50"
+                            : "border-bluevision-border hover:border-accent/50"
                         }`}
                       >
                         <div className="flex items-center justify-between">
@@ -243,8 +243,8 @@ export function PlantifyShowcase() {
                     animate={{ opacity: 1, y: 0 }}
                     className="space-y-3"
                   >
-                    <div className="p-4 rounded-lg bg-plantify-secondary/50 border border-plantify-border">
-                      <p className="text-sm text-plantify-text/70 mb-2">
+                    <div className="p-4 rounded-lg bg-bluevision-secondary/50 border border-bluevision-border">
+                      <p className="text-sm text-bluevision-text/70 mb-2">
                         {isRTL ? "الأعراض" : "Symptoms"}
                       </p>
                       <p className="font-medium">
@@ -254,7 +254,7 @@ export function PlantifyShowcase() {
                       </p>
                     </div>
                     <div className="p-4 rounded-lg bg-accent/5 border border-accent/20">
-                      <p className="text-sm text-plantify-text/70 mb-2">
+                      <p className="text-sm text-bluevision-text/70 mb-2">
                         {isRTL ? "العلاج الموصى به" : "Recommended Treatment"}
                       </p>
                       <p className="font-medium text-accent">
@@ -308,7 +308,7 @@ export function PlantifyShowcase() {
                     <CardTitle>{item.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-plantify-text/70">{item.text}</p>
+                    <p className="text-bluevision-text/70">{item.text}</p>
                   </CardContent>
                 </Card>
               </motion.div>

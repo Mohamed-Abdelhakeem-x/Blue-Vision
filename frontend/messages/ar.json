@@ -65,17 +65,17 @@
     },
     "login": {
       "title": "تسجيل الدخول",
-      "subtitle": "استخدم بيانات حساب Plantify الخاصة بك.",
+      "subtitle": "استخدم بيانات حساب BlueVision الخاصة بك.",
       "cta": "متابعة",
       "loading": "جاري تسجيل الدخول...",
       "success": "تم بنجاح",
       "error": "تعذر تسجيل الدخول",
-      "switchPrompt": "جديد على Plantify؟",
+      "switchPrompt": "جديد على BlueVision؟",
       "switchCta": "أنشئ حساباً"
     },
     "register": {
       "title": "إنشاء حساب",
-      "subtitle": "أنشئ حسابك في Plantify.",
+      "subtitle": "أنشئ حسابك في BlueVision.",
       "cta": "إنشاء حساب",
       "loading": "جاري إنشاء الحساب...",
       "success": "تم إنشاء الحساب",
