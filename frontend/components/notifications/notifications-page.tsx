@@ -65,7 +65,9 @@ export function NotificationsPage() {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="font-semibold text-[var(--text-primary)]">{notification.message}</p>
-                    <p className="mt-1 text-xs text-[var(--text-tertiary)]">{new Date(notification.created_at).toLocaleString()}</p>
+                    <p className="mt-1 text-xs text-[var(--text-tertiary)]">
+                      <span suppressHydrationWarning>{new Date(notification.created_at.endsWith("Z") ? notification.created_at : notification.created_at + "Z").toLocaleString()}</span>
+                    </p>
                   </div>
                   {!notification.is_read ? (
                     <Button type="button" variant="secondary" size="sm" className="rounded-xl" onClick={() => readMutation.mutate(notification.id)}>

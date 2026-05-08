@@ -10,8 +10,8 @@ class DetectionCandidate(BaseModel):
 
 
 class DetectionResponse(BaseModel):
-    disease_type: str
-    plant_name: str
+    health_status: str
+    fish_species: str
     disease: str
     confidence_score: float
     treatment_recommendations: str
@@ -24,10 +24,10 @@ class DetectionResponse(BaseModel):
     top_predictions: list[DetectionCandidate] = []
 
 
-class ScanHistoryResponse(BaseModel):
+class AnalysisHistoryResponse(BaseModel):
     id: str
-    disease_type: str
-    plant_name: str
+    health_status: str
+    fish_species: str
     disease: str
     confidence_score: float
     recommendation: str

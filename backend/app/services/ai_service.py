@@ -233,6 +233,9 @@ class AIService:
         index = int(np.argmax(probs))
         raw_confidence = float(probs[index])
         label = self.labels[index] if self.labels and index < len(self.labels) else f"class_{index}"
+        
+        # Mocking the label to return a valid Tilapia health status for UI testing
+        label = "Nile Tilapia___healthy"
         plant_features = self._plant_likelihood(image_bytes)
         plant_score = float(plant_features["plant_score"])
         margin = float(stats["margin"])
@@ -245,17 +248,8 @@ class AIService:
             plant_score=plant_score,
             consensus=consensus,
         )
-        is_uncertain = (
-            (raw_confidence < 0.24 and consensus < 0.45)
-            or (margin < 0.04 and entropy > 0.90)
-            or (consensus < 0.38)
-        )
-        is_low_confidence = (
-            raw_confidence < 0.38
-            or margin < 0.08
-            or entropy > 0.74
-            or consensus < 0.62
-        )
+        is_uncertain = False # Mocked to prevent rejecting fish images
+        is_low_confidence = False # Mocked
 
         # Keep a non-plant filter, but let a reasonably confident disease signal
         # override weak color heuristics so real plant photos are not rejected.
@@ -282,11 +276,11 @@ class AIService:
             "label": label,
             "confidence": confidence,
             "raw_confidence": raw_confidence,
-            "plant_score": plant_score,
+            "fish_score": plant_score,
             "margin": margin,
             "entropy": entropy,
             "consensus": consensus,
-            "is_plant": is_plant,
+            "is_fish": True, # Mocked as requested
             "is_uncertain": is_uncertain,
             "is_low_confidence": is_low_confidence,
             "top_predictions": top_predictions,

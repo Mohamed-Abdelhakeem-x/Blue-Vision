@@ -30,14 +30,14 @@ class CommunityPostResponse(BaseModel):
     id: str
     user_id: str
     user_name: str
-    plant_name: str
+    fish_species: str
     disease: str
-    disease_type: str
+    health_status: str
     entry_kind: str
     created_at: datetime
     image_b64: str | None = None
     post_text: str
-    ai_plant_name: str
+    ai_fish_species: str
     ai_disease: str
     ai_treatment_recommendation: str
     ai_confidence_score: float
@@ -49,11 +49,11 @@ class CommunityPostResponse(BaseModel):
 
 class CommunityPostSuggestionResponse(BaseModel):
     normalized_problem: str
-    predicted_plant_name: str
+    predicted_fish_species: str
     predicted_disease: str
     treatment_recommendation: str
     confidence_score: float
-    is_plant: bool
+    is_fish: bool
 
 
 class CommunityNormalizedTextResponse(BaseModel):

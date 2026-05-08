@@ -23,7 +23,7 @@ import {cn} from "@/lib/utils";
 import {compressImage} from "@/hooks/use-image-compression";
 import {boostDisplayedConfidence} from "@/lib/confidence";
 import {
-  detectPlant,
+  detectFish,
   fetchStats,
   getStoredAccessToken
 } from "@/lib/api";
@@ -125,7 +125,7 @@ export function FarmerDashboard() {
       }
 
       const compressed = await compressImage(original);
-      return detectPlant({
+      return detectFish({
         token,
         image: compressed,
         domain: "color"
@@ -133,7 +133,7 @@ export function FarmerDashboard() {
     },
     onSuccess: (payload) => {
       setResult(payload);
-      pushNotice("success", `${payload.plant_name}: ${payload.disease}`);
+      pushNotice("success", `${payload.fish_species}: ${payload.health_status}`);
       void queryClient.invalidateQueries({queryKey: ["history"]});
       void queryClient.invalidateQueries({queryKey: ["stats"]});
     }
@@ -167,7 +167,7 @@ export function FarmerDashboard() {
 
   const confidence = boostDisplayedConfidence(result?.confidence_score ?? 0) * 100;
   const treatment = parseTreatmentSections(result?.treatment_recommendations);
-  const isHealthy = result?.disease_type.toLowerCase().includes("healthy") ?? false;
+  const isHealthy = result?.health_status.toLowerCase().includes("healthy") ?? false;
 
   const beforeSrc = result?.before_image_b64
     ? `data:image/jpeg;base64,${result.before_image_b64}`
@@ -248,7 +248,7 @@ export function FarmerDashboard() {
               <>
                 <Image
                   src={previewUrl}
-                  alt="Plant preview"
+                  alt="Fish preview"
                   width={1200}
                   height={720}
                   unoptimized
@@ -314,11 +314,11 @@ export function FarmerDashboard() {
                   <div className="flex flex-wrap items-center gap-2">
                     <div>
                       <p className="text-xs text-[var(--text-tertiary)]">{t("result.plantLabel")}</p>
-                      <p className="text-lg font-semibold text-[var(--text-primary)]">{result.plant_name}</p>
+                      <p className="text-lg font-semibold text-[var(--text-primary)]">{result.fish_species}</p>
                     </div>
                     <div className="hidden sm:block sm:border-l sm:border-[var(--card-border)] sm:pl-4">
                       <p className="text-xs text-[var(--text-tertiary)]">{t("result.statusLabel")}</p>
-                      <p className="text-lg font-semibold text-[var(--text-primary)]">{result.disease}</p>
+                      <p className="text-lg font-semibold text-[var(--text-primary)]">{result.health_status}</p>
                     </div>
                     <span className={cn(
                       "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold",

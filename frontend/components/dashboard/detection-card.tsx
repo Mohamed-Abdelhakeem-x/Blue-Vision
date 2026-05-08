@@ -6,7 +6,7 @@ import { CheckCircle2, Fish, Loader2, Sparkles, UploadCloud, Video, X, XCircle }
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 
-import { detectPlant, getStoredAccessToken } from "@/lib/api";
+import { detectFish, getStoredAccessToken } from "@/lib/api";
 import { formatBoostedConfidence } from "@/lib/confidence";
 import type { DetectionResult } from "@/lib/types";
 import { compressImage } from "@/hooks/use-image-compression";
@@ -20,7 +20,7 @@ interface DetectionCardProps {
 export function DetectionCard({ token, onDetected }: DetectionCardProps) {
   const maxSize = 50 * 1024 * 1024;
   const [file, setFile] = useState<File | null>(null);
-  const [domain, setDomain] = useState("color");
+
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DetectionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -81,7 +81,7 @@ export function DetectionCard({ token, onDetected }: DetectionCardProps) {
     try {
       const imageToAnalyze = isVideo ? await captureVideoFrame() : file;
       const compressed = await compressImage(imageToAnalyze);
-      const response = await detectPlant({ token: activeToken, image: compressed, domain });
+      const response = await detectFish({ token: activeToken, image: compressed, domain: "color" });
       setResult(response);
       onDetected();
     } catch (err) {
@@ -190,27 +190,6 @@ export function DetectionCard({ token, onDetected }: DetectionCardProps) {
             </div>
           )}
 
-          {/* Domain selector */}
-          <div className="flex items-center gap-3">
-            <label className="shrink-0 text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-[0.12em]">Mode</label>
-            <div className="flex flex-1 gap-1 rounded-xl border border-[var(--card-border)] bg-[var(--bg-secondary)] p-1">
-              {["color", "grayscale", "segmented"].map((d) => (
-                <button
-                  key={d}
-                  type="button"
-                  onClick={() => setDomain(d)}
-                  className={cn(
-                    "flex-1 rounded-lg py-1.5 text-xs font-semibold capitalize transition-all",
-                    domain === d
-                      ? "bg-blue-600 text-white shadow-sm"
-                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-                  )}
-                >
-                  {d}
-                </button>
-              ))}
-            </div>
-          </div>
 
           {/* Analyze button */}
           <motion.button
@@ -261,14 +240,14 @@ export function DetectionCard({ token, onDetected }: DetectionCardProps) {
               {/* Status badge */}
               <div className={cn(
                 "flex items-center gap-2 rounded-2xl border px-4 py-3",
-                result.disease_type.toLowerCase().includes("healthy")
+                result.health_status.toLowerCase().includes("healthy")
                   ? "border-blue-500/20 bg-blue-500/8"
                   : "border-amber-500/20 bg-amber-500/8"
               )}>
-                <CheckCircle2 className={cn("h-5 w-5", result.disease_type.toLowerCase().includes("healthy") ? "text-blue-400" : "text-amber-400")} />
+                <CheckCircle2 className={cn("h-5 w-5", result.health_status.toLowerCase().includes("healthy") ? "text-blue-400" : "text-amber-400")} />
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-tertiary)]">Diagnosis</p>
-                  <p className="text-sm font-semibold text-[var(--text-primary)]">{result.disease_type}</p>
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">{result.health_status}</p>
                 </div>
                 <span className="ml-auto text-lg font-bold text-[var(--text-primary)]">
                   {formatBoostedConfidence(result.confidence_score, 1)}

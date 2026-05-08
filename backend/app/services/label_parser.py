@@ -1,21 +1,21 @@
-"""Service for parsing plant disease labels into plant name and disease type."""
+"""Service for parsing fish health labels into fish species and health status."""
 
 
-def parse_disease_label(label: str) -> tuple[str, str]:
+def parse_fish_label(label: str) -> tuple[str, str]:
     """
-    Parse a disease label in the format 'PlantName___DiseaseType' into components.
+    Parse a health label in the format 'FishSpecies___HealthStatus' into components.
     
     Args:
-        label: Label string like "Apple___healthy" or "Tomato___Late_blight"
+        label: Label string like "NileTilapia___healthy" or "NileTilapia___Streptococcus"
     
     Returns:
-        Tuple of (plant_name, disease_type)
+        Tuple of (fish_species, health_status)
     """
     if "___" not in label:
         return label, label
     
     parts = label.split("___", 1)
-    plant_name = parts[0].replace("_", " ").replace("(", "").replace(")", "")
-    disease_type = parts[1].replace("_", " ")
+    fish_species = parts[0].replace("_", " ").replace("(", "").replace(")", "")
+    health_status = parts[1].replace("_", " ")
     
-    return plant_name.strip(), disease_type.strip()
+    return fish_species.strip(), health_status.strip()

@@ -76,30 +76,6 @@ export function ExpertDashboard() {
         </BentoTile>
       </motion.div>
 
-      <motion.div initial={{opacity: 0, y: 14}} animate={{opacity: 1, y: 0}} transition={{delay: 0.08}} className="md:col-span-2 xl:col-span-4">
-        <BentoTile className="h-[21rem]">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-xs uppercase tracking-[0.16em] text-zinc-500">The Reviewer: Domain Comparison</h3>
-            <Microscope className="h-4 w-4 text-[#C8E43B]" />
-          </div>
-          <div className="grid h-[16rem] grid-cols-1 gap-3 md:grid-cols-3">
-            {domainSamples.map((src, index) => (
-              <div key={src} className="overflow-hidden rounded-xl border border-[#1f1f24] bg-black/20">
-                <Image
-                  src={src}
-                  alt={`Domain ${index + 1}`}
-                  width={1200}
-                  height={768}
-                  className="h-[12rem] w-full object-cover"
-                />
-                <p className="px-3 py-2 text-xs uppercase tracking-[0.12em] text-zinc-400">
-                  {index === 0 ? "color" : index === 1 ? "grayscale" : "segmented"}
-                </p>
-              </div>
-            ))}
-          </div>
-        </BentoTile>
-      </motion.div>
     </section>
   );
 }

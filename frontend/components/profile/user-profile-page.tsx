@@ -104,7 +104,9 @@ export function UserProfilePage() {
                 </div>
                 <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--bg-secondary)] p-4">
                   <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-tertiary)]">{copy.joined}</p>
-                  <p className="mt-2 text-sm font-semibold text-[var(--text-primary)]">{new Date(profile.created_at).toLocaleDateString()}</p>
+                  <p className="mt-2 text-sm font-semibold text-[var(--text-primary)]">
+                    <span suppressHydrationWarning>{new Date(profile.created_at.endsWith("Z") ? profile.created_at : profile.created_at + "Z").toLocaleDateString()}</span>
+                  </p>
                 </div>
               </div>
             </div>
@@ -151,16 +153,16 @@ export function UserProfilePage() {
               ) : (
                 profile.posts.map((post) => (
                   <div key={post.id} className="overflow-hidden rounded-[1.5rem] border border-[var(--card-border)] bg-[var(--bg-secondary)]">
-                    {post.image_b64 ? <img src={imageSrc(post.image_b64) ?? ""} alt={post.ai_plant_name} className="h-52 w-full object-cover" /> : null}
+                    {post.image_b64 ? <img src={imageSrc(post.image_b64) ?? ""} alt={post.ai_fish_species} className="h-52 w-full object-cover" /> : null}
                     <div className="space-y-3 p-4">
                       <div className="grid gap-2 sm:grid-cols-3">
                         <div>
                           <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-tertiary)]">{copy.plant}</p>
-                          <p className="mt-1 font-semibold text-[var(--text-primary)]">{post.ai_plant_name}</p>
+                          <p className="mt-1 font-semibold text-[var(--text-primary)]">{post.ai_fish_species}</p>
                         </div>
                         <div>
                           <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-tertiary)]">{copy.disease}</p>
-                          <p className="mt-1 font-semibold text-[var(--text-primary)]">{post.ai_disease}</p>
+                          <p className="mt-1 font-semibold text-[var(--text-primary)]">{post.ai_health_status}</p>
                         </div>
                         <div>
                           <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-tertiary)]">{copy.confidence}</p>
@@ -169,7 +171,7 @@ export function UserProfilePage() {
                       </div>
                       <p className="text-sm leading-6 text-[var(--text-primary)]">{post.post_text}</p>
                       <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--text-secondary)]">
-                        <span>{new Date(post.created_at).toLocaleString()}</span>
+                        <span suppressHydrationWarning>{new Date(post.created_at.endsWith("Z") ? post.created_at : post.created_at + "Z").toLocaleString()}</span>
                         <span>{post.likes_count} {copy.likes}</span>
                         <span>{post.comments_count} {copy.comments}</span>
                       </div>

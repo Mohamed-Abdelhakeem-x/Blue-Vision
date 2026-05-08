@@ -26,7 +26,8 @@ function imageSrc(imageB64?: string | null) {
 const EMPTY_FRIENDS: FriendConnection[] = [];
 
 function formatDate(date: string) {
-  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(date));
+  const utcDateStr = date.endsWith("Z") || date.includes("+") ? date : `${date}Z`;
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(utcDateStr));
 }
 
 function getSocialCopy(locale: AppLocale) {
@@ -219,7 +220,9 @@ export function SocialHub() {
       </div>
       <div className="text-right">
         <p className="text-xs text-[var(--text-tertiary)]">{copy.friendsSince}</p>
-        <p className="text-xs font-medium text-[var(--text-primary)]">{new Date(friend.friends_since).toLocaleDateString()}</p>
+        <p className="text-xs font-medium text-[var(--text-primary)]">
+          <span suppressHydrationWarning>{new Date(friend.friends_since).toLocaleDateString()}</span>
+        </p>
         {friend.unread_messages_count > 0 ? (
           <span className="mt-1 inline-flex rounded-full bg-blue-700 px-2 py-0.5 text-[11px] font-semibold text-white">
             {friend.unread_messages_count} {copy.unread}
@@ -264,7 +267,9 @@ export function SocialHub() {
                     <UserAvatar name={request.sender.full_name} avatarB64={request.sender.avatar_b64} />
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-semibold text-[var(--text-primary)]">{request.sender.full_name}</p>
-                      <p className="text-xs text-[var(--text-secondary)]">{formatDate(request.created_at)}</p>
+                      <p className="text-xs text-[var(--text-secondary)]">
+                        <span suppressHydrationWarning>{formatDate(request.created_at)}</span>
+                      </p>
                     </div>
                     <Button size="sm" className="rounded-xl" onClick={() => acceptRequestMutation.mutate(request.id)} disabled={acceptRequestMutation.isPending}>
                       {acceptRequestMutation.isPending && acceptRequestMutation.variables === request.id ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
@@ -345,7 +350,9 @@ export function SocialHub() {
                     <UserAvatar name={request.receiver.full_name} avatarB64={request.receiver.avatar_b64} />
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-semibold text-[var(--text-primary)]">{request.receiver.full_name}</p>
-                      <p className="text-xs text-[var(--text-secondary)]">{formatDate(request.created_at)}</p>
+                      <p className="text-xs text-[var(--text-secondary)]">
+                        <span suppressHydrationWarning>{formatDate(request.created_at)}</span>
+                      </p>
                     </div>
                     <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
                       {copy.pending}
@@ -385,7 +392,9 @@ export function SocialHub() {
                           }`}
                       >
                         <p className="whitespace-pre-wrap leading-6">{message.body}</p>
-                        <p className={`mt-2 text-[11px] ${message.is_own ? "text-white/80" : "text-[var(--text-tertiary)]"}`}>{formatDate(message.created_at)}</p>
+                        <p className={`mt-2 text-[11px] ${message.is_own ? "text-white/80" : "text-[var(--text-tertiary)]"}`}>
+                          <span suppressHydrationWarning>{formatDate(message.created_at)}</span>
+                        </p>
                       </div>
                     </div>
                   ))

@@ -90,7 +90,7 @@ export function ScanHistoryContent() {
 
   const filteredRows = useMemo(() => {
     const rows: ScanHistory[] = historyQuery.data ?? [];
-    const sortedRows = [...rows].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    const sortedRows = [...rows].sort((a, b) => new Date(b.created_at.endsWith("Z") ? b.created_at : b.created_at + "Z").getTime() - new Date(a.created_at.endsWith("Z") ? a.created_at : a.created_at + "Z").getTime());
     const now = Date.now();
     const timeThreshold =
       timeFilter === "24h"
@@ -105,10 +105,10 @@ export function ScanHistoryContent() {
     const minimumConfidenceValue = Number(minConfidence) / 100;
 
     return sortedRows.filter((row) => {
-      const haystack = `${row.plant_name ?? ""} ${row.disease ?? ""} ${row.disease_type} ${row.domain} ${row.recommendation ?? ""}`.toLowerCase();
+      const haystack = `${row.fish_species ?? ""} ${row.health_status} ${row.domain} ${row.treatment_recommendations ?? ""}`.toLowerCase();
       const matchesQuery = haystack.includes(query.toLowerCase());
-      const createdAt = new Date(row.created_at).getTime();
-      const diseaseLabel = (row.disease || row.disease_type).toLowerCase();
+      const createdAt = new Date(row.created_at.endsWith("Z") ? row.created_at : row.created_at + "Z").getTime();
+      const diseaseLabel = row.health_status.toLowerCase();
       const matchesTime = timeThreshold === null || createdAt >= timeThreshold;
       const matchesDomain = domainFilter === "all" || row.domain === domainFilter;
       const matchesStatus =
@@ -304,23 +304,25 @@ export function ScanHistoryContent() {
               </div>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-semibold text-[var(--text-primary)]">{row.plant_name || row.disease_type}</p>
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">{row.fish_species || row.health_status}</p>
                   <span className="rounded-full bg-[var(--bg-secondary)] px-2 py-0.5 text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-tertiary)]">
                     {row.domain}
                   </span>
                   <span
                     className={cn(
                       "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold",
-                      (row.disease || row.disease_type).toLowerCase().includes("healthy")
+                      row.health_status.toLowerCase().includes("healthy")
                         ? "bg-blue-600/15 text-blue-700 dark:text-blue-300"
                         : "bg-amber-500/15 text-amber-700 dark:text-amber-300"
                     )}
                   >
-                    {row.disease || row.disease_type}
+                    {row.health_status}
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-[var(--text-tertiary)]">{new Date(row.created_at).toLocaleString()}</p>
-                <p className="mt-2 line-clamp-2 text-sm text-[var(--text-secondary)]">{row.recommendation}</p>
+                <p className="mt-1 text-xs text-[var(--text-tertiary)]">
+                  <span suppressHydrationWarning>{new Date(row.created_at.endsWith("Z") ? row.created_at : row.created_at + "Z").toLocaleString()}</span>
+                </p>
+                <p className="mt-2 line-clamp-2 text-sm text-[var(--text-secondary)]">{row.treatment_recommendations}</p>
               </div>
               <div className="text-right">
                 <p className="text-[11px] uppercase tracking-[0.08em] text-[var(--text-tertiary)]">{t("result.metrics.modelConfidence")}</p>

@@ -8,7 +8,7 @@ import {
   FlaskConical,
   History,
   Home,
-  Sprout,
+  Fish,
   LogOut,
   Menu,
   MessageSquareHeart,
@@ -31,7 +31,7 @@ import {cn} from "@/lib/utils";
 export type DashboardNavItem = {
   id: string;
   label: string;
-  icon: "activity" | "clipboard" | "flask" | "history" | "plant" | "message" | "shield" | "users" | "user" | "bell";
+  icon: "activity" | "clipboard" | "flask" | "history" | "fish" | "message" | "shield" | "users" | "user" | "bell";
   href?: string;
 };
 
@@ -45,8 +45,8 @@ export function iconForNavItem(icon: DashboardNavItem["icon"]) {
       return FlaskConical;
     case "history":
       return History;
-    case "plant":
-      return Sprout;
+    case "fish":
+      return Fish;
     case "message":
       return MessageSquareHeart;
     case "shield":

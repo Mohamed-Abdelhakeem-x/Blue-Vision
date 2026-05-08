@@ -486,7 +486,7 @@ export function RoleDashboard() {
   const navItems = useMemo<DashboardNavItem[]>(() => {
     if (role === "farmer") {
       return [
-        {id: "scan", label: copy.navScan, icon: "plant"},
+        {id: "scan", label: copy.navScan, icon: "fish"},
         {id: "analyze", label: copy.navAnalyze, icon: "activity"},
         {id: "act", label: copy.navAct, icon: "clipboard"},
         {id: "scan-history", label: t("history.title"), icon: "history", href: "/scan-history"}
@@ -726,9 +726,17 @@ export function RoleDashboard() {
         onSectionNavigate={setActiveSection}
         topBarLead={
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--card-border)] bg-[var(--bg-secondary)] text-sm font-semibold text-[var(--text-primary)]">
-              {(user?.full_name || user?.email || "U").charAt(0).toUpperCase()}
-            </div>
+            {user?.avatar_b64 ? (
+              <img
+                src={user.avatar_b64.startsWith("data:") ? user.avatar_b64 : `data:image/jpeg;base64,${user.avatar_b64}`}
+                alt={user.full_name || "User Avatar"}
+                className="h-10 w-10 rounded-full border border-[var(--card-border)] object-cover"
+              />
+            ) : (
+              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--card-border)] bg-[var(--bg-secondary)] text-sm font-semibold text-[var(--text-primary)]">
+                {(user?.full_name || user?.email || "U").charAt(0).toUpperCase()}
+              </div>
+            )}
             <div>
               <p className="text-sm font-semibold text-[var(--text-primary)]">{user?.full_name || user?.email || copy.defaultUser}</p>
               {role ? <p className="text-xs text-[var(--text-tertiary)]">{t(`sidebar.role.${role}`)}</p> : null}

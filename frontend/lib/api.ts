@@ -596,6 +596,7 @@ export async function updateMyProfile(input: {
   }
 
   const profile = (await res.json()) as UserProfile;
+  clearProfileCache();
   storeUserProfile(profile);
   return profile;
 }
@@ -702,7 +703,7 @@ export async function fetchTips(token: string): Promise<string[]> {
   return res.json() as Promise<string[]>;
 }
 
-export async function detectPlant(input: {
+export async function detectFish(input: {
   token: string;
   image: File;
   segmented?: File;
@@ -875,20 +876,20 @@ export async function deleteCommunityComment(input: {
 
 export async function createCommunityPost(input: {
   token: string;
-  plantName: string;
+  fishSpecies: string;
   problem: string;
   title?: string;
-  aiDisease: string;
+  aiHealthStatus: string;
   aiConfidenceScore: number;
   image: File;
 }): Promise<CommunityPost> {
   const formData = new FormData();
-  formData.append("plant_name", input.plantName);
+  formData.append("fish_species", input.fishSpecies);
   formData.append("problem", input.problem);
   if (input.title) {
     formData.append("title", input.title);
   }
-  formData.append("ai_disease", input.aiDisease);
+  formData.append("ai_health_status", input.aiHealthStatus);
   formData.append("ai_confidence_score", String(input.aiConfidenceScore));
   formData.append("image", input.image);
 
@@ -940,7 +941,7 @@ export async function fetchCommunityPostSuggestion(input: {
 export async function fetchNormalizedText(input: {
   token: string;
   text: string;
-  field?: "body" | "plant_name";
+  field?: "body" | "fish_species";
 }): Promise<string> {
   const search = new URLSearchParams({
     text: input.text,

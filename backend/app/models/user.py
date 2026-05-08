@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from sqlalchemy import DateTime, String
+from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -13,12 +13,17 @@ class User(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True)
     full_name: Mapped[str] = mapped_column(String(120))
-    role: Mapped[str] = mapped_column(String(32), default="farmer", index=True)
+    role_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("roles.id", ondelete="SET NULL"), index=True, nullable=True)
     avatar_sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
     hashed_password: Mapped[str] = mapped_column(String(255))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
+    last_login: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    scans = relationship("ScanHistory", back_populates="user", cascade="all,delete-orphan")
+    role = relationship("Role", back_populates="users")
+    alerts = relationship("Alert", back_populates="user", cascade="all,delete-orphan")
+    feedbacks = relationship("Feedback", back_populates="user", cascade="all,delete-orphan")
+    fish_farms = relationship("FishFarm", back_populates="user", cascade="all,delete-orphan")
+    media_uploads = relationship("MediaUpload", back_populates="user", cascade="all,delete-orphan")
     community_likes = relationship("CommunityLike", back_populates="user", cascade="all,delete-orphan")
     community_comments = relationship("CommunityComment", back_populates="user", cascade="all,delete-orphan")
     community_comment_likes = relationship("CommunityCommentLike", back_populates="user", cascade="all,delete-orphan")

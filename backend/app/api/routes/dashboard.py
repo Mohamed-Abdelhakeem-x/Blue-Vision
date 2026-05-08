@@ -1,46 +1,60 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy import case, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.api.deps import get_current_user
 from app.db.session import get_session
-from app.models.scan_history import ScanHistory
+from app.models.media_upload import MediaUpload
+from app.models.analysis_history import AnalysisHistory
+from app.models.biological_health import BiologicalHealth
+from app.models.species_identification import SpeciesIdentification
 from app.models.user import User
-from app.schemas.scan import ScanHistoryResponse, StatsResponse
+from app.schemas.scan import AnalysisHistoryResponse, StatsResponse
 from app.services.scan_image_store import load_scan_image_b64
-from app.services.label_parser import parse_disease_label
+from app.services.label_parser import parse_fish_label
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 
-@router.get("/history", response_model=list[ScanHistoryResponse])
+@router.get("/history", response_model=list[AnalysisHistoryResponse])
 async def history(
     limit: int = 20,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
-) -> list[ScanHistoryResponse]:
+) -> list[AnalysisHistoryResponse]:
     stmt = (
-        select(ScanHistory)
-        .where(ScanHistory.user_id == current_user.id, ScanHistory.entry_kind == "scan")
-        .order_by(desc(ScanHistory.created_at))
+        select(AnalysisHistory, MediaUpload, BiologicalHealth, SpeciesIdentification)
+        .join(MediaUpload, AnalysisHistory.upload_id == MediaUpload.id)
+        .outerjoin(BiologicalHealth, AnalysisHistory.id == BiologicalHealth.history_id)
+        .outerjoin(SpeciesIdentification, MediaUpload.id == SpeciesIdentification.upload_id)
+        .where(MediaUpload.user_id == current_user.id)
+        .order_by(desc(AnalysisHistory.analysis_date))
         .limit(limit)
     )
     result = await session.execute(stmt)
-    rows = result.scalars().all()
-    return [
-        ScanHistoryResponse(
-            id=row.id,
-            disease_type=row.disease_type,
-            plant_name=parse_disease_label(row.disease_type)[0],
-            disease=parse_disease_label(row.disease_type)[1],
-            confidence_score=row.confidence_score,
-            recommendation=row.recommendation,
-            domain=row.domain,
-            created_at=row.created_at,
-            before_image_b64=load_scan_image_b64(row.image_sha256),
+    rows = result.all()
+    
+    response = []
+    for analysis, upload, bio_health, species_id in rows:
+        health_status = bio_health.health_status if bio_health else "Unknown"
+        fish_species = species_id.scientific_name if species_id else "Unknown"
+        confidence_score = species_id.confidence_score if species_id else 0.0
+
+        response.append(
+            AnalysisHistoryResponse(
+                id=analysis.id,
+                health_status=health_status,
+                fish_species=fish_species,
+                disease=health_status,
+                confidence_score=confidence_score,
+                recommendation="",
+                domain="color", # Mock domain
+                created_at=analysis.analysis_date,
+                before_image_b64=load_scan_image_b64(upload.file_path),
+            )
         )
-        for row in rows
-    ]
+    return response
 
 
 @router.get("/stats", response_model=StatsResponse)
@@ -48,23 +62,31 @@ async def stats(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ) -> StatsResponse:
-    total_stmt = select(func.count(ScanHistory.id)).where(ScanHistory.user_id == current_user.id)
+    # Total uploads
+    total_stmt = select(func.count(MediaUpload.id)).where(MediaUpload.user_id == current_user.id)
+    
+    # Healthy ratio based on risk_level == 'low'
     healthy_stmt = select(
         func.avg(
             case(
-                (ScanHistory.disease_type.ilike("%healthy%"), 1),
+                (AnalysisHistory.risk_level == "low", 1),
                 else_=0,
             )
         )
-    ).where(ScanHistory.user_id == current_user.id, ScanHistory.entry_kind == "scan")
+    ).join(MediaUpload, AnalysisHistory.upload_id == MediaUpload.id).where(MediaUpload.user_id == current_user.id)
+    
+    # Top disease based on biological_health
     top_stmt = (
-        select(ScanHistory.disease_type, func.count(ScanHistory.id).label("cnt"))
-        .where(ScanHistory.user_id == current_user.id, ScanHistory.entry_kind == "scan")
-        .group_by(ScanHistory.disease_type)
+        select(BiologicalHealth.disease_type, func.count(BiologicalHealth.id).label("cnt"))
+        .join(AnalysisHistory, BiologicalHealth.history_id == AnalysisHistory.id)
+        .join(MediaUpload, AnalysisHistory.upload_id == MediaUpload.id)
+        .where(MediaUpload.user_id == current_user.id)
+        .where(BiologicalHealth.disease_type != "healthy")
+        .where(BiologicalHealth.disease_type.is_not(None))
+        .group_by(BiologicalHealth.disease_type)
         .order_by(desc("cnt"))
         .limit(1)
     )
-    total_stmt = total_stmt.where(ScanHistory.entry_kind == "scan")
 
     total = (await session.execute(total_stmt)).scalar_one() or 0
     healthy_ratio_raw = (await session.execute(healthy_stmt)).scalar_one()
@@ -80,8 +102,8 @@ async def stats(
 @router.get("/tips", response_model=list[str])
 async def tips() -> list[str]:
     return [
-        "Water in the morning to reduce prolonged plant moisture.",
-        "Rotate plant seasonally to reduce disease carryover.",
-        "Prune dense foliage to improve airflow around leaves.",
-        "Inspect plant undersides weekly for early signs of pests.",
+        "Monitor dissolved oxygen levels early in the morning.",
+        "Check stocking density to avoid overcrowding stress.",
+        "Inspect ponds for uneaten feed to prevent ammonia spikes.",
+        "Observe fish behavior daily for signs of lethargy or gasping.",
     ]

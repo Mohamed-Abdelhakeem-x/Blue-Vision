@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { SonarPulse } from "@/components/sonar-pulse";
 import { ThemeLanguageSwitcher } from "@/components/theme-language-switcher";
 import { 
-  Sprout, 
+  Fish, 
   Zap, 
   BarChart3, 
 } from "lucide-react";
@@ -43,17 +43,17 @@ export function BlueVisionShowcase() {
   const [selectedDisease, setSelectedDisease] = useState("Apple Scab");
 
   const diseases = [
-    { name: "Apple Scab", confidence: 0.92, status: "critical" },
-    { name: "Plant Rust", confidence: 0.78, status: "warning" },
-    { name: "Powdery Mildew", confidence: 0.65, status: "warning" },
+    { name: "Aeromonas", confidence: 0.92, status: "critical" },
+    { name: "Streptococcus", confidence: 0.78, status: "warning" },
+    { name: "Columnaris", confidence: 0.65, status: "warning" },
     { name: "Healthy", confidence: 0.95, status: "success" },
   ];
 
   const features = [
     {
-      icon: Sprout,
+      icon: Fish,
       title: isRTL ? "الكشف الدقيق" : "Accurate Detection",
-      desc: isRTL ? "تحديد أمراض النبات برقة 92%" : "Identify plant diseases at 92% accuracy",
+      desc: isRTL ? "تحديد أمراض الأسماك بدقة 92%" : "Identify fish health at 92% accuracy",
     },
     {
       icon: Zap,
@@ -63,7 +63,7 @@ export function BlueVisionShowcase() {
     {
       icon: BarChart3,
       title: isRTL ? "تحليلات متقدمة" : "Advanced Analytics",
-      desc: isRTL ? "تتبع صحة المحاصيل على مدار الوقت" : "Track plant health over time",
+      desc: isRTL ? "تتبع صحة الأسماك على مدار الوقت" : "Track fish health over time",
     },
   ];
 
@@ -103,8 +103,8 @@ export function BlueVisionShowcase() {
             </h2>
             <p className="text-xl text-bluevision-text/70 max-w-2xl">
               {isRTL
-                ? "كشف أمراض النبات وعلاجها باستخدام تقنية الذكاء الاصطناعي المتقدمة والخبراء الزراعيين"
-                : "Detect and treat plant diseases with advanced AI technology and agricultural experts"}
+                ? "كشف أمراض الأسماك وعلاجها باستخدام تقنية الذكاء الاصطناعي المتقدمة وخبراء الاستزراع المائي"
+                : "Detect and treat fish diseases with advanced AI technology and aquaculture experts"}
             </p>
           </motion.div>
 
@@ -175,8 +175,8 @@ export function BlueVisionShowcase() {
             </h3>
             <p className="text-bluevision-text/70">
               {isRTL
-                ? "استخدم النموذج المتقدم لتحديد أمراض النبات برقة عالية"
-                : "Use our advanced model to identify plant diseases with high accuracy"}
+                ? "استخدم النموذج المتقدم لتحديد أمراض الأسماك بدقة عالية"
+                : "Use our advanced model to identify fish diseases with high accuracy"}
             </p>
           </motion.div>
 
@@ -249,8 +249,8 @@ export function BlueVisionShowcase() {
                       </p>
                       <p className="font-medium">
                         {isRTL
-                          ? "بقع بنية مع هالات خفيفة على الأوراق"
-                          : "Brown spots with light halos on leaves"}
+                          ? "جحوظ العينين، نزيف خارجي، وبطء في الحركة"
+                          : "Exophthalmia, external hemorrhages, and erratic swimming"}
                       </p>
                     </div>
                     <div className="p-4 rounded-lg bg-accent/5 border border-accent/20">
@@ -259,8 +259,8 @@ export function BlueVisionShowcase() {
                       </p>
                       <p className="font-medium text-accent">
                         {isRTL
-                          ? "رش مبيد الفطريات كل 7-10 أيام"
-                          : "Apply fungicide every 7-10 days"}
+                          ? "تحسين جودة المياه وعزل الأسماك المصابة فوراً"
+                          : "Improve water quality and isolate infected fish"}
                       </p>
                     </div>
                   </motion.div>

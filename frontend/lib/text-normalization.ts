@@ -6,7 +6,7 @@ function detectArabic(value: string) {
   return /[\u0600-\u06FF]/.test(value);
 }
 
-export function normalizeUserText(text: string, field: "body" | "plant_name" = "body") {
+export function normalizeUserText(text: string, field: "body" | "fish_species" = "body") {
   let value = (text ?? "").normalize("NFKC");
   value = value.replace(/_/g, " ").replace(/،/g, ", ").replace(/؛/g, "; ").replace(/\?/g, "? ").replace(/؟/g, "؟ ");
   value = collapseSpaces(value);
@@ -28,7 +28,7 @@ export function normalizeUserText(text: string, field: "body" | "plant_name" = "
   value = value.replace(/\s*([,;:.!?])\s*/g, "$1 ");
   value = collapseSpaces(value);
 
-  if (field === "plant_name") {
+  if (field === "fish_species") {
     return value.replace(/\b\w/g, (char) => char.toUpperCase());
   }
 

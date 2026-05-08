@@ -11,7 +11,10 @@ from app.db.session import get_session
 from app.models.community_comment import CommunityComment
 from app.models.community_comment_like import CommunityCommentLike
 from app.models.community_like import CommunityLike
-from app.models.scan_history import ScanHistory
+from app.models.media_upload import MediaUpload
+from app.models.analysis_history import AnalysisHistory
+from app.models.biological_health import BiologicalHealth
+from app.models.species_identification import SpeciesIdentification
 from app.models.user import User
 from app.schemas.community import (
     CommunityCommentCreate,
@@ -23,7 +26,7 @@ from app.schemas.community import (
     CommunityPostResponse,
     CommunityPostSuggestionResponse,
 )
-from app.services.label_parser import parse_disease_label
+from app.services.label_parser import parse_fish_label
 from app.services.scan_image_store import load_scan_image_b64
 from app.services.scan_image_store import persist_scan_image
 from app.services.notifications import create_notification
@@ -43,66 +46,75 @@ def _slugify_label_part(value: str) -> str:
 def _post_base_stmt(current_user_id: str) -> Select:
     likes_subquery = (
         select(
-            CommunityLike.scan_id.label("scan_id"),
+            CommunityLike.upload_id.label("upload_id"),
             func.count(CommunityLike.id).label("likes_count"),
         )
-        .group_by(CommunityLike.scan_id)
+        .group_by(CommunityLike.upload_id)
         .subquery()
     )
     comments_subquery = (
         select(
-            CommunityComment.scan_id.label("scan_id"),
+            CommunityComment.upload_id.label("upload_id"),
             func.count(CommunityComment.id).label("comments_count"),
         )
-        .group_by(CommunityComment.scan_id)
+        .group_by(CommunityComment.upload_id)
         .subquery()
     )
     liked_subquery = (
-        select(CommunityLike.scan_id.label("scan_id"))
+        select(CommunityLike.upload_id.label("upload_id"))
         .where(CommunityLike.user_id == current_user_id)
         .subquery()
     )
 
     return (
         select(
-            ScanHistory,
+            MediaUpload,
             User.full_name.label("user_name"),
             func.coalesce(likes_subquery.c.likes_count, 0).label("likes_count"),
             func.coalesce(comments_subquery.c.comments_count, 0).label("comments_count"),
-            case((liked_subquery.c.scan_id.is_not(None), True), else_=False).label("liked_by_current_user"),
+            case((liked_subquery.c.upload_id.is_not(None), True), else_=False).label("liked_by_current_user"),
+            AnalysisHistory,
+            BiologicalHealth,
+            SpeciesIdentification
         )
-        .join(User, User.id == ScanHistory.user_id)
-        .outerjoin(likes_subquery, likes_subquery.c.scan_id == ScanHistory.id)
-        .outerjoin(comments_subquery, comments_subquery.c.scan_id == ScanHistory.id)
-        .outerjoin(liked_subquery, liked_subquery.c.scan_id == ScanHistory.id)
-        .where(ScanHistory.entry_kind == "community")
+        .join(User, User.id == MediaUpload.user_id)
+        .outerjoin(likes_subquery, likes_subquery.c.upload_id == MediaUpload.id)
+        .outerjoin(comments_subquery, comments_subquery.c.upload_id == MediaUpload.id)
+        .outerjoin(liked_subquery, liked_subquery.c.upload_id == MediaUpload.id)
+        .outerjoin(AnalysisHistory, AnalysisHistory.upload_id == MediaUpload.id)
+        .outerjoin(BiologicalHealth, BiologicalHealth.history_id == AnalysisHistory.id)
+        .outerjoin(SpeciesIdentification, SpeciesIdentification.upload_id == MediaUpload.id)
+        .where(MediaUpload.is_community == True)
     )
 
 
 def _serialize_post(row) -> CommunityPostResponse:
-    scan, user_name, likes_count, comments_count, liked_by_current_user = row
-    ai_plant_name, ai_disease = parse_disease_label(scan.disease_type)
-    post_text = scan.recommendation if scan.entry_kind == "community" else ai_disease
-    ai_treatment_recommendation = recommendation_for_label(scan.disease_type)
+    upload, user_name, likes_count, comments_count, liked_by_current_user, analysis, bio_health, species_id = row
+    
+    ai_fish_species = species_id.scientific_name if species_id else "Unknown"
+    ai_disease = bio_health.disease_type if bio_health else "Unknown"
+    ai_treatment_recommendation = "No recommendation available."
+    ai_confidence_score = species_id.confidence_score if species_id else 0.0
+
     return CommunityPostResponse(
-        id=scan.id,
-        user_id=scan.user_id,
+        id=upload.id,
+        user_id=upload.user_id,
         user_name=user_name,
-        plant_name=ai_plant_name,
-        disease=post_text,
-        disease_type=scan.disease_type,
-        entry_kind=scan.entry_kind,
-        created_at=scan.created_at,
-        image_b64=load_scan_image_b64(scan.image_sha256),
-        post_text=post_text,
-        ai_plant_name=ai_plant_name,
+        fish_species=ai_fish_species,
+        disease=ai_disease,
+        health_status=bio_health.health_status if bio_health else "Unknown",
+        entry_kind="community",
+        created_at=upload.upload_time,
+        image_b64=load_scan_image_b64(upload.file_path),
+        post_text=upload.post_text or "",
+        ai_fish_species=ai_fish_species,
         ai_disease=ai_disease,
         ai_treatment_recommendation=ai_treatment_recommendation,
-        ai_confidence_score=float(scan.confidence_score),
+        ai_confidence_score=float(ai_confidence_score),
         likes_count=int(likes_count or 0),
         comments_count=int(comments_count or 0),
         liked_by_current_user=bool(liked_by_current_user),
-        title=scan.title,
+        title=upload.title,
     )
 
 
@@ -117,11 +129,11 @@ async def list_posts(
     stmt = _post_base_stmt(current_user.id)
 
     if sort == "oldest":
-        stmt = stmt.order_by(ScanHistory.created_at.asc())
+        stmt = stmt.order_by(MediaUpload.upload_time.asc())
     elif sort == "top":
-        stmt = stmt.order_by(desc("likes_count"), desc("comments_count"), ScanHistory.created_at.desc())
+        stmt = stmt.order_by(desc("likes_count"), desc("comments_count"), MediaUpload.upload_time.desc())
     else:
-        stmt = stmt.order_by(ScanHistory.created_at.desc())
+        stmt = stmt.order_by(MediaUpload.upload_time.desc())
 
     result = await session.execute(stmt.offset(offset).limit(limit + 1))
     rows = result.all()
@@ -133,7 +145,7 @@ async def list_posts(
 @router.get("/normalize-text", response_model=CommunityNormalizedTextResponse)
 async def normalize_text_preview(
     text: str = Query(default="", max_length=1000),
-    field: str = Query(default="body", pattern="^(body|plant_name)$"),
+    field: str = Query(default="body", pattern="^(body|plant_name|fish_species)$"),
     current_user: User = Depends(get_current_user),
 ) -> CommunityNormalizedTextResponse:
     _ = current_user
@@ -160,30 +172,30 @@ async def preview_post_suggestion(
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="AI service not ready")
 
     prediction = ai_service.predict(image_bytes)
-    if not bool(prediction.get("is_plant", True)):
+    if not bool(prediction.get("is_fish", True)):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="The uploaded image does not appear to contain a plant. Please upload a clearer plant image.",
+            detail="The uploaded image does not appear to contain a fish. Please upload a clearer fish image.",
         )
 
-    predicted_plant_name, predicted_disease = parse_disease_label(str(prediction["label"]))
+    predicted_fish_species, predicted_disease = parse_fish_label(str(prediction["label"]))
     treatment_recommendation = recommendation_for_label(str(prediction["label"]))
     return CommunityPostSuggestionResponse(
         normalized_problem=normalized_problem,
-        predicted_plant_name=normalize_user_text(predicted_plant_name, field="plant_name"),
+        predicted_fish_species=normalize_user_text(predicted_fish_species, field="plant_name"),
         predicted_disease=predicted_disease,
         treatment_recommendation=treatment_recommendation,
         confidence_score=float(prediction["confidence"]),
-        is_plant=bool(prediction.get("is_plant", True)),
+        is_fish=bool(prediction.get("is_fish", True)),
     )
 
 
 @router.post("/posts", response_model=CommunityPostResponse, status_code=status.HTTP_201_CREATED)
 async def create_post(
     image: Annotated[UploadFile, File(...)],
-    plant_name: Annotated[str, Form(...)],
+    fish_species: Annotated[str, Form(...)],
     problem: Annotated[str, Form(...)],
-    ai_disease: Annotated[str, Form(...)],
+    ai_health_status: Annotated[str, Form(...)],
     ai_confidence_score: Annotated[float, Form(...)],
     title: Annotated[str | None, Form(...)] = None,
     session: AsyncSession = Depends(get_session),
@@ -192,31 +204,55 @@ async def create_post(
     image_bytes = await image.read()
     validate_image_upload(image, image_bytes, field_name="image")
 
-    normalized_plant = normalize_user_text(plant_name, field="plant_name")
+    normalized_fish = normalize_user_text(fish_species, field="plant_name")
     normalized_problem = normalize_user_text(problem, field="body")
     normalized_title = normalize_user_text(title, field="body") if title else None
-    normalized_ai_disease = normalize_user_text(ai_disease, field="body")
-    if not normalized_plant or not normalized_problem or not normalized_ai_disease:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Plant name and problem are required")
+    normalized_ai_health_status = normalize_user_text(ai_health_status, field="body")
+    if not normalized_fish or not normalized_problem or not normalized_ai_health_status:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Fish species and problem are required")
 
     digest = hashlib.sha256(image_bytes).hexdigest()
     persist_scan_image(image_sha256=digest, image_bytes=image_bytes)
 
-    disease_type = f"{_slugify_label_part(normalized_plant)}___{_slugify_label_part(normalized_ai_disease)}"
-    post = ScanHistory(
+    upload = MediaUpload(
         user_id=current_user.id,
-        disease_type=disease_type,
-        confidence_score=max(0.0, min(1.0, float(ai_confidence_score))),
-        recommendation=normalized_problem,
-        domain="color",
-        image_sha256=digest,
-        entry_kind="community",
+        pond_id=None,
+        file_type="image",
+        file_path=digest,
+        resolution="auto",
+        is_community=True,
         title=normalized_title,
+        post_text=normalized_problem
     )
-    session.add(post)
+    session.add(upload)
+    await session.flush()
+
+    analysis = AnalysisHistory(
+        upload_id=upload.id,
+        suitability_score=max(0.0, min(1.0, float(ai_confidence_score))),
+        risk_level="high" if "healthy" not in normalized_ai_health_status.lower() else "low",
+    )
+    session.add(analysis)
+    await session.flush()
+
+    bio_health = BiologicalHealth(
+        history_id=analysis.id,
+        health_status=normalized_ai_health_status,
+        disease_type=normalized_ai_health_status if "healthy" not in normalized_ai_health_status.lower() else None,
+        confidence_score=float(ai_confidence_score),
+    )
+    session.add(bio_health)
+
+    species_id = SpeciesIdentification(
+        upload_id=upload.id,
+        scientific_name=normalized_fish,
+        confidence_score=max(0.0, min(1.0, float(ai_confidence_score)))
+    )
+    session.add(species_id)
+
     await session.commit()
 
-    row = (await session.execute(_post_base_stmt(current_user.id).where(ScanHistory.id == post.id))).first()
+    row = (await session.execute(_post_base_stmt(current_user.id).where(MediaUpload.id == upload.id))).first()
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found after creation")
     return _serialize_post(row)
@@ -229,7 +265,7 @@ async def get_post_details(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ) -> CommunityPostDetailResponse:
-    stmt = _post_base_stmt(current_user.id).where(ScanHistory.id == post_id)
+    stmt = _post_base_stmt(current_user.id).where(MediaUpload.id == post_id)
     row = (await session.execute(stmt)).first()
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
@@ -257,7 +293,7 @@ async def get_post_details(
         .join(User, User.id == CommunityComment.user_id)
         .outerjoin(comment_likes_subquery, comment_likes_subquery.c.comment_id == CommunityComment.id)
         .outerjoin(comment_liked_subquery, comment_liked_subquery.c.comment_id == CommunityComment.id)
-        .where(CommunityComment.scan_id == post_id)
+        .where(CommunityComment.upload_id == post_id)
     )
     if comment_sort == "oldest":
         comments_stmt = comments_stmt.order_by(CommunityComment.created_at.asc())
@@ -269,12 +305,12 @@ async def get_post_details(
             id=comment.id,
             user_id=comment.user_id,
             user_name=user_name,
-            user_role=user_role,
+            user_role="farmer", # Hardcoded for now as user.role is an object now
             body=comment.body,
             parent_comment_id=comment.parent_comment_id,
             created_at=comment.created_at,
             is_owner=comment.user_id == current_user.id,
-            is_expert=user_role in {"expert", "admin", "developer"},
+            is_expert=False, # Hardcoded for now
             likes_count=int(likes_count or 0),
             liked_by_current_user=bool(liked_by_current_user),
         )
@@ -291,20 +327,20 @@ async def toggle_like(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ) -> CommunityPostResponse:
-    post_exists = await session.scalar(select(ScanHistory.id).where(ScanHistory.id == post_id))
+    post_exists = await session.scalar(select(MediaUpload.id).where(MediaUpload.id == post_id))
     if post_exists is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
 
     existing = await session.scalar(
         select(CommunityLike).where(
-            CommunityLike.scan_id == post_id,
+            CommunityLike.upload_id == post_id,
             CommunityLike.user_id == current_user.id,
         )
     )
 
     if existing is None:
-        session.add(CommunityLike(scan_id=post_id, user_id=current_user.id))
-        owner_id = await session.scalar(select(ScanHistory.user_id).where(ScanHistory.id == post_id))
+        session.add(CommunityLike(upload_id=post_id, user_id=current_user.id))
+        owner_id = await session.scalar(select(MediaUpload.user_id).where(MediaUpload.id == post_id))
         if owner_id:
             await create_notification(
                 session=session,
@@ -320,7 +356,7 @@ async def toggle_like(
 
     await session.commit()
 
-    row = (await session.execute(_post_base_stmt(current_user.id).where(ScanHistory.id == post_id))).first()
+    row = (await session.execute(_post_base_stmt(current_user.id).where(MediaUpload.id == post_id))).first()
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
     return _serialize_post(row)
@@ -333,7 +369,7 @@ async def create_comment(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ) -> CommunityPostDetailResponse:
-    post_exists = await session.scalar(select(ScanHistory.id).where(ScanHistory.id == post_id))
+    post_exists = await session.scalar(select(MediaUpload.id).where(MediaUpload.id == post_id))
     if post_exists is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
     parent_comment_id = payload.parent_comment_id
@@ -341,21 +377,21 @@ async def create_comment(
         parent_comment = await session.scalar(
             select(CommunityComment).where(
                 CommunityComment.id == parent_comment_id,
-                CommunityComment.scan_id == post_id,
+                CommunityComment.upload_id == post_id,
             )
         )
         if parent_comment is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Parent comment not found")
 
     comment = CommunityComment(
-        scan_id=post_id,
+        upload_id=post_id,
         user_id=current_user.id,
         parent_comment_id=parent_comment_id,
         body=payload.body.strip(),
     )
     session.add(comment)
 
-    post_owner_id = await session.scalar(select(ScanHistory.user_id).where(ScanHistory.id == post_id))
+    post_owner_id = await session.scalar(select(MediaUpload.user_id).where(MediaUpload.id == post_id))
     if post_owner_id:
         await create_notification(
             session=session,
@@ -398,7 +434,7 @@ async def update_comment(
 
     comment.body = payload.body.strip()
     await session.commit()
-    return await get_post_details(post_id=comment.scan_id, session=session, current_user=current_user)
+    return await get_post_details(post_id=comment.upload_id, session=session, current_user=current_user)
 
 
 @router.delete("/comments/{comment_id}", response_model=CommunityPostDetailResponse)
@@ -413,7 +449,7 @@ async def delete_comment(
     if comment.user_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You can only delete your own comment")
 
-    post_id = comment.scan_id
+    post_id = comment.upload_id
     await session.delete(comment)
     await session.commit()
     return await get_post_details(post_id=post_id, session=session, current_user=current_user)
@@ -441,7 +477,7 @@ async def toggle_comment_like(
             session=session,
             user_id=comment.user_id,
             actor_user_id=current_user.id,
-            post_id=comment.scan_id,
+            post_id=comment.upload_id,
             comment_id=comment_id,
             kind="comment_like",
             message=f"{current_user.full_name} liked your comment.",
@@ -450,4 +486,4 @@ async def toggle_comment_like(
         await session.execute(delete(CommunityCommentLike).where(CommunityCommentLike.id == existing.id))
 
     await session.commit()
-    return await get_post_details(post_id=comment.scan_id, session=session, current_user=current_user)
+    return await get_post_details(post_id=comment.upload_id, session=session, current_user=current_user)

@@ -13,13 +13,13 @@ export function HistoryTable({ rows }: HistoryTableProps) {
     <Card className="h-full overflow-hidden">
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-base font-semibold">Recent Field Activity</h3>
-        <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Last {rows.length} scans</p>
+        <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Last {rows.length} uploads</p>
       </div>
       <div className="max-h-72 overflow-y-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Disease</TableHead>
+              <TableHead>Health Status</TableHead>
               <TableHead>Confidence</TableHead>
               <TableHead>Domain</TableHead>
             </TableRow>
@@ -27,7 +27,7 @@ export function HistoryTable({ rows }: HistoryTableProps) {
           <TableBody>
             {rows.map((row) => (
               <TableRow key={row.id}>
-                <TableCell>{row.disease_type}</TableCell>
+                <TableCell>{row.health_status}</TableCell>
                 <TableCell>{(row.confidence_score * 100).toFixed(1)}%</TableCell>
                 <TableCell className="capitalize">{row.domain}</TableCell>
               </TableRow>
@@ -35,7 +35,7 @@ export function HistoryTable({ rows }: HistoryTableProps) {
             {rows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={3} className="py-8 text-center text-muted-foreground">
-                  No scans yet. Upload your first plant image.
+                  No uploads yet. Upload your first fish image.
                 </TableCell>
               </TableRow>
             ) : null}

@@ -17,6 +17,7 @@ from app.core.security import (
 )
 from app.db.session import get_session
 from app.models.refresh_token import RefreshToken
+from app.models.role import Role
 from app.models.user import User
 from app.schemas.auth import LoginRequest, RefreshTokenRequest, SignUpRequest, TokenResponse
 from app.schemas.user import UserResponse
@@ -80,10 +81,21 @@ async def signup(
         )
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
 
+    # Find default role
+    default_role_name = "Nile Tilapia Farm Owners & Managers"
+    role_stmt = select(Role).where(Role.role_name == default_role_name)
+    role = (await session.execute(role_stmt)).scalar_one_or_none()
+    
+    if not role:
+        role = Role(role_name=default_role_name, privileges={})
+        session.add(role)
+        await session.commit()
+        await session.refresh(role)
+
     user = User(
         email=payload.email,
         full_name=payload.full_name,
-        role="farmer",
+        role_id=role.id,
         hashed_password=get_password_hash(payload.password),
     )
     session.add(user)

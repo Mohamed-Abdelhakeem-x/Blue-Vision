@@ -11,7 +11,7 @@ import {
   Plus,
   Reply,
   ShieldCheck,
-  Sprout,
+  Fish,
   Trash2,
   Upload,
   UserRound,
@@ -71,7 +71,8 @@ function treatmentLabelForLocale(locale: AppLocale) {
 }
 
 function formatDate(date: string) {
-  return new Intl.DateTimeFormat(undefined, {dateStyle: "medium", timeStyle: "short"}).format(new Date(date));
+  const utcDateStr = date.endsWith("Z") || date.includes("+") ? date : `${date}Z`;
+  return new Intl.DateTimeFormat(undefined, {dateStyle: "medium", timeStyle: "short"}).format(new Date(utcDateStr));
 }
 
 function imageSrc(imageB64?: string | null) {
@@ -86,7 +87,7 @@ function useLiveNormalizedText({
 }: {
   token: string | null;
   value: string;
-  field?: "body" | "plant_name";
+  field?: "body" | "fish_species";
   delay?: number;
 }) {
   const [normalized, setNormalized] = useState(value);
@@ -134,7 +135,7 @@ function EmptyState({copy}: {copy: ReturnType<typeof getDashboardCopy>["communit
   return (
     <div className="flex min-h-[360px] flex-col items-center justify-center rounded-[1.9rem] border border-dashed border-[var(--card-border)] bg-[linear-gradient(145deg,rgba(37,99,235,0.08),rgba(255,255,255,0.92))] px-6 text-center dark:bg-[linear-gradient(145deg,rgba(37,99,235,0.14),rgba(24,24,27,0.92))]">
       <div className="flex h-16 w-16 items-center justify-center rounded-full border border-blue-600/20 bg-blue-600/10 text-blue-700 dark:text-blue-300">
-        <Sprout className="h-7 w-7" />
+        <Fish className="h-7 w-7" />
       </div>
       <h2 className="mt-5 text-2xl font-semibold text-[var(--text-primary)]">{copy.emptyTitle}</h2>
       <p className="mt-2 max-w-md text-sm leading-6 text-[var(--text-secondary)]">
@@ -152,7 +153,7 @@ function CreatePostComposer({
   token,
   copy
 }: {
-  onSubmit: (payload: {plantName: string; problem: string; title: string; aiDisease: string; aiConfidenceScore: number; image: File}) => Promise<void>;
+  onSubmit: (payload: {fishSpecies: string; problem: string; title: string; aiHealthStatus: string; aiConfidenceScore: number; image: File}) => Promise<void>;
   onSuggest: (payload: {problem: string; image: File}) => Promise<CommunityPostSuggestion>;
   busy: boolean;
   suggestBusy: boolean;
@@ -256,10 +257,10 @@ function CreatePostComposer({
             }
             try {
               await onSubmit({
-                plantName: currentSuggestion.predicted_plant_name,
+                fishSpecies: currentSuggestion.predicted_fish_species,
                 problem: normalizedProblem.trim() || currentSuggestion.normalized_problem,
                 title: title.trim(),
-                aiDisease: currentSuggestion.predicted_disease,
+                aiHealthStatus: currentSuggestion.predicted_health_status,
                 aiConfidenceScore: currentSuggestion.confidence_score,
                 image
               });
@@ -301,10 +302,10 @@ function FeedCard({
     <article className="overflow-hidden rounded-[1.9rem] border border-[var(--card-border)] bg-[var(--card-bg)] shadow-[0_20px_50px_rgba(15,23,42,0.08)]">
       <div className="relative h-60 overflow-hidden bg-[linear-gradient(135deg,#d1fae5,#f0fdf4)]">
         {src ? (
-          <img src={src} alt={`${post.ai_plant_name} post`} className="h-full w-full object-cover" />
+          <img src={src} alt={`${post.ai_fish_species} post`} className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full items-center justify-center text-blue-700/80">
-            <Sprout className="h-14 w-14" />
+            <Fish className="h-14 w-14" />
           </div>
         )}
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 via-black/25 to-transparent p-4 text-white">
@@ -315,7 +316,7 @@ function FeedCard({
               {post.entry_kind === "community" ? copy.manual : copy.scan}
             </span>
           </div>
-          <h3 className="mt-2 text-2xl font-semibold">{post.title || post.ai_plant_name}</h3>
+          <h3 className="mt-2 text-2xl font-semibold">{post.title || post.ai_fish_species}</h3>
         </div>
       </div>
 
@@ -325,7 +326,7 @@ function FeedCard({
         <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--text-secondary)]">
           <span className="inline-flex items-center gap-2 rounded-full bg-[var(--bg-secondary)] px-3 py-1.5">
             <CalendarDays className="h-4 w-4" />
-            {formatDate(post.created_at)}
+            <span suppressHydrationWarning>{formatDate(post.created_at)}</span>
           </span>
           <span className="inline-flex items-center gap-2 rounded-full bg-[var(--bg-secondary)] px-3 py-1.5">
             <MessageCircle className="h-4 w-4" />
@@ -422,7 +423,7 @@ function CommentCard({
               </span>
             ) : null}
           </div>
-          <span className="text-xs text-[var(--text-tertiary)]">{formatDate(comment.created_at)}</span>
+          <span suppressHydrationWarning className="text-xs text-[var(--text-tertiary)]">{formatDate(comment.created_at)}</span>
         </div>
 
         {isEditing ? (
@@ -554,7 +555,7 @@ function DetailsPanel({
         <div className="flex items-center justify-between border-b border-[var(--card-border)] px-5 py-4">
           <div>
             <p className="text-sm text-[var(--text-secondary)]">{post ? post.user_name : copy.loadingPostDetails}</p>
-            <h2 className="text-xl font-semibold text-[var(--text-primary)]">{post ? (post.title || post.ai_plant_name) : copy.details}</h2>
+            <h2 className="text-xl font-semibold text-[var(--text-primary)]">{post ? (post.title || post.ai_fish_species) : copy.details}</h2>
           </div>
           <button type="button" onClick={onClose} className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--card-border)] bg-[var(--bg-secondary)] text-[var(--text-primary)]">
             <X className="h-5 w-5" />
@@ -571,17 +572,17 @@ function DetailsPanel({
             <div className="min-h-0 overflow-auto border-b border-[var(--card-border)] lg:border-b-0 lg:border-r">
               <div className="bg-[linear-gradient(135deg,#d1fae5,#f0fdf4)]">
                 {post.image_b64 ? (
-                  <img src={imageSrc(post.image_b64) ?? ""} alt={post.ai_plant_name} className="h-[320px] w-full object-cover" />
+                  <img src={imageSrc(post.image_b64) ?? ""} alt={post.ai_fish_species} className="h-[320px] w-full object-cover" />
                 ) : (
                   <div className="flex h-[320px] items-center justify-center text-blue-700/80">
-                    <Sprout className="h-16 w-16" />
+                    <Fish className="h-16 w-16" />
                   </div>
                 )}
               </div>
 
               <div className="space-y-4 p-5">
                 <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--text-secondary)]">
-                  <span>{formatDate(post.created_at)}</span>
+                  <span suppressHydrationWarning>{formatDate(post.created_at)}</span>
                   <span>{post.likes_count} {copy.likes.toLowerCase()}</span>
                   <span>{post.comments_count} {copy.commentsCount}</span>
                 </div>
@@ -724,7 +725,7 @@ export function CommunityFeed() {
   });
 
   const createPostMutation = useMutation({
-    mutationFn: async (payload: {plantName: string; problem: string; title: string; aiDisease: string; aiConfidenceScore: number; image: File}) =>
+    mutationFn: async (payload: {fishSpecies: string; problem: string; title: string; aiHealthStatus: string; aiConfidenceScore: number; image: File}) =>
       createCommunityPost({token: token ?? "", ...payload}),
     onSuccess: async () => {
       await queryClient.invalidateQueries({queryKey: ["community-posts"]});

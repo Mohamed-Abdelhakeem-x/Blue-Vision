@@ -5,8 +5,8 @@ export interface DetectionCandidate {
 }
 
 export interface DetectionResult {
-  disease_type: string;
-  plant_name: string;
+  health_status: string;
+  fish_species: string;
   disease: string;
   confidence_score: number;
   treatment_recommendations: string;
@@ -21,11 +21,11 @@ export interface DetectionResult {
 
 export interface ScanHistory {
   id: string;
-  disease_type: string;
-  plant_name: string;
+  health_status: string;
+  fish_species: string;
   disease: string;
   confidence_score: number;
-  recommendation: string;
+  treatment_recommendations: string;
   domain: string;
   created_at: string;
   before_image_b64?: string | null;
@@ -50,8 +50,8 @@ export interface UserProfilePost {
   id: string;
   created_at: string;
   post_text: string;
-  ai_plant_name: string;
-  ai_disease: string;
+  ai_fish_species: string;
+  ai_health_status: string;
   ai_confidence_score: number;
   image_b64?: string | null;
   likes_count: number;
@@ -87,15 +87,15 @@ export interface CommunityPost {
   id: string;
   user_id: string;
   user_name: string;
-  plant_name: string;
+  fish_species: string;
   disease: string;
-  disease_type: string;
+  health_status: string;
   entry_kind: "scan" | "community" | string;
   created_at: string;
   image_b64?: string | null;
   post_text: string;
-  ai_plant_name: string;
-  ai_disease: string;
+  ai_fish_species: string;
+  ai_health_status: string;
   ai_treatment_recommendation: string;
   ai_confidence_score: number;
   likes_count: number;
@@ -115,11 +115,11 @@ export interface CommunityFeedPage {
 
 export interface CommunityPostSuggestion {
   normalized_problem: string;
-  predicted_plant_name: string;
-  predicted_disease: string;
+  predicted_fish_species: string;
+  predicted_health_status: string;
   treatment_recommendation: string;
   confidence_score: number;
-  is_plant: boolean;
+  is_fish: boolean;
 }
 
 export interface AppNotification {

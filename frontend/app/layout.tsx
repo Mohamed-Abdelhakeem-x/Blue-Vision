@@ -9,6 +9,9 @@ import { LocaleSync } from "@/components/ui/locale-sync";
 import { routing, type AppLocale } from "@/i18n/routing";
 import arMessages from "@/messages/ar.json";
 import enMessages from "@/messages/en.json";
+import esMessages from "@/messages/es.json";
+import hiMessages from "@/messages/hi.json";
+import zhMessages from "@/messages/zh.json";
 import "./globals.css";
 
 const sora = Sora({
@@ -33,7 +36,10 @@ export const dynamic = "force-dynamic";
 
 const messagesByLocale = {
   en: enMessages,
-  ar: arMessages
+  ar: arMessages,
+  es: esMessages,
+  hi: hiMessages,
+  zh: zhMessages
 } as const;
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
