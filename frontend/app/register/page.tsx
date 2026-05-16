@@ -7,7 +7,8 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { motion } from "framer-motion";
 
-import { signup } from "@/lib/api";
+import { authGoogle, fetchProfile, storeAuthTokens, storeUserRole, signup } from "@/lib/api";
+import { GoogleLogin } from "@react-oauth/google";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FloatingField } from "@/components/auth/floating-field";
@@ -144,7 +145,46 @@ export default function RegisterPage() {
               {error ? <p className="rounded-lg border border-[#ef4444]/40 bg-[#ef4444]/10 px-3 py-2 text-sm text-[#ef4444]">{error}</p> : null}
             </form>
 
-            <p className="mt-5 text-sm text-[var(--text-secondary)]">
+            <div className="mt-4 flex flex-col gap-4">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-[var(--border-primary)]" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-[var(--card-bg)] px-2 text-[var(--text-tertiary)]">Or continue with</span>
+                </div>
+              </div>
+
+              <div className="flex justify-center">
+                <GoogleLogin
+                  onSuccess={async (credentialResponse) => {
+                    if (!credentialResponse.credential) return;
+                    try {
+                      setLoading(true);
+                      setError(null);
+                      const payload = await authGoogle(credentialResponse.credential);
+                      storeAuthTokens(payload);
+                      try {
+                        const profile = await fetchProfile(payload.access_token);
+                        storeUserRole(profile.role);
+                      } catch {}
+                      setSuccess(true);
+                      setTimeout(() => router.push("/dashboard"), 450);
+                    } catch (err) {
+                      setError(err instanceof Error ? err.message : "Google Signup Failed");
+                      setLoading(false);
+                    }
+                  }}
+                  onError={() => setError("Google Signup Failed")}
+                  theme="filled_blue"
+                  shape="rectangular"
+                  text="continue_with"
+                  width="100%"
+                />
+              </div>
+            </div>
+
+            <p className="mt-5 text-center text-sm text-[var(--text-secondary)]">
               {t("register.switchPrompt")} <Link href="/login" className="font-semibold text-[#2563eb] hover:underline">{t("register.switchCta")}</Link>
             </p>
           </Card>

@@ -63,7 +63,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#2563eb" />
       </head>
-      <body className="antialiased">
+      <body className="antialiased" suppressHydrationWarning>
         <NextIntlClientProvider locale={locale} messages={messages} timeZone="UTC">
           <AppProviders>
             <LocaleSync />

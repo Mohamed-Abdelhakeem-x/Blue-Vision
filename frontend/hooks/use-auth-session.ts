@@ -22,7 +22,7 @@ function readAuthSession(): AuthSessionState {
 }
 
 export function useAuthSession(): AuthSessionState {
-  const [session, setSession] = useState<AuthSessionState>(() => readAuthSession());
+  const [session, setSession] = useState<AuthSessionState>({token: null, profile: null});
 
   useEffect(() => {
     const syncSession = () => {

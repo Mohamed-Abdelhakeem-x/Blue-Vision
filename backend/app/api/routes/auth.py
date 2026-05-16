@@ -224,3 +224,199 @@ async def logout(
     else:
         audit_event(event="auth.logout", outcome="denied", request=request, reason="token_not_active")
     return {"status": "ok"}
+
+
+import random
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+
+from app.models.email_verification import EmailVerification
+from app.services.email import send_verification_email
+from app.schemas.auth import EmailVerificationRequest, EmailVerificationConfirm, ResetPasswordRequest, GoogleAuthRequest
+
+@router.post("/request-verification")
+async def request_verification(
+    payload: EmailVerificationRequest,
+    request: Request,
+    session: AsyncSession = Depends(get_session)
+):
+    await enforce_rate_limit(request=request, scope="auth_verify", limit=5, window_seconds=60)
+    
+    code = f"{random.randint(100000, 999999)}"
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
+    
+    verification = EmailVerification(
+        email=payload.email,
+        verification_code=code,
+        purpose=payload.purpose,
+        expires_at=expires_at
+    )
+    session.add(verification)
+    await session.commit()
+    
+    try:
+        await send_verification_email(payload.email, code, payload.purpose)
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to send verification email.")
+        
+    return {"status": "ok", "message": "Verification email sent"}
+
+@router.post("/verify-email")
+async def verify_email(
+    payload: EmailVerificationConfirm,
+    request: Request,
+    session: AsyncSession = Depends(get_session)
+):
+    await enforce_rate_limit(request=request, scope="auth_verify_confirm", limit=10, window_seconds=60)
+    
+    stmt = select(EmailVerification).where(
+        EmailVerification.email == payload.email,
+        EmailVerification.verification_code == payload.code,
+        EmailVerification.purpose == payload.purpose,
+        EmailVerification.used_at.is_(None)
+    ).order_by(EmailVerification.created_at.desc())
+    
+    verification = (await session.execute(stmt)).scalars().first()
+    
+    if not verification:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid verification code")
+        
+    if verification.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Verification code expired")
+        
+    verification.used_at = datetime.now(timezone.utc)
+    await session.commit()
+    return {"status": "ok"}
+
+@router.post("/forgot-password")
+async def forgot_password(
+    payload: EmailVerificationRequest,
+    request: Request,
+    session: AsyncSession = Depends(get_session)
+):
+    user = (await session.execute(select(User).where(User.email == payload.email))).scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Email not found")
+        
+    code = f"{random.randint(100000, 999999)}"
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
+    
+    verification = EmailVerification(
+        email=payload.email,
+        verification_code=code,
+        purpose="reset_password",
+        expires_at=expires_at
+    )
+    session.add(verification)
+    await session.commit()
+    
+    try:
+        await send_verification_email(payload.email, code, "reset_password")
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to send reset email.")
+        
+    return {"status": "ok", "message": "Code sent successfully."}
+
+@router.post("/verify-reset-code")
+async def verify_reset_code(
+    payload: EmailVerificationConfirm,
+    request: Request,
+    session: AsyncSession = Depends(get_session)
+):
+    await enforce_rate_limit(request=request, scope="auth_verify_reset", limit=10, window_seconds=60)
+    
+    stmt = select(EmailVerification).where(
+        EmailVerification.email == payload.email,
+        EmailVerification.verification_code == payload.code,
+        EmailVerification.purpose == "reset_password",
+        EmailVerification.used_at.is_(None)
+    ).order_by(EmailVerification.created_at.desc())
+    
+    verification = (await session.execute(stmt)).scalars().first()
+    
+    if not verification:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid verification code")
+        
+    if verification.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Verification code expired")
+        
+    # We do not mark it as used yet. We just confirm it's valid.
+    return {"status": "ok"}
+
+@router.post("/reset-password")
+async def reset_password(
+    payload: ResetPasswordRequest,
+    request: Request,
+    session: AsyncSession = Depends(get_session)
+):
+    stmt = select(EmailVerification).where(
+        EmailVerification.email == payload.email,
+        EmailVerification.verification_code == payload.code,
+        EmailVerification.purpose == "reset_password",
+        EmailVerification.used_at.is_(None)
+    ).order_by(EmailVerification.created_at.desc())
+    
+    verification = (await session.execute(stmt)).scalars().first()
+    
+    if not verification:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid reset code")
+        
+    if verification.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Reset code expired")
+        
+    user = (await session.execute(select(User).where(User.email == payload.email))).scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        
+    user.hashed_password = get_password_hash(payload.new_password)
+    verification.used_at = datetime.now(timezone.utc)
+    
+    await _invalidate_all_user_sessions(session, user.id)
+    await session.commit()
+    return {"status": "ok"}
+
+@router.post("/google", response_model=TokenResponse)
+async def google_auth(
+    payload: GoogleAuthRequest,
+    request: Request,
+    session: AsyncSession = Depends(get_session)
+):
+    if not settings.google_client_id:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Google Auth is not configured")
+        
+    try:
+        idinfo = id_token.verify_oauth2_token(
+            payload.token, google_requests.Request(), settings.google_client_id
+        )
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Google token")
+        
+    email = idinfo.get("email")
+    if not email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email not provided by Google")
+        
+    user = (await session.execute(select(User).where(User.email == email))).scalar_one_or_none()
+    
+    if not user:
+        # Create user
+        default_role_name = "Nile Tilapia Farm Owners & Managers"
+        role = (await session.execute(select(Role).where(Role.role_name == default_role_name))).scalar_one_or_none()
+        if not role:
+            role = Role(role_name=default_role_name, privileges={})
+            session.add(role)
+            await session.commit()
+            await session.refresh(role)
+            
+        user = User(
+            email=email,
+            full_name=idinfo.get("name", "Google User"),
+            role_id=role.id,
+            hashed_password=get_password_hash(str(uuid4())),
+            avatar_sha256=None
+        )
+        session.add(user)
+        await session.commit()
+        await session.refresh(user)
+        
+    audit_event(event="auth.google_login", outcome="success", request=request, user_id=user.id, email=user.email)
+    return await _issue_token_pair(session, user.id)

@@ -1,4 +1,5 @@
 from app.models.alert import Alert
+from app.models.email_verification import EmailVerification
 from app.models.analysis_history import AnalysisHistory
 from app.models.biological_health import BiologicalHealth
 from app.models.community_comment import CommunityComment
@@ -21,6 +22,7 @@ from app.models.user import User
 
 __all__ = [
     "Alert",
+    "EmailVerification",
     "AnalysisHistory",
     "BiologicalHealth",
     "CommunityComment",

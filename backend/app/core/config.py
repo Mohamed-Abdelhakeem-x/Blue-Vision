@@ -33,6 +33,16 @@ class Settings(BaseSettings):
     rate_limit_login_per_minute: int = 20
     rate_limit_detect_per_minute: int = 60
 
+    # Google Auth
+    google_client_id: str = ""
+
+    # SMTP Configuration
+    smtp_server: str = ""
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
+    smtp_from_email: str = ""
+
     cors_origins: str = (
         "http://localhost:3000,http://127.0.0.1:3000,"
         "http://localhost:3001,http://127.0.0.1:3001,"

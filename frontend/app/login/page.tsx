@@ -7,7 +7,8 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { motion } from "framer-motion";
 
-import { clearStoredTokens, fetchProfile, login, storeAuthTokens, storeUserRole } from "@/lib/api";
+import { clearStoredTokens, fetchProfile, login, authGoogle, storeAuthTokens, storeUserRole } from "@/lib/api";
+import { GoogleLogin } from "@react-oauth/google";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FloatingField } from "@/components/auth/floating-field";
@@ -121,9 +122,53 @@ export default function LoginPage() {
               {error ? <p className="rounded-lg border border-[#ef4444]/40 bg-[#ef4444]/10 px-3 py-2 text-sm text-[#ef4444]">{error}</p> : null}
             </form>
 
-            <p className="mt-5 text-sm text-[var(--text-secondary)]">
-              {t("login.switchPrompt")} <Link href="/register" className="font-semibold text-[#2563eb] hover:underline">{t("login.switchCta")}</Link>
-            </p>
+            <div className="mt-4 flex flex-col gap-4">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-[var(--border-primary)]" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-[var(--card-bg)] px-2 text-[var(--text-tertiary)]">Or continue with</span>
+                </div>
+              </div>
+
+              <div className="flex justify-center">
+                <GoogleLogin
+                  onSuccess={async (credentialResponse) => {
+                    if (!credentialResponse.credential) return;
+                    try {
+                      setLoading(true);
+                      setError(null);
+                      const payload = await authGoogle(credentialResponse.credential);
+                      storeAuthTokens(payload);
+                      try {
+                        const profile = await fetchProfile(payload.access_token);
+                        storeUserRole(profile.role);
+                      } catch {}
+                      setSuccess(true);
+                      setTimeout(() => router.push("/dashboard"), 450);
+                    } catch (err) {
+                      setError(err instanceof Error ? err.message : "Google Login Failed");
+                      setLoading(false);
+                    }
+                  }}
+                  onError={() => setError("Google Login Failed")}
+                  theme="filled_blue"
+                  shape="rectangular"
+                  text="continue_with"
+                  width="100%"
+                />
+              </div>
+            </div>
+
+            <div className="mt-5 flex flex-col items-center gap-2 text-sm text-[var(--text-secondary)]">
+              <p>
+                {t("login.switchPrompt")} <Link href="/register" className="font-semibold text-[#2563eb] hover:underline">{t("login.switchCta")}</Link>
+              </p>
+              <Link href="/forgot-password" className="text-xs text-[var(--text-tertiary)] hover:text-[#2563eb] hover:underline">
+                Forgot your password?
+              </Link>
+            </div>
           </Card>
         </motion.div>
       </div>

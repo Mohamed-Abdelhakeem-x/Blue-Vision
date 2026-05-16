@@ -52,6 +52,7 @@ function getSocialCopy(locale: AppLocale) {
       chatTitle: "المحادثة",
       chatPlaceholder: "اكتب رسالتك هنا...",
       chatEmpty: "اختر صديقًا من القائمة لبدء المحادثة.",
+      noMessages: "لا توجد رسائل حتى الآن. أرسل رسالة للترحيب!",
       send: "إرسال",
       sending: "جارٍ الإرسال...",
       friendsSince: "أصدقاء منذ",
@@ -84,6 +85,7 @@ function getSocialCopy(locale: AppLocale) {
     chatTitle: "Conversation",
     chatPlaceholder: "Write a message...",
     chatEmpty: "Pick a friend from the list to start chatting.",
+    noMessages: "No messages yet. Send a message to say hello!",
     send: "Send",
     sending: "Sending...",
     friendsSince: "Friends since",
@@ -399,7 +401,7 @@ export function SocialHub() {
                     </div>
                   ))
                 ) : (
-                  <div className="flex h-full items-center justify-center text-center text-sm text-[var(--text-secondary)]">{copy.chatEmpty}</div>
+                  <div className="flex h-full items-center justify-center text-center text-sm text-[var(--text-secondary)]">{copy.noMessages}</div>
                 )}
               </div>
 

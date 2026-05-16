@@ -20,3 +20,24 @@ class TokenResponse(BaseModel):
 
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
+
+
+class EmailVerificationRequest(BaseModel):
+    email: EmailStr
+    purpose: str = "signup"
+
+
+class EmailVerificationConfirm(BaseModel):
+    email: EmailStr
+    code: str
+    purpose: str = "signup"
+
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+    code: str
+    new_password: str = Field(min_length=8, max_length=128)
+
+
+class GoogleAuthRequest(BaseModel):
+    token: str

@@ -46,8 +46,10 @@ def _social_user_response(
     )
 
 
+from sqlalchemy.orm import selectinload
+
 async def _get_user_or_404(session: AsyncSession, user_id: str) -> User:
-    user = await session.scalar(select(User).where(User.id == user_id))
+    user = await session.scalar(select(User).where(User.id == user_id).options(selectinload(User.role)))
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
@@ -68,8 +70,9 @@ async def social_overview(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ) -> SocialOverviewResponse:
+    from sqlalchemy.orm import selectinload
     users = (
-        await session.execute(select(User).where(User.id != current_user.id).order_by(User.full_name.asc(), User.created_at.asc()))
+        await session.execute(select(User).where(User.id != current_user.id).options(selectinload(User.role)).order_by(User.full_name.asc(), User.created_at.asc()))
     ).scalars().all()
 
     friendships = (

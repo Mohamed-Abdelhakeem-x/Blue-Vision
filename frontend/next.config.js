@@ -69,11 +69,11 @@ if (!isStaticExport) {
         { key: "X-Frame-Options", value: "DENY" },
         {
           key: "Content-Security-Policy",
-          value: `default-src 'self'; ${scriptSrc}; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; ${connectSrc}; frame-ancestors 'none'; base-uri 'self'`
+          value: `default-src 'self'; ${scriptSrc} https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https: ws://localhost:* http://localhost:* https://accounts.google.com; frame-src 'self' https://accounts.google.com; frame-ancestors 'none'; base-uri 'self'`
         },
         { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
         { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
-        { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+        { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
         { key: "Cross-Origin-Resource-Policy", value: "same-site" },
         { key: "X-DNS-Prefetch-Control", value: "off" },
         { key: "X-Permitted-Cross-Domain-Policies", value: "none" },

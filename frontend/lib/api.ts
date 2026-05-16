@@ -370,7 +370,11 @@ export function logApiError(context: {
   requestId?: string;
 }): void {
   const entry = { ts: new Date().toISOString(), ...context };
-  console.error(JSON.stringify(entry));
+  if (context.status >= 500) {
+    console.error(JSON.stringify(entry));
+  } else {
+    console.warn(JSON.stringify(entry));
+  }
 }
 
 async function handleApiError(
@@ -398,26 +402,41 @@ export async function login(email: string, password: string) {
   return res.json() as Promise<AuthTokens>;
 }
 
+let _refreshPromise: Promise<AuthTokens | null> | null = null;
+
 export async function refreshAccessToken(): Promise<AuthTokens | null> {
-  const refreshToken = getStoredRefreshToken();
-  if (!refreshToken) {
-    return null;
+  if (_refreshPromise) {
+    return _refreshPromise;
   }
 
-  const res = await apiFetch(`${API_BASE}/auth/refresh`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refresh_token: refreshToken })
-  });
+  const request = (async () => {
+    try {
+      const refreshToken = getStoredRefreshToken();
+      if (!refreshToken) {
+        return null;
+      }
 
-  if (!res.ok) {
-    clearStoredTokens();
-    return null;
-  }
+      const res = await apiFetch(`${API_BASE}/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: refreshToken })
+      });
 
-  const tokens = (await res.json()) as AuthTokens;
-  storeAuthTokens(tokens);
-  return tokens;
+      if (!res.ok) {
+        clearStoredTokens();
+        return null;
+      }
+
+      const tokens = (await res.json()) as AuthTokens;
+      storeAuthTokens(tokens);
+      return tokens;
+    } finally {
+      _refreshPromise = null;
+    }
+  })();
+
+  _refreshPromise = request;
+  return request;
 }
 
 async function authFetch(
@@ -1128,4 +1147,78 @@ export async function sendDirectMessage(input: {token: string; receiverId: strin
   }
 
   return res.json() as Promise<DirectMessage>;
+}
+
+export async function authGoogle(token: string) {
+  const res = await apiFetch(`${API_BASE}/auth/google`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token })
+  });
+
+  if (!res.ok) {
+    await handleApiError(res, "auth/google", "Failed to authenticate with Google");
+  }
+
+  return res.json() as Promise<AuthTokens>;
+}
+
+export async function requestEmailVerification(email: string, purpose: string = "signup") {
+  const res = await apiFetch(`${API_BASE}/auth/request-verification`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, purpose })
+  });
+
+  if (!res.ok) {
+    await handleApiError(res, "auth/request-verification", "Failed to request verification code");
+  }
+}
+
+export async function verifyEmailCode(email: string, code: string, purpose: string = "signup") {
+  const res = await apiFetch(`${API_BASE}/auth/verify-email`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, code, purpose })
+  });
+
+  if (!res.ok) {
+    await handleApiError(res, "auth/verify-email", "Invalid verification code");
+  }
+}
+
+export async function verifyResetCode(email: string, code: string) {
+  const res = await apiFetch(`${API_BASE}/auth/verify-reset-code`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, code, purpose: "reset_password" })
+  });
+
+  if (!res.ok) {
+    await handleApiError(res, "auth/verify-reset-code", "Invalid verification code");
+  }
+}
+
+export async function requestPasswordReset(email: string) {
+  const res = await apiFetch(`${API_BASE}/auth/forgot-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email })
+  });
+
+  if (!res.ok) {
+    await handleApiError(res, "auth/forgot-password", "Failed to request password reset");
+  }
+}
+
+export async function resetPassword(email: string, code: string, new_password: string) {
+  const res = await apiFetch(`${API_BASE}/auth/reset-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, code, new_password })
+  });
+
+  if (!res.ok) {
+    await handleApiError(res, "auth/reset-password", "Failed to reset password");
+  }
 }

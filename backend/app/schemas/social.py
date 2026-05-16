@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from app.schemas.user import UserRole
 
@@ -15,6 +15,14 @@ class SocialUserResponse(BaseModel):
     avatar_b64: str | None = None
     friendship_status: FriendshipStatus = "none"
     pending_request_id: str | None = None
+
+    @field_validator("role", mode="before")
+    @classmethod
+    def extract_role_name(cls, v):
+        from app.schemas.user import UserResponse
+        return UserResponse.extract_role_name(v)
+
+    model_config = {"from_attributes": True}
 
 
 class FriendRequestResponse(BaseModel):

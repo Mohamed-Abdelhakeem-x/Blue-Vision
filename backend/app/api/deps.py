@@ -19,7 +19,8 @@ async def get_current_user(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
     user_id = payload["sub"]
-    result = await session.execute(select(User).where(User.id == user_id))
+    from sqlalchemy.orm import selectinload
+    result = await session.execute(select(User).where(User.id == user_id).options(selectinload(User.role)))
     user = result.scalar_one_or_none()
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
