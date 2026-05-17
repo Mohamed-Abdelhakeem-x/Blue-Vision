@@ -8,7 +8,7 @@ from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.api.routes import auth, chat, community, dashboard, detection, notifications, social, users
+from app.api.routes import auth, chat, community, dashboard, detection, notifications, social, users, team
 from app.core.config import get_settings
 from app.core.logging_config import configure_logging
 from app.core.request_context import request_id as _request_id_ctx
@@ -118,10 +118,12 @@ app.include_router(chat.router, prefix="/api")
 app.include_router(community.router, prefix="/api")
 app.include_router(notifications.router, prefix="/api")
 app.include_router(social.router, prefix="/api")
+app.include_router(team.router, prefix="/api")
 
 
 @app.get("/health")
 async def health() -> dict[str, str]:
+    # Trigger uvicorn reload to fetch new env variables
     return {"status": "ok"}
 
 

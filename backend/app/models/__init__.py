@@ -19,6 +19,8 @@ from app.models.report import Report
 from app.models.role import Role
 from app.models.species_identification import SpeciesIdentification
 from app.models.user import User
+from app.models.farm_member import FarmMember
+from app.models.team_invitation import TeamInvitation
 
 __all__ = [
     "Alert",
@@ -42,4 +44,6 @@ __all__ = [
     "Role",
     "SpeciesIdentification",
     "User",
+    "FarmMember",
+    "TeamInvitation",
 ]

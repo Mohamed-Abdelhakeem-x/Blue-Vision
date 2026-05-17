@@ -167,7 +167,10 @@
         "farmer": "Agricultor",
         "expert": "Experto",
         "admin": "Administrador",
-        "developer": "Desarrollador"
+        "developer": "Desarrollador",
+        "Owner": "Propietario",
+        "Farm Manager": "Gerente de Granja",
+        "AI Admin": "Admin de IA"
       },
       "farmer": {
         "uploadLeaf": "Subir hoja para análisis",

@@ -7,15 +7,17 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
 
-class FishFarm(Base):
-    __tablename__ = "fish_farms"
+class FarmMember(Base):
+    __tablename__ = "farm_members"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    farm_id: Mapped[str] = mapped_column(String(36), ForeignKey("fish_farms.id", ondelete="CASCADE"), index=True)
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id", ondelete="CASCADE"), index=True)
-    farm_name: Mapped[str] = mapped_column(String(200))
-    location: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    
+    # E.g., "Owner" or "Farm Manager"
+    role: Mapped[str] = mapped_column(String(50), default="Farm Manager")
+    
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
 
-    user = relationship("User", back_populates="fish_farms")
-    ponds = relationship("Pond", back_populates="farm", cascade="all,delete-orphan")
-    members = relationship("FarmMember", back_populates="farm", cascade="all,delete-orphan")
+    farm = relationship("FishFarm", back_populates="members")
+    user = relationship("User", back_populates="farm_memberships")

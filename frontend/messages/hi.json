@@ -167,7 +167,10 @@
         "farmer": "किसान",
         "expert": "विशेषज्ञ",
         "admin": "प्रशासक",
-        "developer": "डेवलपर"
+        "developer": "डेवलपर",
+        "Owner": "मालिक",
+        "Farm Manager": "फ़ार्म मैनेजर",
+        "AI Admin": "AI प्रशासक"
       },
       "farmer": {
         "uploadLeaf": "विश्लेषण हेतु पत्ती अपलोड करें",

@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { motion } from "framer-motion";
 
-import { clearStoredTokens, fetchProfile, login, authGoogle, storeAuthTokens, storeUserRole } from "@/lib/api";
+import { clearStoredTokens, fetchProfile, login, authGoogle, storeAuthTokens, storeUserRole, checkGoogleUser } from "@/lib/api";
 import { GoogleLogin } from "@react-oauth/google";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -139,6 +139,16 @@ export default function LoginPage() {
                     try {
                       setLoading(true);
                       setError(null);
+                      
+                      const checkResult = await checkGoogleUser(credentialResponse.credential);
+                      if (!checkResult.exists) {
+                        setError("No BlueVision account associated with this Google email. Redirecting to registration page...");
+                        setTimeout(() => {
+                          router.push("/register");
+                        }, 1800);
+                        return;
+                      }
+
                       const payload = await authGoogle(credentialResponse.credential);
                       storeAuthTokens(payload);
                       try {

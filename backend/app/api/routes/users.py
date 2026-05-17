@@ -44,7 +44,7 @@ async def me(current_user: User = Depends(get_current_user)) -> UserResponse:
         id=current_user.id,
         email=current_user.email,
         full_name=current_user.full_name,
-        role="farmer", # Mocking role for UserResponse schema
+        role=get_role_name(current_user),
         avatar_b64=load_profile_image_b64(current_user.avatar_sha256),
         created_at=current_user.created_at,
     )
@@ -108,7 +108,7 @@ async def my_profile(
         id=current_user.id,
         email=current_user.email,
         full_name=current_user.full_name,
-        role="farmer",
+        role=get_role_name(current_user),
         avatar_b64=load_profile_image_b64(current_user.avatar_sha256),
         created_at=current_user.created_at,
         posts_count=len(posts),
@@ -140,7 +140,7 @@ async def update_my_profile(
         id=current_user.id,
         email=current_user.email,
         full_name=current_user.full_name,
-        role="farmer",
+        role=get_role_name(current_user),
         avatar_b64=load_profile_image_b64(current_user.avatar_sha256),
         created_at=current_user.created_at,
     )
@@ -154,20 +154,19 @@ async def list_users(
 ) -> list[UserResponse]:
     result = await session.execute(select(User).order_by(User.created_at.desc()))
     users = result.scalars().all()
-    # Schema expects role string
-    users_with_mocked_role = []
+    users_with_role = []
     for user in users:
-        users_with_mocked_role.append(
+        users_with_role.append(
             UserResponse(
                 id=user.id,
                 email=user.email,
                 full_name=user.full_name,
-                role="farmer",
+                role=get_role_name(user),
                 avatar_b64=load_profile_image_b64(user.avatar_sha256),
                 created_at=user.created_at,
             )
         )
-    return users_with_mocked_role
+    return users_with_role
 
 
 @router.patch("/{user_id}/role", response_model=UserResponse)
@@ -232,6 +231,17 @@ async def update_own_role_by_code(
         )
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid authorization code")
 
+    # Fetch target role from database
+    role_stmt = select(Role).where(Role.role_name == payload.role)
+    target_role = (await session.execute(role_stmt)).scalar_one_or_none()
+    if not target_role:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Role '{payload.role}' not found"
+        )
+
+    current_user.role_id = target_role.id
+    session.add(current_user)
     await session.commit()
     await session.refresh(current_user)
     audit_event(

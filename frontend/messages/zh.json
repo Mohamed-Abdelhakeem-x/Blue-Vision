@@ -167,7 +167,10 @@
         "farmer": "农户",
         "expert": "专家",
         "admin": "管理员",
-        "developer": "开发者"
+        "developer": "开发者",
+        "Owner": "所有者",
+        "Farm Manager": "农场经理",
+        "AI Admin": "AI 管理员"
       },
       "farmer": {
         "uploadLeaf": "上传叶片进行分析",

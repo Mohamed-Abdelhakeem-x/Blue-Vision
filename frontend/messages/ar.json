@@ -171,7 +171,10 @@
         "farmer": "مزارع",
         "expert": "خبير",
         "admin": "مسؤول",
-        "developer": "مطوّر"
+        "developer": "مطوّر",
+        "Owner": "مالك",
+        "Farm Manager": "مدير المزرعة",
+        "AI Admin": "مسؤول الذكاء الاصطناعي"
       },
       "farmer": {
         "uploadLeaf": "ارفع ورقة للتحليل",

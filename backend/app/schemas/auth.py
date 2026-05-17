@@ -1,10 +1,34 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
+import re
+
+
+def validate_password_strength(password: str) -> str:
+    """Validate password meets strength requirements."""
+    issues = []
+    if len(password) < 8:
+        issues.append("at least 8 characters")
+    if not re.search(r"[A-Z]", password):
+        issues.append("at least one uppercase letter")
+    if not re.search(r"[0-9]", password):
+        issues.append("at least one number")
+    if not re.search(r"[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?`~]", password):
+        issues.append("at least one special character (!@#$%^&*...)")
+    if issues:
+        raise ValueError("Password must contain: " + ", ".join(issues))
+    return password
 
 
 class SignUpRequest(BaseModel):
     email: EmailStr
     full_name: str = Field(min_length=2, max_length=120)
     password: str = Field(min_length=8, max_length=128)
+    verification_code: str
+    invite_token: str | None = None
+
+    @field_validator("password")
+    @classmethod
+    def check_password_strength(cls, v: str) -> str:
+        return validate_password_strength(v)
 
 
 class LoginRequest(BaseModel):
@@ -38,6 +62,38 @@ class ResetPasswordRequest(BaseModel):
     code: str
     new_password: str = Field(min_length=8, max_length=128)
 
+    @field_validator("new_password")
+    @classmethod
+    def check_password_strength(cls, v: str) -> str:
+        return validate_password_strength(v)
+
 
 class GoogleAuthRequest(BaseModel):
     token: str
+    invite_token: str | None = None
+    password: str | None = None
+    full_name: str | None = None
+
+    @field_validator("password")
+    @classmethod
+    def check_password_strength(cls, v: str | None) -> str | None:
+        if v is not None:
+            return validate_password_strength(v)
+        return v
+
+
+class GoogleCheckRequest(BaseModel):
+    token: str
+
+
+class GoogleCheckResponse(BaseModel):
+    exists: bool
+    email: str | None = None
+    name: str | None = None
+
+
+class InvitationInfoResponse(BaseModel):
+    email: str
+    farm_name: str
+    role: str
+    inviter_name: str

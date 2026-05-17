@@ -23,6 +23,7 @@ class User(Base):
     alerts = relationship("Alert", back_populates="user", cascade="all,delete-orphan")
     feedbacks = relationship("Feedback", back_populates="user", cascade="all,delete-orphan")
     fish_farms = relationship("FishFarm", back_populates="user", cascade="all,delete-orphan")
+    farm_memberships = relationship("FarmMember", back_populates="user", cascade="all,delete-orphan")
     media_uploads = relationship("MediaUpload", back_populates="user", cascade="all,delete-orphan")
     community_likes = relationship("CommunityLike", back_populates="user", cascade="all,delete-orphan")
     community_comments = relationship("CommunityComment", back_populates="user", cascade="all,delete-orphan")

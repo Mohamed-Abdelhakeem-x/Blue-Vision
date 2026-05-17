@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, EmailStr, field_validator
 
-UserRole = Literal["farmer", "expert", "admin", "developer"]
+UserRole = Literal["Owner", "Farm Manager", "AI Admin", "farmer", "expert", "admin", "developer"]
 
 
 class UserResponse(BaseModel):
@@ -17,15 +17,13 @@ class UserResponse(BaseModel):
     @field_validator("role", mode="before")
     @classmethod
     def extract_role_name(cls, v):
-        if hasattr(v, "role_name"):
-            # Map database roles to frontend expected values if necessary, or just return role_name
-            # e.g., "System Development Team" -> "developer"
-            name = v.role_name
-            if "Farmer" in name or "Manager" in name: return "farmer"
-            if "Expert" in name: return "expert"
-            if "Admin" in name: return "admin"
-            if "Development" in name: return "developer"
-            return name.lower()
+        name = getattr(v, "role_name", v) if hasattr(v, "role_name") else v
+        if isinstance(name, str):
+            # Map legacy roles to new RBAC roles
+            if "Owner" in name or "farmer" in name.lower(): return "Owner"
+            if "Expert" in name or "Manager" in name or "expert" in name.lower(): return "Farm Manager"
+            if "Development" in name or "Admin" in name or "admin" in name.lower(): return "AI Admin"
+            return name
         return v
 
     model_config = {"from_attributes": True}

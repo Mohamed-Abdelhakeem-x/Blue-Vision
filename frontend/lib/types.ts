@@ -180,7 +180,7 @@ export interface ConversationData {
   messages: DirectMessage[];
 }
 
-export type UserRole = "farmer" | "expert" | "admin" | "developer";
+export type UserRole = "Owner" | "Farm Manager" | "AI Admin";
 
 export interface AuthTokens {
   access_token: string;

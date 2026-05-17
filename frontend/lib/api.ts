@@ -70,8 +70,8 @@ export function clearStoredTokens(): void {
 
 export function getStoredRole(): UserRole | null {
   const value = window.localStorage.getItem(ROLE_KEY);
-  if (value === "farmer" || value === "expert" || value === "admin" || value === "developer") {
-    return value;
+  if (value === "Owner" || value === "Farm Manager" || value === "AI Admin") {
+    return value as UserRole;
   }
   return null;
 }
@@ -96,7 +96,7 @@ export function getStoredProfile(): UserProfile | null {
       typeof parsed.id === "string" &&
       typeof parsed.email === "string" &&
       typeof parsed.full_name === "string" &&
-      (parsed.role === "farmer" || parsed.role === "expert" || parsed.role === "admin" || parsed.role === "developer") &&
+      (parsed.role === "Owner" || parsed.role === "Farm Manager" || parsed.role === "AI Admin") &&
       typeof parsed.created_at === "string"
     ) {
       return parsed as UserProfile;
@@ -480,7 +480,7 @@ export async function logoutCurrentSession(): Promise<void> {
   }
 }
 
-export async function signup(payload: { email: string; full_name: string; password: string }) {
+export async function signup(payload: { email: string; full_name: string; password: string; verification_code: string; invite_token?: string | null }) {
   const res = await apiFetch(`${API_BASE}/auth/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -1149,11 +1149,11 @@ export async function sendDirectMessage(input: {token: string; receiverId: strin
   return res.json() as Promise<DirectMessage>;
 }
 
-export async function authGoogle(token: string) {
+export async function authGoogle(token: string, invite_token?: string | null, password?: string | null, fullName?: string | null) {
   const res = await apiFetch(`${API_BASE}/auth/google`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token })
+    body: JSON.stringify({ token, invite_token, password, full_name: fullName })
   });
 
   if (!res.ok) {
@@ -1161,6 +1161,33 @@ export async function authGoogle(token: string) {
   }
 
   return res.json() as Promise<AuthTokens>;
+}
+
+export async function checkGoogleUser(token: string): Promise<{ exists: boolean; email?: string; name?: string }> {
+  const res = await apiFetch(`${API_BASE}/auth/google/check`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token })
+  });
+
+  if (!res.ok) {
+    await handleApiError(res, "auth/google/check", "Failed to check Google user");
+  }
+
+  return res.json() as Promise<{ exists: boolean; email?: string; name?: string }>;
+}
+
+export async function getInvitationInfo(token: string): Promise<{ email: string; farm_name: string; role: string; inviter_name: string }> {
+  const res = await apiFetch(`${API_BASE}/auth/invitation/${token}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" }
+  });
+
+  if (!res.ok) {
+    await handleApiError(res, "auth/invitation-info", "Failed to load invitation info");
+  }
+
+  return res.json() as Promise<{ email: string; farm_name: string; role: string; inviter_name: string }>;
 }
 
 export async function requestEmailVerification(email: string, purpose: string = "signup") {
@@ -1171,11 +1198,11 @@ export async function requestEmailVerification(email: string, purpose: string = 
   });
 
   if (!res.ok) {
-    await handleApiError(res, "auth/request-verification", "Failed to request verification code");
+    await handleApiError(res, "auth/request-verification", "Failed to send verification email");
   }
 }
 
-export async function verifyEmailCode(email: string, code: string, purpose: string = "signup") {
+export async function verifyEmail(email: string, code: string, purpose: string = "signup") {
   const res = await apiFetch(`${API_BASE}/auth/verify-email`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -1221,4 +1248,62 @@ export async function resetPassword(email: string, code: string, new_password: s
   if (!res.ok) {
     await handleApiError(res, "auth/reset-password", "Failed to reset password");
   }
+}
+
+export async function inviteTeamMember(email: string, role: string = "Farm Manager") {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/team/invite`, {
+      method: "POST",
+      headers: { ...authHeaders(token), "Content-Type": "application/json" },
+      body: JSON.stringify({ email, role })
+    })
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, "team/invite", "Failed to invite team member");
+  }
+}
+
+export async function getTeamMembers() {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/team/members`, {
+      method: "GET",
+      headers: authHeaders(token)
+    })
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, "team/members", "Failed to load team members");
+  }
+
+  return res.json() as Promise<UserProfile[]>;
+}
+
+export async function removeTeamMember(memberId: string) {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/team/members/${memberId}`, {
+      method: "DELETE",
+      headers: authHeaders(token)
+    })
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, "team/members", "Failed to remove team member");
+  }
+}
+
+export async function elevateRole(code: string, role: string = "AI Admin") {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/users/self/role/by-code`, {
+      method: "POST",
+      headers: { ...authHeaders(token), "Content-Type": "application/json" },
+      body: JSON.stringify({ code, role })
+    })
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, "users/elevate-role", "Failed to elevate role");
+  }
+
+  return res.json() as Promise<UserProfile>;
 }

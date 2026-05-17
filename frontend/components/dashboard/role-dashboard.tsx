@@ -21,6 +21,7 @@ import {Button} from "@/components/ui/button";
 import {DashboardShell} from "@/components/dashboard/dashboard-shell";
 import {DetectionCard} from "@/components/dashboard/detection-card";
 import {FarmerDashboard} from "@/components/farmer/farmer-dashboard";
+import {TeamPanel} from "@/components/dashboard/team-panel";
 import {type DashboardNavItem} from "@/components/dashboard/dashboard-sidebar";
 import {cn} from "@/lib/utils";
 import {isNativeMobilePlatform} from "@/lib/platform";
@@ -442,10 +443,9 @@ function RoleManager({
                       onChange={(event) => void onUpdate(u.id, event.target.value as UserRole)}
                       disabled={currentUser?.id === u.id}
                     >
-                      <option value="farmer">farmer</option>
-                      <option value="expert">expert</option>
-                      <option value="admin">admin</option>
-                      <option value="developer">developer</option>
+                      <option value="Owner">Owner</option>
+                      <option value="Farm Manager">Farm Manager</option>
+                      <option value="AI Admin">AI Admin</option>
                     </select>
                   </td>
                 </tr>
@@ -484,7 +484,17 @@ export function RoleDashboard() {
   };
 
   const navItems = useMemo<DashboardNavItem[]>(() => {
-    if (role === "farmer") {
+    if (role === "Owner") {
+      return [
+        {id: "scan", label: copy.navScan, icon: "fish"},
+        {id: "analyze", label: copy.navAnalyze, icon: "activity"},
+        {id: "act", label: copy.navAct, icon: "clipboard"},
+        {id: "scan-history", label: t("history.title"), icon: "history", href: "/scan-history"},
+        {id: "team-management", label: "Team Management", icon: "users"}
+      ];
+    }
+
+    if (role === "Farm Manager") {
       return [
         {id: "scan", label: copy.navScan, icon: "fish"},
         {id: "analyze", label: copy.navAnalyze, icon: "activity"},
@@ -493,22 +503,9 @@ export function RoleDashboard() {
       ];
     }
 
-    if (role === "expert") {
-      return [];
-    }
-
-    if (role === "admin") {
+    if (role === "AI Admin") {
       return [
         {id: "admin-overview", label: copy.navOperationsOverview, icon: "activity"},
-        {id: "role-management", label: copy.roleManagement, icon: "users"}
-      ];
-    }
-
-    if (role === "developer") {
-      return [
-        {id: "developer-workspace", label: copy.navWorkspace, icon: "flask"},
-        {id: "developer-environment", label: copy.navEnvironment, icon: "shield"},
-        {id: "developer-account", label: copy.navAccount, icon: "users"},
         {id: "role-management", label: copy.roleManagement, icon: "users"}
       ];
     }
@@ -749,11 +746,10 @@ export function RoleDashboard() {
           <DetectionCard token={token} onDetected={() => void 0} />
         </section>
 
-        {role === "admin" ? <AdminPanel copy={copy} /> : null}
-        {role === "developer" ? <DeveloperPanel user={user} copy={copy} /> : null}
-        {role === "farmer" ? <FarmerPanel /> : null}
+        {role === "AI Admin" ? <AdminPanel copy={copy} /> : null}
+        {role === "Owner" ? <TeamPanel /> : null}
 
-        {role === "admin" || role === "developer" ? (
+        {role === "AI Admin" ? (
           <RoleManager users={users} currentUser={user} onUpdate={updateRole} copy={copy} />
         ) : null}
       </DashboardShell>

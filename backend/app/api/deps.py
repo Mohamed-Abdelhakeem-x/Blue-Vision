@@ -29,7 +29,7 @@ async def get_current_user(
 
 def require_roles(*allowed_roles: str):
     async def _role_guard(current_user: User = Depends(get_current_user)) -> User:
-        if current_user.role not in allowed_roles:
+        if not current_user.role or current_user.role.role_name not in allowed_roles:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions")
         return current_user
 

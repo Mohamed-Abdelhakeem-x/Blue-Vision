@@ -1,10 +1,9 @@
 "use client";
 
 import {motion} from "framer-motion";
-import {Flag, Microscope} from "lucide-react";
+import {Flag} from "lucide-react";
 import {Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 import {useMemo, useState} from "react";
-import Image from "next/image";
 
 import {BentoTile} from "@/components/ui/bento-tile";
 import {Button} from "@/components/ui/button";
@@ -20,11 +19,6 @@ const mockHeatmap = [
   {day: "Sun", severity: 2}
 ];
 
-const domainSamples = [
-  "https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?q=80&w=1200",
-  "https://images.unsplash.com/photo-1515150144380-bca9f1650ed9?q=80&w=1200",
-  "https://images.unsplash.com/photo-1512428559087-560fa5ceab42?q=80&w=1200"
-];
 
 export function ExpertDashboard() {
   const [suggestedLabel, setSuggestedLabel] = useState("Tomato___Early_blight");

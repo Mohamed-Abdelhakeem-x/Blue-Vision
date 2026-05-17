@@ -19,6 +19,10 @@ from app.db.session import get_session
 from app.models.refresh_token import RefreshToken
 from app.models.role import Role
 from app.models.user import User
+from app.models.team_invitation import TeamInvitation
+from app.models.farm_member import FarmMember
+from app.models.fish_farm import FishFarm
+from app.models.email_verification import EmailVerification
 from app.schemas.auth import LoginRequest, RefreshTokenRequest, SignUpRequest, TokenResponse
 from app.schemas.user import UserResponse
 from app.services.rate_limiter import enforce_rate_limit
@@ -81,13 +85,44 @@ async def signup(
         )
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
 
-    # Find default role
-    default_role_name = "Nile Tilapia Farm Owners & Managers"
-    role_stmt = select(Role).where(Role.role_name == default_role_name)
+    # Verify email code
+    stmt = select(EmailVerification).where(
+        EmailVerification.email == payload.email,
+        EmailVerification.verification_code == payload.verification_code,
+        EmailVerification.purpose == "signup",
+        EmailVerification.used_at.is_(None)
+    ).order_by(EmailVerification.created_at.desc())
+    
+    verification = (await session.execute(stmt)).scalars().first()
+    
+    if not verification:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid verification code")
+        
+    if verification.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Verification code expired")
+
+    # Resolve role and check invitation
+    target_role_name = "Owner"
+    invitation = None
+    
+    if payload.invite_token:
+        # Check if invitation exists and is valid
+        stmt = select(TeamInvitation).where(
+            TeamInvitation.token == payload.invite_token,
+            TeamInvitation.email == payload.email,
+            TeamInvitation.status == "pending"
+        )
+        invitation = (await session.execute(stmt)).scalar_one_or_none()
+        if not invitation:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired invitation token.")
+        
+        target_role_name = invitation.role
+
+    role_stmt = select(Role).where(Role.role_name == target_role_name)
     role = (await session.execute(role_stmt)).scalar_one_or_none()
     
     if not role:
-        role = Role(role_name=default_role_name, privileges={})
+        role = Role(role_name=target_role_name, privileges={})
         session.add(role)
         await session.commit()
         await session.refresh(role)
@@ -99,9 +134,38 @@ async def signup(
         hashed_password=get_password_hash(payload.password),
     )
     session.add(user)
+    await session.flush()  # Ensure user.id is populated before referencing it
+    
+    # If invited, associate the user with the farm
+    if invitation:
+        invitation.status = "accepted"
+        farm_member = FarmMember(
+            farm_id=invitation.farm_id,
+            user_id=user.id,
+            role=invitation.role
+        )
+        session.add(farm_member)
+    elif target_role_name == "Owner":
+        # Auto-create a default farm for new owners
+        farm = FishFarm(
+            user_id=user.id,
+            farm_name=f"{payload.full_name}'s Farm"
+        )
+        session.add(farm)
+
+    # Mark code as used
+    verification.used_at = datetime.now(timezone.utc)
+
     await session.commit()
     await session.refresh(user)
     audit_event(event="auth.signup", outcome="success", request=request, user_id=user.id, email=user.email)
+
+    # Send welcome email (fire-and-forget, non-critical)
+    try:
+        await send_welcome_email(user.email, user.full_name)
+    except Exception:
+        pass
+
     return UserResponse.model_validate(user)
 
 
@@ -231,8 +295,11 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 
 from app.models.email_verification import EmailVerification
-from app.services.email import send_verification_email
-from app.schemas.auth import EmailVerificationRequest, EmailVerificationConfirm, ResetPasswordRequest, GoogleAuthRequest
+from app.services.email import send_verification_email, send_welcome_email
+from app.schemas.auth import (
+    EmailVerificationRequest, EmailVerificationConfirm, ResetPasswordRequest,
+    GoogleAuthRequest, GoogleCheckRequest, GoogleCheckResponse, InvitationInfoResponse,
+)
 
 @router.post("/request-verification")
 async def request_verification(
@@ -287,6 +354,62 @@ async def verify_email(
     verification.used_at = datetime.now(timezone.utc)
     await session.commit()
     return {"status": "ok"}
+
+@router.get("/invitation/{token}", response_model=InvitationInfoResponse)
+async def get_invitation_info(
+    token: str,
+    session: AsyncSession = Depends(get_session)
+):
+    """Look up a pending invitation by token. Returns email, farm name, role."""
+    from sqlalchemy.orm import selectinload
+    stmt = select(TeamInvitation).where(
+        TeamInvitation.token == token,
+        TeamInvitation.status == "pending"
+    ).options(selectinload(TeamInvitation.farm), selectinload(TeamInvitation.inviter))
+
+    invitation = (await session.execute(stmt)).scalar_one_or_none()
+    if not invitation:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invitation not found or expired")
+
+    if invitation.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+        invitation.status = "expired"
+        await session.commit()
+        raise HTTPException(status_code=status.HTTP_410_GONE, detail="Invitation has expired")
+
+    return InvitationInfoResponse(
+        email=invitation.email,
+        farm_name=invitation.farm.farm_name if invitation.farm else "Unknown Farm",
+        role=invitation.role,
+        inviter_name=invitation.inviter.full_name if invitation.inviter else "Someone",
+    )
+
+@router.post("/google/check", response_model=GoogleCheckResponse)
+async def google_check(
+    payload: GoogleCheckRequest,
+    request: Request,
+    session: AsyncSession = Depends(get_session)
+):
+    """Check if a Google user already exists. Does NOT create an account."""
+    if not settings.google_client_id:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Google Auth is not configured")
+
+    try:
+        idinfo = id_token.verify_oauth2_token(
+            payload.token, google_requests.Request(), settings.google_client_id
+        )
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Google token")
+
+    email = idinfo.get("email")
+    if not email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email not provided by Google")
+
+    user = (await session.execute(select(User).where(User.email == email))).scalar_one_or_none()
+
+    if user:
+        return GoogleCheckResponse(exists=True, email=email, name=idinfo.get("name"))
+    else:
+        return GoogleCheckResponse(exists=False, email=email, name=idinfo.get("name"))
 
 @router.post("/forgot-password")
 async def forgot_password(
@@ -398,25 +521,64 @@ async def google_auth(
     user = (await session.execute(select(User).where(User.email == email))).scalar_one_or_none()
     
     if not user:
-        # Create user
-        default_role_name = "Nile Tilapia Farm Owners & Managers"
-        role = (await session.execute(select(Role).where(Role.role_name == default_role_name))).scalar_one_or_none()
+        # Resolve role and check invitation
+        target_role_name = "Owner"
+        invitation = None
+        
+        if payload.invite_token:
+            stmt = select(TeamInvitation).where(
+                TeamInvitation.token == payload.invite_token,
+                TeamInvitation.email == email,
+                TeamInvitation.status == "pending"
+            )
+            invitation = (await session.execute(stmt)).scalar_one_or_none()
+            if not invitation:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired invitation token.")
+            
+            target_role_name = invitation.role
+
+        role_stmt = select(Role).where(Role.role_name == target_role_name)
+        role = (await session.execute(role_stmt)).scalar_one_or_none()
+        
         if not role:
-            role = Role(role_name=default_role_name, privileges={})
+            role = Role(role_name=target_role_name, privileges={})
             session.add(role)
             await session.commit()
             await session.refresh(role)
-            
+
         user = User(
             email=email,
-            full_name=idinfo.get("name", "Google User"),
+            full_name=payload.full_name or idinfo.get("name", "Google User"),
             role_id=role.id,
-            hashed_password=get_password_hash(str(uuid4())),
-            avatar_sha256=None
+            hashed_password=get_password_hash(payload.password if payload.password else f"google_{uuid4()}"),
         )
         session.add(user)
+        await session.flush()  # Ensure user.id is populated before referencing it
+        
+        if invitation:
+            invitation.status = "accepted"
+            farm_member = FarmMember(
+                farm_id=invitation.farm_id,
+                user_id=user.id,
+                role=invitation.role
+            )
+            session.add(farm_member)
+        elif target_role_name == "Owner":
+            # Auto-create a default farm for new owners
+            farm = FishFarm(
+                user_id=user.id,
+                farm_name=f"{idinfo.get('name', 'My')}'s Farm"
+            )
+            session.add(farm)
+            
         await session.commit()
         await session.refresh(user)
+
+        # Send welcome email (fire-and-forget, non-critical)
+        try:
+            await send_welcome_email(user.email, user.full_name)
+        except Exception:
+            pass
         
     audit_event(event="auth.google_login", outcome="success", request=request, user_id=user.id, email=user.email)
     return await _issue_token_pair(session, user.id)
