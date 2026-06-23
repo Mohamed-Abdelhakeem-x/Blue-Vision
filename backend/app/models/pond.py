@@ -12,6 +12,7 @@ class Pond(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
     farm_id: Mapped[str] = mapped_column(String(36), ForeignKey("fish_farms.id", ondelete="CASCADE"), index=True)
     type: Mapped[str] = mapped_column(String(100))
+    name: Mapped[str | None] = mapped_column(String(200), nullable=True)
     size_sq_meters: Mapped[float | None] = mapped_column(Float, nullable=True)
     stocking_density: Mapped[float | None] = mapped_column(Float, nullable=True)
 

@@ -20,9 +20,16 @@ import {
 import {Button} from "@/components/ui/button";
 import {DashboardShell} from "@/components/dashboard/dashboard-shell";
 import {DetectionCard} from "@/components/dashboard/detection-card";
-import {FarmerDashboard} from "@/components/farmer/farmer-dashboard";
+
 import {TeamPanel} from "@/components/dashboard/team-panel";
 import {type DashboardNavItem} from "@/components/dashboard/dashboard-sidebar";
+
+// New high-end dashboards and widgets
+import {OwnerBiDashboard} from "@/components/dashboard/owner-bi-dashboard";
+import {AdminMloPsDashboard} from "@/components/dashboard/admin-mlops-dashboard";
+import {PondManagement} from "@/components/farmer/pond-management";
+import {LiveTelemetry} from "@/components/farmer/live-telemetry";
+import {IncidentCenter} from "@/components/farmer/incident-center";
 import {cn} from "@/lib/utils";
 import {isNativeMobilePlatform} from "@/lib/platform";
 import type {AppLocale} from "@/i18n/routing";
@@ -474,6 +481,8 @@ export function RoleDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState("overview");
   const [notices, setNotices] = useState<Notice[]>([]);
+  const [activeTelemetryPondId, setActiveTelemetryPondId] = useState<string | null>(null);
+  const [reloadIncidents, setReloadIncidents] = useState<boolean>(false);
 
   const pushNotice = (kind: NoticeKind, message: string) => {
     const id = Date.now() + Math.floor(Math.random() * 10000);
@@ -610,7 +619,7 @@ export function RoleDashboard() {
         storeUserRole(profile.role);
         storeUserProfile(profile);
 
-        if (profile.role === "admin" || profile.role === "developer") {
+        if (profile.role === "AI Admin") {
           const allUsers = await fetchUsers(accessToken);
           if (!cancelled) {
             setUsers(allUsers);
@@ -742,15 +751,49 @@ export function RoleDashboard() {
         }
         contentClassName="overflow-y-auto pb-4"
       >
-        <section className="mx-auto w-full max-w-7xl px-4 pb-2 pt-4">
-          <DetectionCard token={token} onDetected={() => void 0} />
-        </section>
+        {/* OWNER VIEW: Read-Only macro financial & Yield Forecast dashboard */}
+        {role === "Owner" ? (
+          <section className="mx-auto w-full max-w-7xl px-4 py-6 space-y-6">
+            <OwnerBiDashboard />
+            <TeamPanel />
+          </section>
+        ) : null}
 
-        {role === "AI Admin" ? <AdminPanel copy={copy} /> : null}
-        {role === "Owner" ? <TeamPanel /> : null}
+        {/* FARM MANAGER VIEW: Tactical environmental monitoring and scan diagnostics */}
+        {role === "Farm Manager" ? (
+          <section className="mx-auto w-full max-w-7xl px-4 py-6 space-y-6">
+            {/* The primary focal point: AI Hub scanning and telemetry display */}
+            <div className="grid gap-6 lg:grid-cols-3">
+              <div className="lg:col-span-2">
+                <DetectionCard 
+                  token={token} 
+                  onDetected={() => setReloadIncidents(prev => !prev)}
+                  onPondSelected={setActiveTelemetryPondId}
+                />
+              </div>
+              <div className="space-y-6">
+                <LiveTelemetry pondId={activeTelemetryPondId} />
+                <IncidentCenter triggerReload={reloadIncidents} />
+              </div>
+            </div>
 
+            {/* Daily Pond spec CRUD manager */}
+            <div className="rounded-[1.75rem] border border-[var(--card-border)] bg-[var(--card-bg)] p-6 shadow-[0_4px_32px_rgba(15,23,42,0.08)]">
+              <PondManagement onPondsUpdated={(ponds) => {
+                if (ponds.length > 0 && !activeTelemetryPondId) {
+                  setActiveTelemetryPondId(ponds[0].id);
+                }
+              }} />
+            </div>
+          </section>
+        ) : null}
+
+        {/* AI ADMIN VIEW: Infrastructure calibration and weights Hot-Swaps */}
         {role === "AI Admin" ? (
-          <RoleManager users={users} currentUser={user} onUpdate={updateRole} copy={copy} />
+          <section className="mx-auto w-full max-w-7xl px-4 py-6 space-y-6">
+            <AdminMloPsDashboard />
+            <RoleManager users={users} currentUser={user} onUpdate={updateRole} copy={copy} />
+          </section>
         ) : null}
       </DashboardShell>
     </>

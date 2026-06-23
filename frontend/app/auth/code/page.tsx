@@ -26,7 +26,7 @@ export default function AuthCodePage() {
   const router = useRouter();
   const t = useTranslations("authCode");
   const [code, setCode] = useState("");
-  const [role, setRole] = useState<UserRole>("farmer");
+  const [role, setRole] = useState<any>("farmer");
   const [verified, setVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

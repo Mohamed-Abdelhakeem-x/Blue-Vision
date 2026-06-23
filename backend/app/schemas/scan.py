@@ -9,6 +9,12 @@ class DetectionCandidate(BaseModel):
     confidence: float
 
 
+class BoundingBox(BaseModel):
+    label: str
+    box: list[float]  # [ymin, xmin, ymax, xmax] coordinates
+    confidence: float
+
+
 class DetectionResponse(BaseModel):
     health_status: str
     fish_species: str
@@ -22,6 +28,7 @@ class DetectionResponse(BaseModel):
     is_low_confidence: bool = False
     analysis_note: str | None = None
     top_predictions: list[DetectionCandidate] = []
+    bounding_boxes: list[BoundingBox] = []
 
 
 class AnalysisHistoryResponse(BaseModel):

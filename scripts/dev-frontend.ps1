@@ -1,17 +1,3 @@
-$ErrorActionPreference = 'Stop'
-
-$repoRoot = Split-Path -Parent $PSScriptRoot
-
-# Kill any stale process holding port 3000 from a previous dev session
-foreach ($line in @(netstat -ano)) {
-    if ($line -match ':3000\s+\S+\s+LISTENING\s+(\d+)') {
-        Write-Host "[frontend] Releasing stale port 3000 (PID $($Matches[1]))"
-        taskkill /F /T /PID $Matches[1] 2>&1 | Out-Null
-        Start-Sleep -Milliseconds 600
-    }
-}
-
-Set-Location (Join-Path $repoRoot 'frontend')
 
 $ErrorActionPreference = 'Stop'
 
@@ -45,7 +31,7 @@ if (Test-Path Env:PLATFORM_TARGET) { Remove-Item Env:PLATFORM_TARGET }
 if (Test-Path Env:NEXT_PUBLIC_STATIC_LOCALE) { Remove-Item Env:NEXT_PUBLIC_STATIC_LOCALE }
 
 try {
-    bun run dev
+    npm run dev
 } finally {
     Kill-Port 3000
 }

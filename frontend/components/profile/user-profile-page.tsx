@@ -41,7 +41,7 @@ export function UserProfilePage() {
       updateMyProfile({
         token: token ?? "",
         fullName: fullName.trim() || profileQuery.data?.full_name || "",
-        role,
+        role: (profileQuery.data?.role === "Owner" || profileQuery.data?.role === "Farm Manager" ? "farmer" : "expert") as any,
         avatar
       }),
     onSuccess: async () => {

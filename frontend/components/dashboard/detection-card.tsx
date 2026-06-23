@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CheckCircle2, Fish, Loader2, Sparkles, UploadCloud, Video, X, XCircle } from "lucide-react";
+import { CheckCircle2, Fish, Loader2, Sparkles, UploadCloud, Video, X, XCircle, AlertOctagon, HelpCircle } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 
-import { detectFish, getStoredAccessToken } from "@/lib/api";
+import { detectFish, getStoredAccessToken, getPonds, PondResponse } from "@/lib/api";
 import { formatBoostedConfidence } from "@/lib/confidence";
 import type { DetectionResult } from "@/lib/types";
 import { compressImage } from "@/hooks/use-image-compression";
@@ -14,17 +14,22 @@ import { cn } from "@/lib/utils";
 
 interface DetectionCardProps {
   token: string | null;
-  onDetected: () => void;
+  onDetected: (result: DetectionResult) => void;
+  onPondSelected?: (pondId: string) => void;
 }
 
-export function DetectionCard({ token, onDetected }: DetectionCardProps) {
+export function DetectionCard({ token, onDetected, onPondSelected }: DetectionCardProps) {
   const maxSize = 50 * 1024 * 1024;
   const [file, setFile] = useState<File | null>(null);
 
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<DetectionResult | null>(null);
+  const [result, setResult] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  
+  // Ponds selection states
+  const [ponds, setPonds] = useState<PondResponse[]>([]);
+  const [selectedPondId, setSelectedPondId] = useState<string>("");
 
   const isVideo = file?.type.startsWith("video/") ?? false;
 
@@ -32,6 +37,24 @@ export function DetectionCard({ token, onDetected }: DetectionCardProps) {
     if (!file) return null;
     return URL.createObjectURL(file);
   }, [file]);
+
+  // Load ponds on mount
+  useEffect(() => {
+    getPonds()
+      .then((data) => {
+        setPonds(data);
+        if (data.length > 0) {
+          setSelectedPondId(data[0].id);
+          if (onPondSelected) onPondSelected(data[0].id);
+        }
+      })
+      .catch((err) => console.error("Error loading ponds:", err));
+  }, []);
+
+  const handlePondChange = (id: string) => {
+    setSelectedPondId(id);
+    if (onPondSelected) onPondSelected(id);
+  };
 
   const { getRootProps, getInputProps, isDragActive, fileRejections } = useDropzone({
     onDrop: (accepted) => {
@@ -73,6 +96,7 @@ export function DetectionCard({ token, onDetected }: DetectionCardProps) {
   const onSubmit = async () => {
     const activeToken = token ?? getStoredAccessToken();
     if (!activeToken) { setError("Please sign in first."); return; }
+    if (!selectedPondId) { setError("Please select a target pond first."); return; }
     if (!file) { setError("Please upload a fish photo or video first."); return; }
 
     setLoading(true);
@@ -81,9 +105,14 @@ export function DetectionCard({ token, onDetected }: DetectionCardProps) {
     try {
       const imageToAnalyze = isVideo ? await captureVideoFrame() : file;
       const compressed = await compressImage(imageToAnalyze);
-      const response = await detectFish({ token: activeToken, image: compressed, domain: "color" });
+      const response = await detectFish({ 
+        token: activeToken, 
+        image: compressed, 
+        pondId: selectedPondId,
+        domain: "color" 
+      });
       setResult(response);
-      onDetected();
+      onDetected(response);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Analysis failed. Please try again.");
     } finally {
@@ -93,33 +122,44 @@ export function DetectionCard({ token, onDetected }: DetectionCardProps) {
 
   const clearFile = () => { setFile(null); setResult(null); setError(null); };
 
+  const isHealthy = result?.health_status.toLowerCase().includes("healthy") ?? false;
+
   return (
     <div className="w-full rounded-[1.75rem] border border-[var(--card-border)] bg-[var(--card-bg)] overflow-hidden shadow-[0_4px_32px_rgba(15,23,42,0.08)]">
       {/* Header */}
-      <div className="flex items-center gap-3 border-b border-[var(--card-border)] bg-gradient-to-r from-blue-600/8 to-transparent px-6 py-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600/15">
-          <Fish className="h-5 w-5 text-blue-500" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--card-border)] bg-gradient-to-r from-blue-600/8 to-transparent px-6 py-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600/15">
+            <Fish className="h-5 w-5 text-blue-500" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-[var(--text-primary)]">AI Video & Photo Diagnosis Hub</h3>
+            <p className="text-xs text-[var(--text-tertiary)]">Interactive Computer Vision scanning for active ponds</p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-sm font-semibold text-[var(--text-primary)]">Fish Health Analysis</h3>
-          <p className="text-xs text-[var(--text-tertiary)]">Upload a photo or video — AI will analyze fish health instantly</p>
+
+        {/* Mandatory Pond Selection Dropdown */}
+        <div className="flex items-center gap-2 shrink-0">
+          <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">Target Pond:</label>
+          {ponds.length === 0 ? (
+            <span className="text-xs text-red-400 font-medium">Deploy a pond first!</span>
+          ) : (
+            <select
+              className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-1.5 text-xs text-zinc-800 dark:text-zinc-200 outline-none focus:border-blue-500 font-medium"
+              value={selectedPondId}
+              onChange={(e) => handlePondChange(e.target.value)}
+            >
+              {ponds.map((p) => (
+                <option key={p.id} value={p.id}>{p.type} ({p.id.slice(0, 8)})</option>
+              ))}
+            </select>
+          )}
         </div>
-        {file ? (
-          <button
-            type="button"
-            onClick={clearFile}
-            className="ml-auto rounded-lg p-1.5 text-[var(--text-tertiary)] transition hover:bg-red-500/10 hover:text-red-400"
-            aria-label="Clear file"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        ) : null}
       </div>
 
       <div className="grid gap-6 p-6 lg:grid-cols-2">
-        {/* Left column – upload + controls */}
+        {/* Left column – upload + preview */}
         <div className="flex flex-col gap-4">
-          {/* Dropzone / Preview */}
           {!file ? (
             <div
               {...getRootProps()}
@@ -161,7 +201,7 @@ export function DetectionCard({ token, onDetected }: DetectionCardProps) {
               </motion.div>
             </div>
           ) : isVideo ? (
-            <div className="overflow-hidden rounded-2xl bg-black ring-1 ring-[var(--card-border)]">
+            <div className="overflow-hidden rounded-2xl bg-black ring-1 ring-[var(--card-border)] relative">
               <video
                 ref={videoRef}
                 src={preview ?? undefined}
@@ -174,32 +214,84 @@ export function DetectionCard({ token, onDetected }: DetectionCardProps) {
               </p>
             </div>
           ) : (
-            <div className="relative overflow-hidden rounded-2xl">
-              <Image
-                src={preview ?? ""}
-                alt="Fish preview"
-                width={800}
-                height={320}
-                unoptimized
-                className="h-[220px] w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-              <p className="absolute bottom-3 left-3 rounded-lg bg-black/60 px-2.5 py-1 text-xs text-white backdrop-blur-sm">
-                {file.name}
-              </p>
+            <div className="relative overflow-hidden rounded-2xl border border-[var(--card-border)]">
+              {/* Responsive container for visual SVG overlays */}
+              <div className="relative w-full h-[220px]">
+                <Image
+                  src={preview ?? ""}
+                  alt="Fish preview"
+                  fill
+                  unoptimized
+                  className="object-cover"
+                />
+
+                {/* VISUAL BOUNDING BOX OVERLAYS */}
+                {result?.bounding_boxes && (
+                  <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+                    {result.bounding_boxes.map((bbox: any, i: number) => {
+                      const [ymin, xmin, ymax, xmax] = bbox.box;
+                      const isBBoxHealthy = bbox.label.toLowerCase().includes("healthy");
+                      const color = isBBoxHealthy ? "#10b981" : "#ef4444";
+                      
+                      return (
+                        <g key={i}>
+                          <rect
+                            x={`${xmin * 100}%`}
+                            y={`${ymin * 100}%`}
+                            width={`${(xmax - xmin) * 100}%`}
+                            height={`${(ymax - ymin) * 100}%`}
+                            fill={isBBoxHealthy ? "rgba(16, 185, 129, 0.08)" : "rgba(239, 68, 68, 0.12)"}
+                            stroke={color}
+                            strokeWidth="2.5"
+                            strokeDasharray={isBBoxHealthy ? "none" : "4 2"}
+                            className={isBBoxHealthy ? "" : "animate-pulse"}
+                          />
+                          <foreignObject
+                            x={`${xmin * 100}%`}
+                            y={`${(ymin * 100) - 8}%`}
+                            width="140"
+                            height="20"
+                          >
+                            <span 
+                              style={{ backgroundColor: color }}
+                              className="text-[8px] font-black text-white px-1.5 py-0.5 rounded shadow uppercase tracking-wide inline-block"
+                            >
+                              {bbox.label} ({(bbox.confidence * 100).toFixed(0)}%)
+                            </span>
+                          </foreignObject>
+                        </g>
+                      );
+                    })}
+                  </svg>
+                )}
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
+              <div className="absolute bottom-3 left-3 flex items-center justify-between right-3 pointer-events-none">
+                <p className="rounded-lg bg-black/60 px-2.5 py-1 text-xs text-white backdrop-blur-sm">
+                  {file.name}
+                </p>
+                {file && (
+                  <button
+                    type="button"
+                    onClick={clearFile}
+                    className="rounded-lg p-1 bg-black/60 hover:bg-red-500/20 text-zinc-300 hover:text-red-400 backdrop-blur-sm pointer-events-auto transition"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
           )}
-
 
           {/* Analyze button */}
           <motion.button
             type="button"
             onClick={onSubmit}
-            disabled={loading || !file}
+            disabled={loading || !file || !selectedPondId}
             whileTap={{ scale: 0.98 }}
             className={cn(
               "flex h-11 w-full items-center justify-center gap-2 rounded-2xl text-sm font-semibold transition-all",
-              loading || !file
+              loading || !file || !selectedPondId
                 ? "cursor-not-allowed bg-blue-600/40 text-white/60"
                 : "bg-blue-600 text-white shadow-[0_4px_14px_rgba(37,99,235,0.4)] hover:bg-blue-700 hover:shadow-[0_6px_20px_rgba(37,99,235,0.5)]"
             )}
@@ -207,7 +299,7 @@ export function DetectionCard({ token, onDetected }: DetectionCardProps) {
             {loading ? (
               <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing…</>
             ) : (
-              <><Sparkles className="h-4 w-4" /> Analyze Fish</>
+              <><Sparkles className="h-4 w-4" /> Run Diagnosis Scan</>
             )}
           </motion.button>
 
@@ -240,24 +332,43 @@ export function DetectionCard({ token, onDetected }: DetectionCardProps) {
               {/* Status badge */}
               <div className={cn(
                 "flex items-center gap-2 rounded-2xl border px-4 py-3",
-                result.health_status.toLowerCase().includes("healthy")
-                  ? "border-blue-500/20 bg-blue-500/8"
-                  : "border-amber-500/20 bg-amber-500/8"
+                isHealthy
+                  ? "border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-950/10"
+                  : "border-red-500/20 bg-red-500/5 dark:bg-red-950/10"
               )}>
-                <CheckCircle2 className={cn("h-5 w-5", result.health_status.toLowerCase().includes("healthy") ? "text-blue-400" : "text-amber-400")} />
+                <CheckCircle2 className={cn("h-5 w-5", isHealthy ? "text-emerald-400 animate-pulse" : "text-red-400 animate-bounce")} />
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-tertiary)]">Diagnosis</p>
-                  <p className="text-sm font-semibold text-[var(--text-primary)]">{result.health_status}</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-tertiary)]">Diagnosis Status</p>
+                  <p className="text-sm font-semibold text-[var(--text-primary)]">
+                    {isHealthy ? "Healthy Nile Tilapia" : `Disease Flagged: ${result.health_status}`}
+                  </p>
                 </div>
                 <span className="ml-auto text-lg font-bold text-[var(--text-primary)]">
                   {formatBoostedConfidence(result.confidence_score, 1)}
                 </span>
               </div>
 
+              {/* DYNAMIC ALERT & ISOLATION PROTOCOLS CARD */}
+              {!isHealthy && (
+                <motion.div
+                  initial={{ scale: 0.95 }}
+                  animate={{ scale: 1 }}
+                  className="rounded-2xl border border-red-500/30 bg-red-500/5 p-4 space-y-2 animate-pulse"
+                >
+                  <div className="flex items-center gap-2 text-red-500">
+                    <AlertOctagon className="h-5 w-5 shrink-0" />
+                    <h4 className="text-xs font-bold uppercase tracking-wider">Immediate Biosecurity Isolation Required</h4>
+                  </div>
+                  <p className="text-xs leading-4 text-zinc-700 dark:text-zinc-300 font-medium">
+                    Critical infection profile identified. Place Pond units under immediate quarantine and isolate affected stock specimens to prevent biological leakage.
+                  </p>
+                </motion.div>
+              )}
+
               {/* Confidence bar */}
               <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--bg-secondary)] px-4 py-3">
                 <div className="mb-2 flex items-center justify-between text-xs text-[var(--text-tertiary)]">
-                  <span>Model confidence</span>
+                  <span>Inference Confidence</span>
                   <span>{formatBoostedConfidence(result.confidence_score, 1)}</span>
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-zinc-300/30 dark:bg-zinc-700/50">
@@ -265,7 +376,7 @@ export function DetectionCard({ token, onDetected }: DetectionCardProps) {
                     initial={{ width: 0 }}
                     animate={{ width: formatBoostedConfidence(result.confidence_score, 1) }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="h-full rounded-full bg-blue-500"
+                    className={`h-full rounded-full ${isHealthy ? "bg-emerald-500" : "bg-red-500"}`}
                   />
                 </div>
               </div>
@@ -273,7 +384,7 @@ export function DetectionCard({ token, onDetected }: DetectionCardProps) {
               {/* Treatment */}
               {result.treatment_recommendations ? (
                 <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--bg-secondary)] px-4 py-3">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-tertiary)]">Recommendation</p>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-tertiary)]">Isolation & Treatment Recommendations</p>
                   <p className="text-sm leading-relaxed text-[var(--text-secondary)]">{result.treatment_recommendations}</p>
                 </div>
               ) : null}
@@ -289,24 +400,6 @@ export function DetectionCard({ token, onDetected }: DetectionCardProps) {
                   {result.analysis_note}
                 </p>
               ) : null}
-
-              {/* Before/after images */}
-              {(result.before_image_b64 || result.after_image_b64) ? (
-                <div className="grid grid-cols-2 gap-2">
-                  {result.before_image_b64 ? (
-                    <div className="overflow-hidden rounded-xl">
-                      <p className="mb-1 text-[10px] text-[var(--text-tertiary)]">Before</p>
-                      <Image src={`data:image/jpeg;base64,${result.before_image_b64}`} alt="Before" width={240} height={96} unoptimized className="h-24 w-full rounded-lg object-cover" />
-                    </div>
-                  ) : null}
-                  {result.after_image_b64 ? (
-                    <div className="overflow-hidden rounded-xl">
-                      <p className="mb-1 text-[10px] text-[var(--text-tertiary)]">After</p>
-                      <Image src={`data:image/jpeg;base64,${result.after_image_b64}`} alt="After" width={240} height={96} unoptimized className="h-24 w-full rounded-lg object-cover" />
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
             </motion.div>
           ) : (
             <motion.div
@@ -314,14 +407,14 @@ export function DetectionCard({ token, onDetected }: DetectionCardProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex min-h-[220px] flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[var(--card-border)] text-center"
+              className="flex min-h-[220px] flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-[var(--card-border)] text-center bg-zinc-50/20 dark:bg-zinc-950/10"
             >
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600/10">
                 <Fish className="h-6 w-6 text-blue-400" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-[var(--text-primary)]">Analysis results</p>
-                <p className="mt-1 text-xs text-[var(--text-tertiary)]">Upload a fish photo or video and click Analyze</p>
+                <p className="text-sm font-semibold text-[var(--text-primary)]">Diagnosis scan results</p>
+                <p className="mt-1 text-xs text-[var(--text-tertiary)] font-medium">Select a pond, upload a fish photo/video, and execute scan</p>
               </div>
             </motion.div>
           )}

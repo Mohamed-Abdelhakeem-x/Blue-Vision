@@ -40,7 +40,4 @@ def normalize_user_text(text: str, *, field: str = "body") -> str:
     value = re.sub(r"\s*([,;:.!?])\s*", r"\1 ", value)
     value = _collapse_spaces(value)
 
-    if field == "plant_name":
-        return value.title()
-
     return value[:1].upper() + value[1:] if value else value

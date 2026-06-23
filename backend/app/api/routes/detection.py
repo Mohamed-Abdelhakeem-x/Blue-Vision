@@ -4,15 +4,19 @@ from typing import Annotated
 from typing import Literal
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user
+from app.api.deps import require_roles
 from app.db.session import get_session
 from app.models.media_upload import MediaUpload
 from app.models.analysis_history import AnalysisHistory
 from app.models.biological_health import BiologicalHealth
 from app.models.species_identification import SpeciesIdentification
 from app.models.user import User
+from app.models.farm_member import FarmMember
+from app.models.pond import Pond
+from app.models.alert import Alert
 from app.schemas.scan import DetectionResponse
 from app.services.recommendations import recommendation_for_label
 from app.services.rate_limiter import enforce_rate_limit
@@ -29,11 +33,11 @@ settings = get_settings()
 async def detect(
     request: Request,
     image: Annotated[UploadFile, File(...)],
+    pond_id: Annotated[str, Form(...)],
     domain: Annotated[Literal["color", "grayscale", "segmented"], Form()] = "color",
     segmented_image: UploadFile | None = File(default=None),
-    pond_id: Annotated[str | None, Form()] = None,
     session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_roles("Farm Manager")),
 ) -> DetectionResponse:
     await enforce_rate_limit(
         request=request,
@@ -42,6 +46,25 @@ async def detect(
         window_seconds=60,
         identity=f"user:{current_user.id}",
     )
+
+    # Validate that the pond belongs to the manager's farm
+    member = (await session.execute(
+        select(FarmMember).where(FarmMember.user_id == current_user.id)
+    )).scalar_one_or_none()
+    if not member:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Farm Manager does not belong to any farm."
+        )
+
+    pond = (await session.execute(
+        select(Pond).where(Pond.id == pond_id, Pond.farm_id == member.farm_id)
+    )).scalar_one_or_none()
+    if not pond:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Pond not found or access denied."
+        )
 
     ai = getattr(router, "ai_service", None)
     if ai is None:
@@ -117,6 +140,15 @@ async def detect(
     )
     session.add(species_id)
 
+    is_healthy = "healthy" in health_status.lower()
+    if not is_healthy:
+        alert = Alert(
+            user_id=current_user.id,
+            alert_type="AI Diagnostic anomaly",
+            message=f"High risk of {health_status} detected in Pond {pond.type} (ID: {pond.id[:8]}). Please trigger isolation protocols immediately."
+        )
+        session.add(alert)
+
     await session.commit()
 
     before_b64 = base64.b64encode(image_bytes).decode("utf-8")
@@ -126,6 +158,24 @@ async def detect(
         if segmented_bytes:
             validate_image_upload(segmented_image, segmented_bytes, field_name="segmented_image")
             after_b64 = base64.b64encode(segmented_bytes).decode("utf-8")
+
+    # Generate visual mock bounding boxes coordinate mapping
+    if is_healthy:
+        bboxes = [
+            {
+                "label": f"Healthy Nile Tilapia ({fish_species})",
+                "box": [0.15, 0.10, 0.85, 0.90],
+                "confidence": confidence
+            }
+        ]
+    else:
+        bboxes = [
+            {
+                "label": f"Infected ({health_status})",
+                "box": [0.25, 0.20, 0.75, 0.80],
+                "confidence": confidence
+            }
+        ]
 
     return DetectionResponse(
         health_status=health_status,
@@ -140,4 +190,5 @@ async def detect(
         is_low_confidence=bool(prediction.get("is_low_confidence", False)),
         analysis_note=prediction.get("analysis_note"),
         top_predictions=prediction.get("top_predictions", []),
+        bounding_boxes=bboxes,
     )

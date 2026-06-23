@@ -8,7 +8,7 @@ from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.api.routes import auth, chat, community, dashboard, detection, notifications, social, users, team
+from app.api.routes import auth, community, dashboard, detection, notifications, social, users, team, ponds
 from app.core.config import get_settings
 from app.core.logging_config import configure_logging
 from app.core.request_context import request_id as _request_id_ctx
@@ -51,19 +51,11 @@ async def lifespan(app: FastAPI):
     model_path = Path(settings.model_path)
     labels_path = Path(settings.labels_path)
     if not model_path.exists() or not labels_path.exists():
-        try:
-            from scripts.export_onnx import export as export_onnx
-        except ModuleNotFoundError as exc:
-            raise RuntimeError(
-                "Model artifacts are missing and ONNX export dependencies are unavailable. "
-                "Install torch/torchvision or provide prebuilt model artifacts."
-            ) from exc
-
-        export_onnx(settings.checkpoint_path)
+        raise RuntimeError("Model artifacts are missing. Please provide prebuilt model artifacts.")
 
     ai_service = AIService(model_path=settings.model_path, labels_path=settings.labels_path)
     app.state.ai_service = ai_service
-    detection.router.ai_service = ai_service
+    setattr(detection.router, "ai_service", ai_service)  # type: ignore
 
     async with SessionLocal() as session:
         await seed_metadata_if_empty(session, settings.labels_path)
@@ -114,11 +106,12 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 app.include_router(detection.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")
-app.include_router(chat.router, prefix="/api")
+
 app.include_router(community.router, prefix="/api")
 app.include_router(notifications.router, prefix="/api")
 app.include_router(social.router, prefix="/api")
 app.include_router(team.router, prefix="/api")
+app.include_router(ponds.router, prefix="/api")
 
 
 @app.get("/health")
@@ -158,7 +151,7 @@ async def metrics_prometheus() -> PlainTextResponse:
 
 
 @app.get("/slo")
-async def slo() -> dict[str, float | int | bool]:
+async def slo() -> dict[str, float | int | bool | str]:
     return render_slo_snapshot(
         target_availability=settings.slo_target_availability,
         target_p95_seconds=settings.slo_target_p95_seconds,

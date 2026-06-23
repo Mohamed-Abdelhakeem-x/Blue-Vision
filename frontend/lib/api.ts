@@ -725,11 +725,13 @@ export async function fetchTips(token: string): Promise<string[]> {
 export async function detectFish(input: {
   token: string;
   image: File;
+  pondId: string;
   segmented?: File;
   domain: string;
 }): Promise<DetectionResult> {
   const formData = new FormData();
   formData.append("image", input.image);
+  formData.append("pond_id", input.pondId);
   formData.append("domain", input.domain);
   if (input.segmented) {
     formData.append("segmented_image", input.segmented);
@@ -1264,6 +1266,25 @@ export async function inviteTeamMember(email: string, role: string = "Farm Manag
   }
 }
 
+export async function getMarketPrices() {
+  const res = await authFetch((token) => apiFetch(`${API_BASE}/market-prices`));
+  return res.json();
+}
+
+export async function updateMarketPrice(price_per_kg: number) {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/dashboard/market-price`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...authHeaders(token)
+      },
+      body: JSON.stringify({ price_per_kg }),
+    })
+  );
+  return res.json();
+}
+
 export async function getTeamMembers() {
   const res = await authFetch((token) =>
     apiFetch(`${API_BASE}/team/members`, {
@@ -1306,4 +1327,237 @@ export async function elevateRole(code: string, role: string = "AI Admin") {
   }
 
   return res.json() as Promise<UserProfile>;
+}
+
+// ----------------------------------------------------
+// POND CRUD & PLATFORM BI DASHBOARD API HELPERS
+// ----------------------------------------------------
+
+export interface PondResponse {
+  id: string;
+  farm_id: string;
+  type: string;
+  name: string | null;
+  size_sq_meters: number | null;
+  stocking_density: number | null;
+}
+
+export async function getPonds() {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/ponds`, {
+      method: "GET",
+      headers: authHeaders(token)
+    })
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, "ponds", "Failed to load ponds");
+  }
+
+  return res.json() as Promise<PondResponse[]>;
+}
+
+export async function createPond(payload: { type: string; name?: string; size_sq_meters: number; stocking_density: number }) {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/ponds`, {
+      method: "POST",
+      headers: { ...authHeaders(token), "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, "ponds", "Failed to create pond");
+  }
+
+  return res.json() as Promise<PondResponse>;
+}
+
+export async function updatePond(pondId: string, payload: { type?: string; name?: string; size_sq_meters?: number; stocking_density?: number }) {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/ponds/${pondId}`, {
+      method: "PUT",
+      headers: { ...authHeaders(token), "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, `ponds/${pondId}`, "Failed to update pond");
+  }
+
+  return res.json() as Promise<PondResponse>;
+}
+
+export async function deletePond(pondId: string) {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/ponds/${pondId}`, {
+      method: "DELETE",
+      headers: authHeaders(token)
+    })
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, `ponds/${pondId}`, "Failed to delete pond");
+  }
+}
+
+export async function getBiAnalytics() {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/dashboard/bi-analytics`, {
+      method: "GET",
+      headers: authHeaders(token)
+    })
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, "dashboard/bi-analytics", "Failed to load BI analytics");
+  }
+
+  return res.json();
+}
+
+export async function downloadTreasureReport() {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/dashboard/treasure-report`, {
+      method: "GET",
+      headers: authHeaders(token)
+    })
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, "dashboard/treasure-report", "Failed to download report");
+  }
+
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "the_treasure_monthly_report.pdf";
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  a.remove();
+}
+
+export async function getAdminAnalytics() {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/dashboard/admin-analytics`, {
+      method: "GET",
+      headers: authHeaders(token)
+    })
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, "dashboard/admin-analytics", "Failed to load admin metrics");
+  }
+
+  return res.json();
+}
+
+export async function getAdminSettings() {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/dashboard/admin-settings`, {
+      method: "GET",
+      headers: authHeaders(token)
+    })
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, "dashboard/admin-settings", "Failed to load admin settings");
+  }
+
+  return res.json() as Promise<{ sensitivity_threshold: number }>;
+}
+
+export async function updateAdminSettings(threshold: number) {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/dashboard/admin-settings`, {
+      method: "PUT",
+      headers: { ...authHeaders(token), "Content-Type": "application/json" },
+      body: JSON.stringify({ sensitivity_threshold: threshold })
+    })
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, "dashboard/admin-settings", "Failed to update admin settings");
+  }
+
+  return res.json();
+}
+
+export async function getTelemetry(pondId: string) {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/dashboard/telemetry?pond_id=${pondId}`, {
+      method: "GET",
+      headers: authHeaders(token)
+    })
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, "dashboard/telemetry", "Failed to load telemetry sensor data");
+  }
+
+  return res.json();
+}
+
+export async function getIncidents() {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/dashboard/incidents`, {
+      method: "GET",
+      headers: authHeaders(token)
+    })
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, "dashboard/incidents", "Failed to load active incidents");
+  }
+
+  return res.json() as Promise<Array<{ id: string; alert_type: string; message: string; created_at: string }>>;
+}
+
+export async function resolveIncident(alertId: string) {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/dashboard/incidents/${alertId}/resolve`, {
+      method: "POST",
+      headers: authHeaders(token)
+    })
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, `dashboard/incidents/${alertId}/resolve`, "Failed to resolve incident");
+  }
+
+  return res.json();
+}
+
+export async function triggerMlopsRetrain() {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/dashboard/mlops/retrain`, {
+      method: "POST",
+      headers: authHeaders(token)
+    })
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, "dashboard/mlops/retrain", "Failed to trigger MLOps retraining");
+  }
+
+  return res.json();
+}
+
+export async function hotswapModelWeights(version: string) {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/dashboard/mlops/hotswap`, {
+      method: "POST",
+      headers: { ...authHeaders(token), "Content-Type": "application/json" },
+      body: JSON.stringify({ version })
+    })
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, "dashboard/mlops/hotswap", "Failed to hotswap weights");
+  }
+
+  return res.json();
 }
