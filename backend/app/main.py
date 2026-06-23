@@ -8,7 +8,7 @@ from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.api.routes import auth, community, dashboard, detection, notifications, social, users, team, ponds
+from app.api.routes import auth, community, dashboard, detection, notifications, social, users, team, ponds, chatbot
 from app.core.config import get_settings
 from app.core.logging_config import configure_logging
 from app.core.request_context import request_id as _request_id_ctx
@@ -112,6 +112,7 @@ app.include_router(notifications.router, prefix="/api")
 app.include_router(social.router, prefix="/api")
 app.include_router(team.router, prefix="/api")
 app.include_router(ponds.router, prefix="/api")
+app.include_router(chatbot.router, prefix="/api")
 
 
 @app.get("/health")

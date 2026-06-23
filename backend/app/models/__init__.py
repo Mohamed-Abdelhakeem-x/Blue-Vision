@@ -21,7 +21,8 @@ from app.models.species_identification import SpeciesIdentification
 from app.models.user import User
 from app.models.farm_member import FarmMember
 from app.models.team_invitation import TeamInvitation
-
+from app.models.chat_session import ChatSession
+from app.models.chat_message import ChatMessage
 __all__ = [
     "Alert",
     "EmailVerification",
@@ -46,4 +47,6 @@ __all__ = [
     "User",
     "FarmMember",
     "TeamInvitation",
+    "ChatSession",
+    "ChatMessage",
 ]

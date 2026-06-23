@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     chatbot_base_url: str = "http://ollama:11434"
     chatbot_auto_pull_model: bool = True
     chatbot_pull_timeout_seconds: int = 900
+    gemini_api_key: str = ""
+    groq_api_key: str = ""
+    chroma_db_path: str = str(BACKEND_DIR / "data" / "db_v5")
     upload_max_bytes: int = 5 * 1024 * 1024
     upload_allowed_mime_types: str = "image/jpeg,image/png,image/webp"
     rate_limit_signup_per_minute: int = 10

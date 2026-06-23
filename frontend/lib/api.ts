@@ -28,7 +28,7 @@ const ROLE_KEY = "bluevision_user_role";
 const PROFILE_KEY = "bluevision_user_profile";
 export const AUTH_STATE_CHANGED_EVENT = "bluevision-auth-state-changed";
 
-const REQUEST_TIMEOUT_MS = 15000;
+const REQUEST_TIMEOUT_MS = 60000;
 const RETRYABLE_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
 
 let activeApiBase = API_BASE;
@@ -1560,4 +1560,76 @@ export async function hotswapModelWeights(version: string) {
   }
 
   return res.json();
+}
+
+export async function getChatSessions(token: string) {
+  const res = await authFetch(async (authToken) =>
+    apiFetch(`${API_BASE}/chatbot/sessions`, {
+      method: "GET",
+      headers: authHeaders(authToken)
+    }),
+    token
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, "chatbot/sessions", "Failed to load chat sessions");
+  }
+
+  return res.json() as Promise<Array<{ id: string; title: string; created_at: string; updated_at: string }>>;
+}
+
+export async function getChatMessages(input: { token: string; sessionId: string }) {
+  const res = await authFetch(async (authToken) =>
+    apiFetch(`${API_BASE}/chatbot/sessions/${input.sessionId}/messages`, {
+      method: "GET",
+      headers: authHeaders(authToken)
+    }),
+    input.token
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, `chatbot/sessions/${input.sessionId}/messages`, "Failed to load messages");
+  }
+
+  return res.json() as Promise<Array<{ id: string; role: string; content: string; created_at: string }>>;
+}
+
+export async function deleteChatSession(input: { token: string; sessionId: string }) {
+  const res = await authFetch(async (authToken) =>
+    apiFetch(`${API_BASE}/chatbot/sessions/${input.sessionId}`, {
+      method: "DELETE",
+      headers: authHeaders(authToken)
+    }),
+    input.token
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, `chatbot/sessions/${input.sessionId}`, "Failed to delete session");
+  }
+
+  return res.json();
+}
+
+export async function askChatbot(input: {
+  token: string;
+  question: string;
+  sessionId?: string;
+}): Promise<{answer: string; session_id: string}> {
+  const res = await authFetch(async (authToken) =>
+    apiFetch(`${API_BASE}/chatbot/ask`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...authHeaders(authToken)
+      },
+      body: JSON.stringify({ question: input.question, session_id: input.sessionId })
+    }),
+    input.token
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, "chatbot/ask", "Failed to get an answer");
+  }
+
+  return res.json() as Promise<{answer: string; session_id: string}>;
 }

@@ -204,7 +204,7 @@
     }
   },
   "chat": {
-    "title": "Aquaculture Expert Chat",
+    "title": "BlueVision Assistant",
     "welcome": "Welcome to Aquaculture Expert",
     "subtitle": "Ask questions about fish health, disease treatment, and aquaculture practices. I'll respond in your language.",
     "inputPlaceholder": "Ask a question about your fish...",

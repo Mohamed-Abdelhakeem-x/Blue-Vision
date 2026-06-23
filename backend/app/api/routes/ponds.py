@@ -60,6 +60,7 @@ async def create_pond(
     pond = Pond(
         farm_id=farm_id,
         type=payload.type.value,
+        name=payload.name,
         size_sq_meters=payload.size_sq_meters,
         stocking_density=payload.stocking_density
     )
@@ -131,6 +132,8 @@ async def update_pond(
         
     if payload.type is not None:
         pond.type = payload.type.value
+    if payload.name is not None:
+        pond.name = payload.name
     if payload.size_sq_meters is not None:
         pond.size_sq_meters = payload.size_sq_meters
     if payload.stocking_density is not None:

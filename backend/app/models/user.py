@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 from sqlalchemy import DateTime, ForeignKey, String
@@ -16,7 +16,7 @@ class User(Base):
     role_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("roles.id", ondelete="SET NULL"), index=True, nullable=True)
     avatar_sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
     hashed_password: Mapped[str] = mapped_column(String(255))
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     last_login: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     role = relationship("Role", back_populates="users")
@@ -36,3 +36,4 @@ class User(Base):
     friendships_as_user_two = relationship("Friendship", foreign_keys="Friendship.user_two_id", back_populates="user_two", cascade="all,delete-orphan")
     sent_direct_messages = relationship("DirectMessage", foreign_keys="DirectMessage.sender_id", back_populates="sender", cascade="all,delete-orphan")
     received_direct_messages = relationship("DirectMessage", foreign_keys="DirectMessage.receiver_id", back_populates="receiver", cascade="all,delete-orphan")
+    chat_sessions = relationship("ChatSession", back_populates="user", cascade="all,delete-orphan")

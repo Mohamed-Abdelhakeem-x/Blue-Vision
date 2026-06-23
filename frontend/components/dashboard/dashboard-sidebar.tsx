@@ -173,6 +173,7 @@ function SidePanelContent({
 
   const quickLinks = [
     {id: "dashboard", label: copy.home, href: "/dashboard", icon: Home},
+    {id: "chatbot", label: copy.chat, href: "/dashboard/chatbot", icon: MessageSquareHeart},
     {id: "social", label: locale === "ar" ? "التواصل" : "Social", href: "/social", icon: Users},
     {id: "community", label: copy.community, href: "/community", icon: Users},
     {id: "notifications", label: copy.notifications, href: "/notifications", icon: Bell},
@@ -233,7 +234,9 @@ function SidePanelContent({
         )}
         <ul className={cn("mt-2 space-y-2", collapsed && "mt-0 flex flex-col items-center gap-2 space-y-0")}>
           {quickLinks.map((link) => {
-            const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
+            const isActive = link.href === "/dashboard" 
+              ? pathname === "/dashboard" 
+              : pathname === link.href || pathname.startsWith(`${link.href}/`);
             return (
               <li key={link.id} className="w-full">
                 <NavLink

@@ -88,7 +88,8 @@ export function DashboardTopNav({
 
   const quickLinks = [
     {id: "dashboard", label: copy.home, href: "/dashboard", icon: Home},
-    {id: "social", label: locale === "ar" ? "التواصل" : "Social", href: "/social", icon: MessageSquareHeart},
+    {id: "chatbot", label: copy.chat, href: "/dashboard/chatbot", icon: MessageSquareHeart},
+    {id: "social", label: locale === "ar" ? "التواصل" : "Social", href: "/social", icon: Users},
     {id: "community", label: copy.community, href: "/community", icon: Users},
     {id: "notifications", label: copy.notifications, href: "/notifications", icon: Bell},
     {id: "profile", label: copy.profile, href: "/profile", icon: UserRound},
@@ -170,7 +171,9 @@ export function DashboardTopNav({
             <div className="mx-2 h-6 w-px bg-[var(--card-border)]" />
 
             {quickLinks.map((link) => {
-              const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
+              const isActive = link.href === "/dashboard" 
+                ? pathname === "/dashboard" 
+                : pathname === link.href || pathname.startsWith(`${link.href}/`);
               const Icon = link.icon;
               return (
                 <Link key={link.id} href={link.href} className={cn("relative flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]", isActive ? "text-blue-600 bg-blue-600/10" : "text-[var(--text-secondary)]")} title={link.label}>
@@ -225,7 +228,9 @@ export function DashboardTopNav({
             <div className="space-y-1">
               <p className="px-2 text-xs font-semibold uppercase text-[var(--text-tertiary)]">{copy.navigate}</p>
               {quickLinks.map((link) => {
-                const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
+                const isActive = link.href === "/dashboard" 
+                  ? pathname === "/dashboard" 
+                  : pathname === link.href || pathname.startsWith(`${link.href}/`);
                 const Icon = link.icon;
                 return (
                   <Link key={link.id} href={link.href} onClick={() => setIsOpen(false)} className={cn(

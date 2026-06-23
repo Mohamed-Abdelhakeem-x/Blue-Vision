@@ -16,9 +16,10 @@ interface DetectionCardProps {
   token: string | null;
   onDetected: (result: DetectionResult) => void;
   onPondSelected?: (pondId: string) => void;
+  triggerReloadPonds?: boolean;
 }
 
-export function DetectionCard({ token, onDetected, onPondSelected }: DetectionCardProps) {
+export function DetectionCard({ token, onDetected, onPondSelected, triggerReloadPonds }: DetectionCardProps) {
   const maxSize = 50 * 1024 * 1024;
   const [file, setFile] = useState<File | null>(null);
 
@@ -49,7 +50,7 @@ export function DetectionCard({ token, onDetected, onPondSelected }: DetectionCa
         }
       })
       .catch((err) => console.error("Error loading ponds:", err));
-  }, []);
+  }, [triggerReloadPonds]);
 
   const handlePondChange = (id: string) => {
     setSelectedPondId(id);
@@ -150,7 +151,7 @@ export function DetectionCard({ token, onDetected, onPondSelected }: DetectionCa
               onChange={(e) => handlePondChange(e.target.value)}
             >
               {ponds.map((p) => (
-                <option key={p.id} value={p.id}>{p.type} ({p.id.slice(0, 8)})</option>
+                <option key={p.id} value={p.id}>{p.name ? `${p.name} (${p.type})` : `${p.type} (${p.id.slice(0, 8)})`}</option>
               ))}
             </select>
           )}

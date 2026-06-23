@@ -19,6 +19,7 @@ class PondCreate(PondBase):
 
 class PondUpdate(BaseModel):
     type: PondType | None = None
+    name: str | None = None
     size_sq_meters: float | None = Field(default=None, ge=0)
     stocking_density: float | None = Field(default=None, ge=0)
 

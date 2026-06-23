@@ -483,6 +483,7 @@ export function RoleDashboard() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [activeTelemetryPondId, setActiveTelemetryPondId] = useState<string | null>(null);
   const [reloadIncidents, setReloadIncidents] = useState<boolean>(false);
+  const [reloadPonds, setReloadPonds] = useState<boolean>(false);
 
   const pushNotice = (kind: NoticeKind, message: string) => {
     const id = Date.now() + Math.floor(Math.random() * 10000);
@@ -769,6 +770,7 @@ export function RoleDashboard() {
                   token={token} 
                   onDetected={() => setReloadIncidents(prev => !prev)}
                   onPondSelected={setActiveTelemetryPondId}
+                  triggerReloadPonds={reloadPonds}
                 />
               </div>
               <div className="space-y-6">
@@ -780,6 +782,7 @@ export function RoleDashboard() {
             {/* Daily Pond spec CRUD manager */}
             <div className="rounded-[1.75rem] border border-[var(--card-border)] bg-[var(--card-bg)] p-6 shadow-[0_4px_32px_rgba(15,23,42,0.08)]">
               <PondManagement onPondsUpdated={(ponds) => {
+                setReloadPonds(prev => !prev);
                 if (ponds.length > 0 && !activeTelemetryPondId) {
                   setActiveTelemetryPondId(ponds[0].id);
                 }
