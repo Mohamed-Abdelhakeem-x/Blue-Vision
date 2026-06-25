@@ -16,7 +16,7 @@ export function FloatingField({label, className, ...props}: FloatingFieldProps) 
         id={id}
         placeholder=" "
         className={cn(
-          "peer h-12 border-[var(--card-border)] bg-[var(--bg-primary)] pt-5 text-[var(--text-primary)]",
+          "peer h-14 border-[var(--card-border)] bg-[var(--bg-primary)] pt-6 pb-1 text-[var(--text-primary)]",
           "focus:border-[#2563eb] focus:ring-0 focus:outline-none",
           className
         )}
@@ -24,7 +24,7 @@ export function FloatingField({label, className, ...props}: FloatingFieldProps) 
       />
       <label
         htmlFor={id}
-        className="pointer-events-none absolute start-3 top-2.5 text-xs text-[var(--text-tertiary)] transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm peer-focus:top-2.5 peer-focus:text-xs peer-focus:text-[#2563eb]"
+        className="pointer-events-none absolute start-3 top-2 text-xs text-[var(--text-tertiary)] transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-xs peer-focus:text-[#2563eb]"
       >
         {label}
       </label>

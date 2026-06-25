@@ -1,5 +1,13 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator
+from email_validator import validate_email, EmailNotValidError
 import re
+
+def validate_deliverable_email(email: str) -> str:
+    try:
+        emailinfo = validate_email(email, check_deliverability=True)
+        return emailinfo.normalized
+    except EmailNotValidError as e:
+        raise ValueError(str(e))
 
 
 def validate_password_strength(password: str) -> str:
@@ -19,11 +27,16 @@ def validate_password_strength(password: str) -> str:
 
 
 class SignUpRequest(BaseModel):
-    email: EmailStr
+    email: str
     full_name: str = Field(min_length=2, max_length=120)
     password: str = Field(min_length=8, max_length=128)
     verification_code: str
     invite_token: str | None = None
+
+    @field_validator("email")
+    @classmethod
+    def check_email_deliverability(cls, v: str) -> str:
+        return validate_deliverable_email(v)
 
     @field_validator("password")
     @classmethod
@@ -32,7 +45,7 @@ class SignUpRequest(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 
@@ -47,8 +60,13 @@ class RefreshTokenRequest(BaseModel):
 
 
 class EmailVerificationRequest(BaseModel):
-    email: EmailStr
+    email: str
     purpose: str = "signup"
+
+    @field_validator("email")
+    @classmethod
+    def check_email_deliverability(cls, v: str) -> str:
+        return validate_deliverable_email(v)
 
 
 class EmailVerificationConfirm(BaseModel):

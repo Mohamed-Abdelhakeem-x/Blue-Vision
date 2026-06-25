@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Check, Loader2, Info, XCircle } from "lucide-react";
+import { ArrowRight, Check, Loader2, Info, XCircle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -187,6 +187,11 @@ function RegisterForm() {
   if (inviteError) {
     return (
       <main className="relative min-h-[calc(100vh-90px)] overflow-hidden bg-[var(--bg-primary)] text-[var(--text-primary)]">
+        {/* Back to Home Button */}
+        <Link href="/" className="absolute top-6 left-6 flex items-center gap-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors z-50">
+          <ArrowLeft className="w-4 h-4" />
+          Back to Home
+        </Link>
         <div className="mx-auto flex min-h-[calc(100vh-90px)] w-full max-w-md flex-col items-center justify-center px-4 py-10">
           <Card className="w-full rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-7 text-center shadow-[var(--shadow-md)]">
             <XCircle className="mx-auto h-12 w-12 text-red-500" />
@@ -203,6 +208,11 @@ function RegisterForm() {
 
   return (
     <main className="relative min-h-[calc(100vh-90px)] overflow-hidden bg-[var(--bg-primary)] text-[var(--text-primary)]">
+      {/* Back to Home Button */}
+      <Link href="/" className="absolute top-6 left-6 flex items-center gap-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors z-50">
+        <ArrowLeft className="w-4 h-4" />
+        Back to Home
+      </Link>
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute right-[-8rem] top-8 h-72 w-72 rounded-full bg-blue-600/10 blur-3xl" />
         <div className="absolute bottom-0 left-[-8rem] h-80 w-80 rounded-full bg-zinc-500/10 blur-3xl" />

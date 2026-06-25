@@ -40,15 +40,24 @@ async def invite_member(
     )).scalar_one_or_none()
     
     if existing_user:
-        existing_member = (await session.execute(
-            select(FarmMember).where(
-                FarmMember.farm_id == farm.id,
-                FarmMember.user_id == existing_user.id
-            )
+        user_with_farms = (await session.execute(
+            select(User)
+            .options(selectinload(User.fish_farms), selectinload(User.farm_memberships))
+            .where(User.id == existing_user.id)
         )).scalar_one_or_none()
         
-        if existing_member:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User is already a member of this farm.")
+        if user_with_farms:
+            is_member_here = any(m.farm_id == farm.id for m in user_with_farms.farm_memberships)
+            is_owner_here = any(f.id == farm.id for f in user_with_farms.fish_farms)
+            
+            if is_member_here or is_owner_here:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User is already a member of this farm.")
+                
+            if user_with_farms.fish_farms or user_with_farms.farm_memberships:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST, 
+                    detail="This user already belongs to another farm. They must leave their current farm before they can be invited."
+                )
             
     # Check if a pending invite already exists
     existing_invite = (await session.execute(
@@ -162,8 +171,16 @@ async def remove_member(
     if not member:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Member not found.")
         
-    # Also optionally delete the user's sessions or change their role?
-    # For now, just removing them from the farm is enough. Next time they log in, they have no farm access.
+    # Invalidate the user's active sessions so they are logged out immediately
+    from app.models.refresh_token import RefreshToken
+    from sqlalchemy import update
+    now = datetime.now(timezone.utc)
+    stmt = (
+        update(RefreshToken)
+        .where(RefreshToken.user_id == member.user_id, RefreshToken.revoked_at.is_(None))
+        .values(revoked_at=now)
+    )
+    await session.execute(stmt)
     
     await session.delete(member)
     await session.commit()

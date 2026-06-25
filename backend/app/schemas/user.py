@@ -11,6 +11,7 @@ class UserResponse(BaseModel):
     email: EmailStr
     full_name: str
     role: UserRole
+    has_farm: bool = True
     avatar_b64: str | None = None
     created_at: datetime
 

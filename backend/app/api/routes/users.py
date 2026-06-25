@@ -17,6 +17,7 @@ from app.models.biological_health import BiologicalHealth
 from app.models.species_identification import SpeciesIdentification
 from app.models.user import User
 from app.models.role import Role
+from app.models.fish_farm import FishFarm
 from app.schemas.user import (
     RoleCodeUpdateRequest,
     UserProfileDetailResponse,
@@ -39,12 +40,26 @@ def get_role_name(user: User) -> str:
     return getattr(user.role, "role_name", "farmer") if hasattr(user, "role") and user.role else "farmer"
 
 @router.get("/me", response_model=UserResponse)
-async def me(current_user: User = Depends(get_current_user)) -> UserResponse:
+async def me(
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+) -> UserResponse:
+    from sqlalchemy.orm import selectinload
+    user_with_farms = (await session.execute(
+        select(User).options(selectinload(User.fish_farms), selectinload(User.farm_memberships))
+        .where(User.id == current_user.id)
+    )).scalar_one_or_none()
+    
+    has_farm = False
+    if user_with_farms:
+        has_farm = bool(user_with_farms.fish_farms or user_with_farms.farm_memberships)
+
     return UserResponse(
         id=current_user.id,
         email=current_user.email,
         full_name=current_user.full_name,
         role=get_role_name(current_user),
+        has_farm=has_farm,
         avatar_b64=load_profile_image_b64(current_user.avatar_sha256),
         created_at=current_user.created_at,
     )
@@ -144,6 +159,85 @@ async def update_my_profile(
         avatar_b64=load_profile_image_b64(current_user.avatar_sha256),
         created_at=current_user.created_at,
     )
+
+
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_my_account(
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    from app.models.refresh_token import RefreshToken
+    from sqlalchemy import update
+    import datetime
+    
+    # Invalidate all refresh tokens for this user
+    now = datetime.datetime.now(datetime.timezone.utc)
+    stmt = (
+        update(RefreshToken)
+        .where(RefreshToken.user_id == current_user.id, RefreshToken.revoked_at.is_(None))
+        .values(revoked_at=now)
+    )
+    await session.execute(stmt)
+    
+    # Delete the user. Because of `cascade="all,delete-orphan"` on `User.fish_farms` 
+    # and `User.farm_memberships`, related core entries will be removed automatically.
+    await session.delete(current_user)
+    await session.commit()
+    
+    audit_event(
+        event="users.delete_account",
+        outcome="success",
+        request=request,
+        user_id=current_user.id,
+        email=current_user.email
+    )
+    return None
+
+
+@router.post("/me/create-farm")
+async def create_personal_farm(
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    from sqlalchemy.orm import selectinload
+    user = (await session.execute(
+        select(User)
+        .options(selectinload(User.fish_farms), selectinload(User.farm_memberships))
+        .where(User.id == current_user.id)
+    )).scalar_one_or_none()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    if user.fish_farms or user.farm_memberships:
+        raise HTTPException(status_code=400, detail="User already belongs to a farm.")
+        
+    role_stmt = select(Role).where(Role.role_name == "Owner")
+    role = (await session.execute(role_stmt)).scalar_one_or_none()
+    
+    if not role:
+        role = Role(role_name="Owner", privileges={})
+        session.add(role)
+        await session.flush()
+        
+    user.role_id = role.id
+    
+    farm = FishFarm(
+        user_id=user.id,
+        farm_name=f"{user.full_name}'s Farm"
+    )
+    session.add(farm)
+    await session.commit()
+    
+    audit_event(
+        event="users.create_farm",
+        outcome="success",
+        user_id=user.id,
+        email=user.email,
+    )
+    
+    return {"status": "ok", "message": "Farm created and user upgraded to Owner."}
 
 
 @router.get("", response_model=list[UserResponse])

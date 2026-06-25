@@ -1321,12 +1321,39 @@ export async function elevateRole(code: string, role: string = "AI Admin") {
       body: JSON.stringify({ code, role })
     })
   );
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(json.detail || "Failed to update role");
+  }
+  return json as UserProfile;
+}
+
+export async function createFarm(token: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/users/me/create-farm`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
 
   if (!res.ok) {
-    await handleApiError(res, "users/elevate-role", "Failed to elevate role");
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || "Failed to create farm");
   }
+}
 
-  return res.json() as Promise<UserProfile>;
+export async function deleteMyAccount(token: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/users/me`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.detail || "Failed to delete account");
+  }
 }
 
 // ----------------------------------------------------

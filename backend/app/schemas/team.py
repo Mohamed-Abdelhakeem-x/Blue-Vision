@@ -1,10 +1,16 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
+from app.schemas.auth import validate_deliverable_email
 from datetime import datetime
 
 class InviteMemberRequest(BaseModel):
-    email: EmailStr
+    email: str
     # E.g. "Farm Manager"
     role: str = "Farm Manager"
+
+    @field_validator("email")
+    @classmethod
+    def check_email_deliverability(cls, v: str) -> str:
+        return validate_deliverable_email(v)
 
 class FarmMemberResponse(BaseModel):
     id: str

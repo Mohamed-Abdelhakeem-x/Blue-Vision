@@ -269,50 +269,27 @@ export function OwnerBiDashboard() {
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        {/* Disease financial trends breakdown */}
-        <div className="rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-5 md:col-span-2">
-          <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 mb-4 flex items-center gap-1.5">
-            Infection Financial Impact Projection
-          </h3>
-          <div className="space-y-3">
-            {d.disease_trends.map((t, idx) => (
-              <div key={idx} className="flex flex-col gap-1.5 bg-black/5 dark:bg-white/5 p-3 rounded-xl">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-[var(--text-primary)]">{t.disease}</span>
-                  <span className="font-black text-red-500">{t.loss_egp.toLocaleString()} EGP</span>
-                </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
-                  <div
-                    style={{ width: `${d.financial_loss_egp > 0 ? (t.loss_egp / d.financial_loss_egp) * 100 : 0}%` }}
-                    className="h-full rounded-full bg-red-500"
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
+      <div className="mt-6">
         {/* The Treasure: PDF download */}
-        <div className="rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-600/5 to-transparent p-5 flex flex-col justify-between">
-          <div className="space-y-2">
+        <div className="rounded-2xl border border-blue-500/20 bg-gradient-to-br from-blue-600/5 to-transparent p-5 md:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="space-y-2 flex-1 max-w-2xl">
             <h3 className="text-sm font-black text-blue-500 flex items-center gap-1.5 uppercase tracking-wide">
               <Sparkles className="h-4 w-4" />
-              The Treasure Report
+              PDF Report
             </h3>
-            <p className="text-xs leading-5 text-[var(--text-secondary)]">
-              Download your comprehensive, executive-ready monthly PDF report in one-click. Summarizes biomass analytics, water stability indexes, FCR values, and security audit certifications.
+            <p className="text-xs md:text-sm leading-relaxed text-[var(--text-secondary)]">
+              Download your comprehensive, executive-ready PDF report in one-click. Summarizes biomass analytics, water stability indexes, FCR values, and security audit certifications.
             </p>
           </div>
           <Button
             onClick={handleDownloadReport}
             disabled={downloading}
-            className="w-full mt-4 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-2.5 text-xs font-bold transition shadow-md"
+            className="w-full md:w-auto shrink-0 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-3 px-6 text-sm font-bold transition shadow-md"
           >
             {downloading ? (
-              <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Fetching audited PDF…</>
+              <><Loader2 className="h-4 w-4 animate-spin" /> Fetching audited PDF…</>
             ) : (
-              <><FileText className="h-3.5 w-3.5" /> Download Monthly Report</>
+              <><FileText className="h-4 w-4" /> Download Report</>
             )}
           </Button>
         </div>

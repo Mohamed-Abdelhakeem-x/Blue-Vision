@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Check, Loader2 } from "lucide-react";
+import { ArrowRight, Check, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -51,6 +51,12 @@ export default function LoginPage() {
 
   return (
     <main className="relative min-h-[calc(100vh-90px)] overflow-hidden bg-[var(--bg-primary)] text-[var(--text-primary)]">
+      
+      {/* Back to Home Button */}
+      <Link href="/" className="absolute top-6 left-6 flex items-center gap-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors z-50">
+        <ArrowLeft className="w-4 h-4" />
+        Back to Home
+      </Link>
 
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute left-[-8rem] top-10 h-72 w-72 rounded-full bg-blue-600/10 blur-3xl" />
@@ -84,14 +90,13 @@ export default function LoginPage() {
 
             <form onSubmit={onSubmit} className="mt-6 space-y-3">
               <FloatingField
-                label={t("common.email")}
-                type="email"
-                autoComplete="email"
+                label={t("common.usernameOrEmail")}
+                type="text"
+                autoComplete="username"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 required
               />
-              <p className="-mt-1 text-xs text-[var(--text-tertiary)]">{t("common.emailHint")}</p>
               <FloatingField
                 label={t("common.password")}
                 type="password"

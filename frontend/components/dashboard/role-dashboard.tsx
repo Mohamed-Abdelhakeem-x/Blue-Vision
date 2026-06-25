@@ -1,4 +1,5 @@
 "use client";
+// Force Next.js Turbopack reload
 
 import {useEffect, useMemo, useState} from "react";
 import {AlertCircle, CheckCircle2, Code2, Info, Loader2, Settings2, ShieldCheck, Users, X} from "lucide-react";
@@ -15,7 +16,8 @@ import {
   logoutCurrentSession,
   storeUserRole,
   storeUserProfile,
-  updateUserRole
+  updateUserRole,
+  createFarm
 } from "@/lib/api";
 import {Button} from "@/components/ui/button";
 import {DashboardShell} from "@/components/dashboard/dashboard-shell";
@@ -484,6 +486,7 @@ export function RoleDashboard() {
   const [activeTelemetryPondId, setActiveTelemetryPondId] = useState<string | null>(null);
   const [reloadIncidents, setReloadIncidents] = useState<boolean>(false);
   const [reloadPonds, setReloadPonds] = useState<boolean>(false);
+  const [creatingFarm, setCreatingFarm] = useState(false);
 
   const pushNotice = (kind: NoticeKind, message: string) => {
     const id = Date.now() + Math.floor(Math.random() * 10000);
@@ -499,7 +502,6 @@ export function RoleDashboard() {
         {id: "scan", label: copy.navScan, icon: "fish"},
         {id: "analyze", label: copy.navAnalyze, icon: "activity"},
         {id: "act", label: copy.navAct, icon: "clipboard"},
-        {id: "scan-history", label: t("history.title"), icon: "history", href: "/scan-history"},
         {id: "team-management", label: "Team Management", icon: "users"}
       ];
     }
@@ -719,6 +721,55 @@ export function RoleDashboard() {
           >
             {copy.goToLogin}
           </Button>
+        </div>
+      </main>
+    );
+  }
+
+  if (user && user.has_farm === false) {
+    return (
+      <main className="flex min-h-[100svh] flex-col items-center justify-center bg-[var(--bg-primary)] px-4">
+        <NotificationStack notices={notices} dismissLabel={copy.dismissNotification} onDismiss={(id) => setNotices((prev) => prev.filter((notice) => notice.id !== id))} />
+        <div className="w-full max-w-md rounded-3xl border border-[var(--card-border)] bg-[var(--card-bg)] p-8 text-center shadow-xl">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+            <Info className="h-8 w-8" />
+          </div>
+          <h1 className="mb-2 text-2xl font-bold text-[var(--text-primary)]">Welcome to Blue-Vision</h1>
+          <p className="mb-8 text-sm text-[var(--text-secondary)]">
+            It looks like you don't belong to any farm yet. You can create your own farm to get started, or wait for an invitation from an existing farm owner.
+          </p>
+          <div className="space-y-4">
+            <Button
+              className="w-full h-12 text-base font-medium"
+              disabled={creatingFarm}
+              onClick={async () => {
+                if (!token) return;
+                try {
+                  setCreatingFarm(true);
+                  await createFarm(token);
+                  window.location.reload();
+                } catch (err) {
+                  pushNotice("error", err instanceof Error ? err.message : "Failed to create farm");
+                  setCreatingFarm(false);
+                }
+              }}
+            >
+              {creatingFarm ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
+              Create a New Farm
+            </Button>
+            <Button
+              variant="secondary"
+              className="w-full h-12 text-base font-medium"
+              onClick={async () => {
+                try {
+                  await logoutCurrentSession();
+                } catch {}
+                window.location.href = "/login";
+              }}
+            >
+              Log out
+            </Button>
+          </div>
         </div>
       </main>
     );

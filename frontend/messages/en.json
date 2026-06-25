@@ -58,6 +58,7 @@
     "common": {
       "username": "Username",
       "email": "Email",
+      "usernameOrEmail": "Username or Email",
       "password": "Password",
       "confirmPassword": "Confirm password",
       "emailHint": "Use a valid email format, for example name@domain.com.",

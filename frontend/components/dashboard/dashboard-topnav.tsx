@@ -18,11 +18,11 @@ import {
   Users,
   X
 } from "lucide-react";
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {useLocale} from "next-intl";
 
 import {Link, usePathname} from "@/i18n/navigation";
-import {fetchNotifications, getStoredAccessToken, logoutCurrentSession} from "@/lib/api";
+import {fetchNotifications, getStoredAccessToken, logoutCurrentSession, getStoredRole} from "@/lib/api";
 import {getDashboardCopy} from "@/lib/dashboard-copy";
 import type {AppLocale} from "@/i18n/routing";
 import {Button} from "@/components/ui/button";
@@ -95,6 +95,16 @@ export function DashboardTopNav({
     {id: "profile", label: copy.profile, href: "/profile", icon: UserRound},
     {id: "history", label: copy.history, href: "/scan-history", icon: History}
   ];
+  
+  const [role, setRole] = useState<string | null>(null);
+  useEffect(() => {
+    setRole(getStoredRole());
+  }, []);
+
+  const visibleQuickLinks = quickLinks.filter(link => {
+    if (link.id === "history" && role === "Owner") return false;
+    return true;
+  });
 
   const handleNavigate = (sectionId: string) => {
     onSectionNavigate?.(sectionId);
@@ -170,7 +180,7 @@ export function DashboardTopNav({
 
             <div className="mx-2 h-6 w-px bg-[var(--card-border)]" />
 
-            {quickLinks.map((link) => {
+            {visibleQuickLinks.map((link) => {
               const isActive = link.href === "/dashboard" 
                 ? pathname === "/dashboard" 
                 : pathname === link.href || pathname.startsWith(`${link.href}/`);
@@ -227,7 +237,7 @@ export function DashboardTopNav({
             
             <div className="space-y-1">
               <p className="px-2 text-xs font-semibold uppercase text-[var(--text-tertiary)]">{copy.navigate}</p>
-              {quickLinks.map((link) => {
+              {visibleQuickLinks.map((link) => {
                 const isActive = link.href === "/dashboard" 
                   ? pathname === "/dashboard" 
                   : pathname === link.href || pathname.startsWith(`${link.href}/`);

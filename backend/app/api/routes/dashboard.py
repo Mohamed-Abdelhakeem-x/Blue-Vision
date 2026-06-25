@@ -188,9 +188,12 @@ async def bi_analytics(
     sick_scans = sum(1 for s in scans if "healthy" not in s[0].lower())
     
     # Mortality projection rate based on scan infection profiles
-    mortality_rate = (sick_scans / total_scans) if total_scans > 0 else 0.0
-    # Add a base minimum natural mortality of 3.5% for realism
-    mortality_rate = max(0.035, mortality_rate)
+    if total_biomass_count == 0:
+        mortality_rate = 0.0
+    else:
+        mortality_rate = (sick_scans / total_scans) if total_scans > 0 else 0.0
+        # Add a base minimum natural mortality of 3.5% for realism
+        mortality_rate = max(0.035, mortality_rate)
     
     financial_loss_egp = total_estimated_weight_tons * TON_MARKET_PRICE_EGP * mortality_rate
     

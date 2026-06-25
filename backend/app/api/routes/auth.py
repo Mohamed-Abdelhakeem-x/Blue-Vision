@@ -2,8 +2,9 @@ from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from sqlalchemy import select, update
+from sqlalchemy import or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.audit import audit_event
 from app.core.config import get_settings
@@ -182,7 +183,11 @@ async def login(
         window_seconds=60,
     )
 
-    result = await session.execute(select(User).where(User.email == payload.email))
+    result = await session.execute(
+        select(User)
+        .options(selectinload(User.role), selectinload(User.fish_farms), selectinload(User.farm_memberships))
+        .where(or_(User.email == payload.email, User.full_name == payload.email))
+    )
     user = result.scalar_one_or_none()
 
     if not user or not verify_password(payload.password, user.hashed_password):
@@ -194,7 +199,7 @@ async def login(
             reason="invalid_credentials",
         )
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-
+        
     audit_event(event="auth.login", outcome="success", request=request, user_id=user.id, email=user.email)
     return await _issue_token_pair(session, user.id)
 
@@ -361,6 +366,7 @@ async def get_invitation_info(
     session: AsyncSession = Depends(get_session)
 ):
     """Look up a pending invitation by token. Returns email, farm name, role."""
+    token = token.strip()
     from sqlalchemy.orm import selectinload
     stmt = select(TeamInvitation).where(
         TeamInvitation.token == token,
@@ -518,7 +524,11 @@ async def google_auth(
     if not email:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email not provided by Google")
         
-    user = (await session.execute(select(User).where(User.email == email))).scalar_one_or_none()
+    user = (await session.execute(
+        select(User)
+        .options(selectinload(User.role), selectinload(User.fish_farms), selectinload(User.farm_memberships))
+        .where(User.email == email)
+    )).scalar_one_or_none()
     
     if not user:
         # Resolve role and check invitation
@@ -579,6 +589,7 @@ async def google_auth(
             await send_welcome_email(user.email, user.full_name)
         except Exception:
             pass
+        
         
     audit_event(event="auth.google_login", outcome="success", request=request, user_id=user.id, email=user.email)
     return await _issue_token_pair(session, user.id)
