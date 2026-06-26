@@ -1384,7 +1384,7 @@ export async function getPonds() {
   return res.json() as Promise<PondResponse[]>;
 }
 
-export async function createPond(payload: { type: string; name?: string; size_sq_meters: number; stocking_density: number }) {
+export async function createPond(payload: { type: string; name?: string; size_sq_meters: number; stocking_density?: number }) {
   const res = await authFetch((token) =>
     apiFetch(`${API_BASE}/ponds`, {
       method: "POST",

@@ -28,7 +28,6 @@ export function PondManagement({
   const [pondType, setPondType] = useState("Earthen Pond");
   const [name, setName] = useState("");
   const [size, setSize] = useState(1200);
-  const [totalFish, setTotalFish] = useState(18000);
   const [submitting, setSubmitting] = useState(false);
 
   const loadPonds = async () => {
@@ -52,12 +51,10 @@ export function PondManagement({
     e.preventDefault();
     try {
       setSubmitting(true);
-      const calcDensity = size > 0 ? (Number(totalFish) / Number(size)) : 0;
       await createPond({
         type: pondType,
         name: name.trim() || undefined,
-        size_sq_meters: Number(size),
-        stocking_density: Number(calcDensity.toFixed(2))
+        size_sq_meters: Number(size)
       });
       setShowAddModal(false);
       await loadPonds();
@@ -73,12 +70,10 @@ export function PondManagement({
     if (!editingPond) return;
     try {
       setSubmitting(true);
-      const calcDensity = size > 0 ? (Number(totalFish) / Number(size)) : 0;
       await updatePond(editingPond.id, {
         type: pondType,
         name: name.trim() || undefined,
-        size_sq_meters: Number(size),
-        stocking_density: Number(calcDensity.toFixed(2))
+        size_sq_meters: Number(size)
       });
       setEditingPond(null);
       await loadPonds();
@@ -104,7 +99,6 @@ export function PondManagement({
     setPondType(pond.type);
     setName(pond.name || "");
     setSize(pond.size_sq_meters || 1200);
-    setTotalFish(Math.floor((pond.size_sq_meters || 1200) * (pond.stocking_density || 15)));
   };
 
   const openAdd = () => {
@@ -112,7 +106,6 @@ export function PondManagement({
     setPondType("Earthen Pond");
     setName("");
     setSize(1200);
-    setTotalFish(18000);
   };
 
   return (
@@ -149,8 +142,6 @@ export function PondManagement({
           {ponds.map((p) => {
             const typeInfo = POND_TYPES.find((t) => t.value === p.type) || POND_TYPES[0];
             const sizeM = p.size_sq_meters || 0;
-            const dense = p.stocking_density || 0;
-            const fishCount = Math.floor(sizeM * dense);
 
             return (
               <motion.div
@@ -180,18 +171,10 @@ export function PondManagement({
                   </div>
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 gap-2 border-t border-black/5 dark:border-white/5 pt-3">
+                <div className="mt-4 border-t border-black/5 dark:border-white/5 pt-3">
                   <div className="space-y-0.5">
                     <span className="text-[10px] uppercase text-zinc-500 dark:text-zinc-400">Dimensions</span>
                     <p className="text-sm font-semibold">{sizeM.toLocaleString()} m²</p>
-                  </div>
-                  <div className="space-y-0.5">
-                    <span className="text-[10px] uppercase text-zinc-500 dark:text-zinc-400">Density</span>
-                    <p className="text-sm font-semibold">{dense} fish / m²</p>
-                  </div>
-                  <div className="col-span-2 space-y-0.5 mt-1 bg-black/5 dark:bg-white/5 p-2 rounded-xl">
-                    <span className="text-[9px] uppercase text-zinc-500 dark:text-zinc-400">Total Stocking Est.</span>
-                    <p className="text-sm font-bold text-blue-500 dark:text-blue-400">{fishCount.toLocaleString()} Tilapia</p>
                   </div>
                 </div>
               </motion.div>
@@ -247,29 +230,16 @@ export function PondManagement({
                   </select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">Pond Area (m²)</label>
-                    <input
-                      type="number"
-                      required
-                      min="1"
-                      className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm text-zinc-800 dark:text-zinc-200 outline-none focus:border-blue-500"
-                      value={size}
-                      onChange={(e) => setSize(Number(e.target.value))}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">Total Fish Stocked</label>
-                    <input
-                      type="number"
-                      required
-                      min="1"
-                      className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm text-zinc-800 dark:text-zinc-200 outline-none focus:border-blue-500"
-                      value={totalFish}
-                      onChange={(e) => setTotalFish(Number(e.target.value))}
-                    />
-                  </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">Pond Area (m²)</label>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    className="w-full rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-3 py-2 text-sm text-zinc-800 dark:text-zinc-200 outline-none focus:border-blue-500"
+                    value={size}
+                    onChange={(e) => setSize(Number(e.target.value))}
+                  />
                 </div>
 
                 <div className="bg-blue-500/5 dark:bg-blue-500/10 p-3 rounded-xl border border-blue-500/20">
