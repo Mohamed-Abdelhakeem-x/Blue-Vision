@@ -200,6 +200,29 @@ async def login(
         )
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
         
+    if payload.invite_token:
+        stmt = select(TeamInvitation).where(
+            TeamInvitation.token == payload.invite_token,
+            TeamInvitation.email == user.email,
+            TeamInvitation.status == "pending"
+        )
+        invitation = (await session.execute(stmt)).scalar_one_or_none()
+        if invitation:
+            invitation.status = "accepted"
+            member_stmt = select(FarmMember).where(
+                FarmMember.farm_id == invitation.farm_id,
+                FarmMember.user_id == user.id
+            )
+            existing_member = (await session.execute(member_stmt)).scalar_one_or_none()
+            if not existing_member:
+                farm_member = FarmMember(
+                    farm_id=invitation.farm_id,
+                    user_id=user.id,
+                    role=invitation.role
+                )
+                session.add(farm_member)
+            await session.commit()
+
     audit_event(event="auth.login", outcome="success", request=request, user_id=user.id, email=user.email)
     return await _issue_token_pair(session, user.id)
 
@@ -589,6 +612,29 @@ async def google_auth(
             await send_welcome_email(user.email, user.full_name)
         except Exception:
             pass
+    else:
+        if payload.invite_token:
+            stmt = select(TeamInvitation).where(
+                TeamInvitation.token == payload.invite_token,
+                TeamInvitation.email == email,
+                TeamInvitation.status == "pending"
+            )
+            invitation = (await session.execute(stmt)).scalar_one_or_none()
+            if invitation:
+                invitation.status = "accepted"
+                member_stmt = select(FarmMember).where(
+                    FarmMember.farm_id == invitation.farm_id,
+                    FarmMember.user_id == user.id
+                )
+                existing_member = (await session.execute(member_stmt)).scalar_one_or_none()
+                if not existing_member:
+                    farm_member = FarmMember(
+                        farm_id=invitation.farm_id,
+                        user_id=user.id,
+                        role=invitation.role
+                    )
+                    session.add(farm_member)
+                await session.commit()
         
         
     audit_event(event="auth.google_login", outcome="success", request=request, user_id=user.id, email=user.email)

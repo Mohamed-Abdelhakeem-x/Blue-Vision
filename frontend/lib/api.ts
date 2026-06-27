@@ -388,11 +388,15 @@ async function handleApiError(
   throw new Error(message);
 }
 
-export async function login(email: string, password: string) {
+export async function login(email: string, password: string, invite_token?: string | null) {
+  const body: Record<string, string> = { email, password };
+  if (invite_token) {
+    body.invite_token = invite_token;
+  }
   const res = await apiFetch(`${API_BASE}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify(body)
   });
 
   if (!res.ok) {

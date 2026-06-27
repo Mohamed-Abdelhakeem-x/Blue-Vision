@@ -584,7 +584,7 @@ function RegisterForm() {
 
             <p className="mt-5 text-center text-sm text-[var(--text-secondary)]">
               {t("register.switchPrompt")}{" "}
-              <Link href="/login" className="font-semibold text-[#2563eb] hover:underline">
+              <Link href={inviteToken ? `/login?invite_token=${inviteToken}` : "/login"} className="font-semibold text-[#2563eb] hover:underline">
                 {t("register.switchCta")}
               </Link>
             </p>

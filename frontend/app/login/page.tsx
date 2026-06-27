@@ -15,14 +15,41 @@ import { FloatingField } from "@/components/auth/floating-field";
 
 
 
-export default function LoginPage() {
+import { Suspense, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { getInvitationInfo } from "@/lib/api";
+
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const inviteToken = searchParams.get("invite_token");
+
   const t = useTranslations("auth");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  const [invitationInfo, setInvitationInfo] = useState<{
+    email: string;
+    farm_name: string;
+    role: string;
+    inviter_name: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (inviteToken) {
+      getInvitationInfo(inviteToken)
+        .then((info) => {
+          setInvitationInfo(info);
+          setEmail(info.email);
+        })
+        .catch(() => {
+          // ignore
+        });
+    }
+  }, [inviteToken]);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -32,7 +59,7 @@ export default function LoginPage() {
     clearStoredTokens();
 
     try {
-      const payload = await login(email, password);
+      const payload = await login(email, password, inviteToken);
       storeAuthTokens(payload);
       try {
         const profile = await fetchProfile(payload.access_token);
@@ -85,6 +112,16 @@ export default function LoginPage() {
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.15 }} className="w-full">
           <Card className="w-full rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] p-7 shadow-[var(--shadow-md)]">
+            
+            {invitationInfo && (
+              <div className="mb-5 rounded-lg border border-cyan-500/20 bg-cyan-950/20 p-3.5 text-sm text-cyan-300">
+                <p className="font-semibold text-cyan-200">Team Invitation Received</p>
+                <p className="mt-1 text-xs opacity-90">
+                  Log in to join <strong className="text-white">{invitationInfo.farm_name}</strong> as a <strong className="text-white">{invitationInfo.role}</strong>.
+                </p>
+              </div>
+            )}
+
             <h2 className="text-xl font-semibold text-[var(--text-primary)]">{t("login.title")}</h2>
             <p className="mt-1 text-sm text-[var(--text-secondary)]">{t("login.subtitle")}</p>
 
@@ -149,12 +186,12 @@ export default function LoginPage() {
                       if (!checkResult.exists) {
                         setError("No BlueVision account associated with this Google email. Redirecting to registration page...");
                         setTimeout(() => {
-                          router.push("/register");
+                          router.push(inviteToken ? `/register?invite_token=${inviteToken}` : "/register");
                         }, 1800);
                         return;
                       }
 
-                      const payload = await authGoogle(credentialResponse.credential);
+                      const payload = await authGoogle(credentialResponse.credential, inviteToken);
                       storeAuthTokens(payload);
                       try {
                         const profile = await fetchProfile(payload.access_token);
@@ -178,7 +215,7 @@ export default function LoginPage() {
 
             <div className="mt-5 flex flex-col items-center gap-2 text-sm text-[var(--text-secondary)]">
               <p>
-                {t("login.switchPrompt")} <Link href="/register" className="font-semibold text-[#2563eb] hover:underline">{t("login.switchCta")}</Link>
+                {t("login.switchPrompt")} <Link href={inviteToken ? `/register?invite_token=${inviteToken}` : "/register"} className="font-semibold text-[#2563eb] hover:underline">{t("login.switchCta")}</Link>
               </p>
               <Link href="/forgot-password" className="text-xs text-[var(--text-tertiary)] hover:text-[#2563eb] hover:underline">
                 Forgot your password?
@@ -188,5 +225,13 @@ export default function LoginPage() {
         </motion.div>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-[calc(100vh-90px)] items-center justify-center bg-[var(--bg-primary)]"><Loader2 className="h-8 w-8 animate-spin text-cyan-400" /></div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

@@ -47,6 +47,7 @@ class SignUpRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: str
     password: str
+    invite_token: str | None = None
 
 
 class TokenResponse(BaseModel):
