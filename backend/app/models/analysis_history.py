@@ -15,6 +15,7 @@ class AnalysisHistory(Base):
     analysis_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, index=True)
     suitability_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     risk_level: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    fish_count: Mapped[int] = mapped_column(default=0)
 
     media_upload = relationship("MediaUpload", back_populates="analysis_history")
     biological_healths = relationship("BiologicalHealth", back_populates="analysis_history", cascade="all,delete-orphan")

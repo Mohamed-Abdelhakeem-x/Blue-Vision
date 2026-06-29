@@ -305,6 +305,11 @@ export function ScanHistoryContent() {
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="text-sm font-semibold text-[var(--text-primary)]">{row.fish_species || row.health_status}</p>
+                  {row.pond_name && (
+                    <span className="text-xs font-medium text-[var(--text-tertiary)]">
+                      in {row.pond_name}
+                    </span>
+                  )}
                   <span className="rounded-full bg-[var(--bg-secondary)] px-2 py-0.5 text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-tertiary)]">
                     {row.domain}
                   </span>
@@ -318,6 +323,11 @@ export function ScanHistoryContent() {
                   >
                     {row.health_status}
                   </span>
+                  {row.fish_count !== undefined && row.fish_count > 0 && (
+                    <span className="inline-flex items-center rounded-full bg-blue-500/15 px-2 py-0.5 text-[11px] font-semibold text-blue-700 dark:text-blue-300">
+                      Count: {row.fish_count}
+                    </span>
+                  )}
                 </div>
                 <p className="mt-1 text-xs text-[var(--text-tertiary)]">
                   <span suppressHydrationWarning>{new Date(row.created_at.endsWith("Z") ? row.created_at : row.created_at + "Z").toLocaleString()}</span>

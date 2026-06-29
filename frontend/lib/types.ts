@@ -14,6 +14,7 @@ export interface DetectionResult {
   image_sha256?: string | null;
   before_image_b64?: string | null;
   after_image_b64?: string | null;
+  fish_count?: number;
   is_low_confidence?: boolean;
   analysis_note?: string | null;
   top_predictions?: DetectionCandidate[];
@@ -27,6 +28,8 @@ export interface ScanHistory {
   confidence_score: number;
   treatment_recommendations: string;
   domain: string;
+  fish_count?: number;
+  pond_name?: string | null;
   created_at: string;
   before_image_b64?: string | null;
 }

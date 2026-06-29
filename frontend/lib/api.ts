@@ -1415,6 +1415,28 @@ export async function getBiAnalytics() {
   return res.json();
 }
 
+export async function updateFarmMetrics(marketPrice: number, averageWeight: number) {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/dashboard/farm-metrics`, {
+      method: "PUT",
+      headers: {
+        ...authHeaders(token),
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        market_price_per_kg: marketPrice,
+        average_fish_weight_grams: averageWeight
+      })
+    })
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, "dashboard/farm-metrics", "Failed to update farm metrics");
+  }
+
+  return res.json();
+}
+
 export async function downloadTreasureReport() {
   const res = await authFetch((token) =>
     apiFetch(`${API_BASE}/dashboard/treasure-report`, {
@@ -1514,6 +1536,7 @@ export async function detectBehaviorAnomaly(token: string, file: File, pondId: s
     prediction: string;
     healthy_tracks: number;
     abnormal_tracks: number;
+    fish_count: number;
   }>;
 }
 

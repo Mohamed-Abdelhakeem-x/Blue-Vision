@@ -101,6 +101,10 @@ async def detect(
     digest = hashlib.sha256(image_bytes).hexdigest()
     persist_scan_image(image_sha256=digest, image_bytes=image_bytes)
 
+    fish_detection = ai.detect_fish(image_bytes)
+    fish_count = fish_detection.get("fish_count", 0)
+    detected_boxes = fish_detection.get("boxes", [])
+
     fish_species, health_status = parse_fish_label(label)
 
     # 1. Create MediaUpload
@@ -119,6 +123,7 @@ async def detect(
         upload_id=upload.id,
         suitability_score=confidence, # Mocking suitability score using confidence for now
         risk_level="high" if "healthy" not in health_status.lower() else "low",
+        fish_count=fish_count,
     )
     session.add(analysis)
     await session.flush() # flush to get analysis.id
@@ -160,23 +165,27 @@ async def detect(
             validate_image_upload(segmented_image, segmented_bytes, field_name="segmented_image")
             after_b64 = base64.b64encode(segmented_bytes).decode("utf-8")
 
-    # Generate visual mock bounding boxes coordinate mapping
-    if is_healthy:
-        bboxes = [
-            {
-                "label": f"Healthy Nile Tilapia ({fish_species})",
-                "box": [0.15, 0.10, 0.85, 0.90],
-                "confidence": confidence
-            }
-        ]
+    # Map YOLO bounding boxes if present, else fallback
+    if detected_boxes:
+        bboxes = detected_boxes
     else:
-        bboxes = [
-            {
-                "label": f"Infected ({health_status})",
-                "box": [0.25, 0.20, 0.75, 0.80],
-                "confidence": confidence
-            }
-        ]
+        # Generate visual mock bounding boxes coordinate mapping
+        if is_healthy:
+            bboxes = [
+                {
+                    "label": f"Healthy Nile Tilapia ({fish_species})",
+                    "box": [0.15, 0.10, 0.85, 0.90],
+                    "confidence": confidence
+                }
+            ]
+        else:
+            bboxes = [
+                {
+                    "label": f"Infected ({health_status})",
+                    "box": [0.25, 0.20, 0.75, 0.80],
+                    "confidence": confidence
+                }
+            ]
 
     return DetectionResponse(
         health_status=health_status,
@@ -185,10 +194,11 @@ async def detect(
         confidence_score=confidence,
         treatment_recommendations=recommendation,
         domain=domain,
+        fish_count=fish_count,
         image_sha256=digest,
         before_image_b64=before_b64,
         after_image_b64=after_b64,
-        is_low_confidence=bool(prediction.get("is_low_confidence", False)),
+        is_low_confidence=prediction.get("is_low_confidence", False),
         analysis_note=prediction.get("analysis_note"),
         top_predictions=prediction.get("top_predictions", []),
         bounding_boxes=bboxes,

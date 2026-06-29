@@ -15,6 +15,7 @@ class FishFarm(Base):
     farm_name: Mapped[str] = mapped_column(String(200))
     location: Mapped[str | None] = mapped_column(String(255), nullable=True)
     market_price_per_kg: Mapped[float] = mapped_column(Float, default=95.0, server_default="95.0")
+    average_fish_weight_grams: Mapped[float] = mapped_column(Float, default=450.0, server_default="450.0")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", back_populates="fish_farms")

@@ -6,14 +6,22 @@ from typing import Any
 import numpy as np
 import onnxruntime as ort
 from PIL import Image
+from ultralytics import YOLO
 
 
 class AIService:
-    def __init__(self, model_path: str, labels_path: str) -> None:
+    def __init__(self, model_path: str, labels_path: str, yolo_path: str = "model/yolov8_fish.pt") -> None:
         self.model_path = Path(model_path)
         self.labels_path = Path(labels_path)
+        self.yolo_path = Path(yolo_path)
         self.session = self._load_session()
         self.labels = self._load_labels()
+        self.yolo_model = self._load_yolo()
+
+    def _load_yolo(self) -> YOLO | None:
+        if self.yolo_path.exists():
+            return YOLO(str(self.yolo_path))
+        return None
 
     def _load_session(self) -> ort.InferenceSession:
         providers = ["CPUExecutionProvider"]
@@ -292,3 +300,33 @@ class AIService:
         shifted = logits - np.max(logits)
         exp = np.exp(shifted)
         return exp / np.sum(exp)
+
+    def detect_fish(self, image_bytes: bytes) -> dict[str, Any]:
+        """Detect and count fish using YOLOv8."""
+        if not getattr(self, "yolo_model", None):
+            return {"fish_count": 0, "boxes": []}
+            
+        try:
+            image = Image.open(BytesIO(image_bytes)).convert("RGB")
+            results = self.yolo_model(image)
+            result = results[0]
+            boxes = []
+            
+            for box in result.boxes:
+                coords = box.xyxy[0].tolist()
+                conf = float(box.conf[0])
+                cls_idx = int(box.cls[0])
+                label = result.names[cls_idx] if result.names else str(cls_idx)
+                
+                boxes.append({
+                    "label": label,
+                    "box": coords,
+                    "confidence": conf
+                })
+                
+            return {
+                "fish_count": len(result.boxes),
+                "boxes": boxes
+            }
+        except Exception:
+            return {"fish_count": 0, "boxes": []}

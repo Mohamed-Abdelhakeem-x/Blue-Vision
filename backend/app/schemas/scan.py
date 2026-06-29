@@ -22,6 +22,7 @@ class DetectionResponse(BaseModel):
     confidence_score: float
     treatment_recommendations: str
     domain: str
+    fish_count: int = 0
     image_sha256: str | None = None
     before_image_b64: str | None = None
     after_image_b64: str | None = None
@@ -39,6 +40,8 @@ class AnalysisHistoryResponse(BaseModel):
     confidence_score: float
     recommendation: str
     domain: str
+    fish_count: int = 0
+    pond_name: str | None = None
     created_at: datetime
     before_image_b64: str | None = None
 

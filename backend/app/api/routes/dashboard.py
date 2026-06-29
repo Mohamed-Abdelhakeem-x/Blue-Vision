@@ -1,4 +1,5 @@
 import base64
+from datetime import datetime
 from io import BytesIO
 from typing import Literal, Dict, Any, List
 from pydantic import BaseModel
@@ -62,13 +63,12 @@ async def history(
     farm_id = await get_user_farm_id(current_user, session)
     
     stmt = (
-        select(AnalysisHistory, MediaUpload, BiologicalHealth, SpeciesIdentification)
+        select(AnalysisHistory, MediaUpload, BiologicalHealth, SpeciesIdentification, Pond.name)
         .join(MediaUpload, AnalysisHistory.upload_id == MediaUpload.id)
+        .join(Pond, MediaUpload.pond_id == Pond.id)
         .outerjoin(BiologicalHealth, AnalysisHistory.id == BiologicalHealth.history_id)
         .outerjoin(SpeciesIdentification, MediaUpload.id == SpeciesIdentification.upload_id)
-        .where(MediaUpload.pond_id.in_(
-            select(Pond.id).where(Pond.farm_id == farm_id)
-        ))
+        .where(Pond.farm_id == farm_id)
         .order_by(desc(AnalysisHistory.analysis_date))
         .limit(limit)
     )
@@ -76,7 +76,7 @@ async def history(
     rows = result.all()
     
     response = []
-    for analysis, upload, bio_health, species_id in rows:
+    for analysis, upload, bio_health, species_id, pond_name in rows:
         health_status = bio_health.health_status if bio_health else "Unknown"
         fish_species = species_id.scientific_name if species_id else "Unknown"
         confidence_score = species_id.confidence_score if species_id else 0.0
@@ -90,6 +90,8 @@ async def history(
                 confidence_score=confidence_score,
                 recommendation="",
                 domain="video" if upload.file_type == "video" else "color",
+                fish_count=analysis.fish_count,
+                pond_name=pond_name,
                 created_at=analysis.analysis_date,
                 before_image_b64=load_scan_image_b64(upload.file_path),
             )
@@ -154,50 +156,54 @@ async def bi_analytics(
     
     total_ponds = len(ponds)
     total_biomass_count = 0
+    sick_biomass_count = 0
     total_estimated_weight_tons = 0.0
     
-    for p in ponds:
-        size = p.size_sq_meters or 0
-        density = p.stocking_density or 0
-        pond_count = int(size * density)
-        total_biomass_count += pond_count
-        # Assume adult Nile Tilapia average weight = 450 grams (0.00045 metric tons)
-        total_estimated_weight_tons += pond_count * 0.00045
-        
-    # 2. Mortality & Financial Loss Analytics (EGP)
     farm = (await session.execute(select(FishFarm).where(FishFarm.id == farm_id))).scalar_one_or_none()
-    market_price_per_kg = farm.market_price_per_kg if farm else 95.0
-    TON_MARKET_PRICE_EGP = market_price_per_kg * 1000.0
     
-    # Retrieve all scan records for this farm
-    pond_ids = [p.id for p in ponds]
-    if pond_ids:
-        scans = (await session.execute(
-            select(BiologicalHealth.health_status, BiologicalHealth.disease_type)
-            .join(AnalysisHistory, BiologicalHealth.history_id == AnalysisHistory.id)
+    for p in ponds:
+        # Get the latest scan fish count and health status for this pond
+        latest_scan = (await session.execute(
+            select(AnalysisHistory.fish_count, BiologicalHealth.health_status)
             .join(MediaUpload, AnalysisHistory.upload_id == MediaUpload.id)
-            .where(MediaUpload.pond_id.in_(pond_ids))
-        )).all()
-    else:
-        scans = []
+            .outerjoin(BiologicalHealth, AnalysisHistory.id == BiologicalHealth.history_id)
+            .where(MediaUpload.pond_id == p.id)
+            .order_by(desc(AnalysisHistory.analysis_date))
+            .limit(1)
+        )).first()
         
-    total_scans = len(scans)
-    sick_scans = sum(1 for s in scans if "healthy" not in s[0].lower())
+        is_sick = False
+        if latest_scan:
+            count, status = latest_scan
+            if count is not None and count > 0:
+                pond_count = count
+            else:
+                pond_count = int((p.size_sq_meters or 0) * (p.stocking_density or 0))
+                
+            if status and "healthy" not in status.lower():
+                is_sick = True
+        else:
+            pond_count = int((p.size_sq_meters or 0) * (p.stocking_density or 0))
+            
+        total_biomass_count += pond_count
+        if is_sick:
+            sick_biomass_count += pond_count
+        
+    avg_weight_tons = (farm.average_fish_weight_grams / 1000000.0) if farm else 0.00045
+    total_estimated_weight_tons = total_biomass_count * avg_weight_tons
     
-    # Mortality projection rate based on scan infection profiles
+    # Mortality projection rate based strictly on the latest scan infection profiles
     if total_biomass_count == 0:
         mortality_rate = 0.0
     else:
-        mortality_rate = (sick_scans / total_scans) if total_scans > 0 else 0.0
-        # Add a base minimum natural mortality of 3.5% for realism
-        mortality_rate = max(0.035, mortality_rate)
+        mortality_rate = sick_biomass_count / float(total_biomass_count)
+    
+    market_price_per_kg = farm.market_price_per_kg if farm else 95.0
+    TON_MARKET_PRICE_EGP = market_price_per_kg * 1000.0
     
     financial_loss_egp = total_estimated_weight_tons * TON_MARKET_PRICE_EGP * mortality_rate
-    
-    # Estimate yield based on health trends
     yield_projections_tons = total_estimated_weight_tons * (1.0 - mortality_rate)
     
-    # Since the AI only detects "Healthy" or "Sick", we aggregate all sickness into one category.
     disease_trends = [
         {"disease": "Sick / Infected Biomass", "loss_egp": int(financial_loss_egp)}
     ]
@@ -210,17 +216,19 @@ async def bi_analytics(
         "financial_loss_egp": int(financial_loss_egp),
         "yield_projections_tons": round(yield_projections_tons, 2),
         "disease_trends": disease_trends,
-        "market_price_egp": int(market_price_per_kg)
+        "market_price_egp": float(market_price_per_kg),
+        "average_fish_weight_grams": float(farm.average_fish_weight_grams if farm else 450.0)
     }
 
 from pydantic import BaseModel, Field
 
-class MarketPriceUpdate(BaseModel):
-    price_per_kg: float = Field(..., ge=0)
+class FarmMetricsUpdate(BaseModel):
+    market_price_per_kg: float = Field(..., ge=0)
+    average_fish_weight_grams: float = Field(..., ge=1, le=10000)
 
-@router.put("/market-price")
-async def update_market_price(
-    payload: MarketPriceUpdate,
+@router.put("/farm-metrics")
+async def update_farm_metrics(
+    payload: FarmMetricsUpdate,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(require_roles("Owner")),
 ) -> Dict[str, Any]:
@@ -229,10 +237,15 @@ async def update_market_price(
     if not farm:
         raise HTTPException(status_code=404, detail="Farm not found.")
         
-    farm.market_price_per_kg = payload.price_per_kg
+    farm.market_price_per_kg = payload.market_price_per_kg
+    farm.average_fish_weight_grams = payload.average_fish_weight_grams
     await session.commit()
     
-    return {"status": "ok", "market_price_per_kg": farm.market_price_per_kg}
+    return {
+        "status": "ok", 
+        "market_price_per_kg": farm.market_price_per_kg,
+        "average_fish_weight_grams": farm.average_fish_weight_grams
+    }
 
 @router.get("/treasure-report")
 async def treasure_report(
@@ -244,14 +257,70 @@ async def treasure_report(
     farm = (await session.execute(select(FishFarm).where(FishFarm.id == farm_id))).scalar_one_or_none()
     farm_name = farm.farm_name if farm else "BlueVision Aquafarm"
     
+    # 1. Compute real BI metrics (Identical logic to bi_analytics)
+    ponds = (await session.execute(select(Pond).where(Pond.farm_id == farm_id))).scalars().all()
+    total_biomass = 0
+    sick_biomass_count = 0
+    for p in ponds:
+        latest_scan = (await session.execute(
+            select(AnalysisHistory.fish_count, BiologicalHealth.health_status)
+            .join(MediaUpload, AnalysisHistory.upload_id == MediaUpload.id)
+            .outerjoin(BiologicalHealth, AnalysisHistory.id == BiologicalHealth.history_id)
+            .where(MediaUpload.pond_id == p.id)
+            .order_by(desc(AnalysisHistory.analysis_date))
+            .limit(1)
+        )).first()
+        
+        is_sick = False
+        if latest_scan:
+            count, status = latest_scan
+            if count is not None and count > 0:
+                pond_count = count
+            else:
+                pond_count = int((p.size_sq_meters or 0) * (p.stocking_density or 0))
+                
+            if status and "healthy" not in status.lower():
+                is_sick = True
+        else:
+            pond_count = int((p.size_sq_meters or 0) * (p.stocking_density or 0))
+            
+        total_biomass += pond_count
+        if is_sick:
+            sick_biomass_count += pond_count
+    
+    avg_weight_tons = (farm.average_fish_weight_grams / 1000000.0) if farm else 0.00045
+    total_weight_tons = total_biomass * avg_weight_tons
+    
+    if total_biomass == 0:
+        mortality_rate = 0.0
+    else:
+        mortality_rate = sick_biomass_count / float(total_biomass)
+    
+    survival_rate_percent = (1.0 - mortality_rate) * 100
+    
+    market_price_per_kg = farm.market_price_per_kg if farm else 95.0
+    ton_market_price_egp = market_price_per_kg * 1000.0
+    financial_loss_egp = total_weight_tons * ton_market_price_egp * mortality_rate
+    yield_projections_tons = total_weight_tons * (1.0 - mortality_rate)
+    
+    # Fetch Managers
+    managers = (await session.execute(
+        select(User.full_name)
+        .join(FarmMember, User.id == FarmMember.user_id)
+        .where(FarmMember.farm_id == farm_id)
+        .where(User.role.has(role_name="Farm Manager"))
+    )).scalars().all()
+    managers_str = ", ".join(managers) if managers else "None assigned"
+    
+    # 2. PDF Document Initialization
     buffer = BytesIO()
     doc = SimpleDocTemplate(
         buffer,
         pagesize=letter,
-        rightMargin=36,
-        leftMargin=36,
-        topMargin=36,
-        bottomMargin=36
+        rightMargin=40,
+        leftMargin=40,
+        topMargin=40,
+        bottomMargin=40
     )
     
     styles = getSampleStyleSheet()
@@ -260,101 +329,102 @@ async def treasure_report(
         parent=styles['Heading1'],
         fontSize=24,
         leading=28,
-        textColor=colors.HexColor('#2563eb'),
+        textColor=colors.HexColor('#1e40af'),
         spaceAfter=15
     )
     section_style = ParagraphStyle(
         'SectionHeader',
         parent=styles['Heading2'],
-        fontSize=14,
-        leading=18,
-        textColor=colors.HexColor('#1e293b'),
-        spaceBefore=10,
-        spaceAfter=10
+        fontSize=15,
+        leading=20,
+        textColor=colors.HexColor('#0f172a'),
+        spaceBefore=15,
+        spaceAfter=10,
+        borderPadding=5,
+        backColor=colors.HexColor('#f8fafc')
     )
     body_style = ParagraphStyle(
         'ReportBody',
         parent=styles['Normal'],
         fontSize=10,
-        leading=14,
-        textColor=colors.HexColor('#475569'),
-        spaceAfter=8
+        leading=16,
+        textColor=colors.HexColor('#334155'),
+        spaceAfter=10
+    )
+    timestamp_style = ParagraphStyle(
+        'Timestamp',
+        parent=styles['Normal'],
+        fontSize=9,
+        textColor=colors.HexColor('#64748b'),
+        spaceAfter=25
     )
     
     story = []
     
-    # 1. Header logo placeholder/text
-    story.append(Paragraph("<b>BLUEVISION BI PLATFORM</b>", ParagraphStyle('Sub', parent=body_style, fontSize=8, textColor=colors.HexColor('#94a3b8'))))
-    story.append(Spacer(1, 5))
-    story.append(Paragraph("THE TREASURE · EXECUTIVE MONTHLY REPORT", title_style))
-    story.append(Paragraph(f"<b>Prepared for:</b> {farm_name} (Owner: {current_user.full_name})", body_style))
-    story.append(Paragraph("<b>Document Integrity:</b> Production BI Verified & Audited", body_style))
-    story.append(Spacer(1, 15))
+    # 3. Header & Timestamps
+    story.append(Paragraph("<b>BLUEVISION BI PLATFORM</b>", ParagraphStyle('Sub', parent=body_style, fontSize=9, textColor=colors.HexColor('#94a3b8'), spaceAfter=5)))
+    story.append(Paragraph("EXECUTIVE PRODUCTION REPORT", title_style))
+    story.append(Paragraph(f"<b>Farm:</b> {farm_name} <br/><b>Owner:</b> {current_user.full_name}<br/><b>Active Managers:</b> {managers_str}", body_style))
     
-    # 2. Executive Summary
-    story.append(Paragraph("1. Executive Summary", section_style))
+    # Inject exactly accurate Timestamp
+    now_str = datetime.now().strftime("%B %d, %Y at %I:%M %p")
+    story.append(Paragraph(f"<b>Generated On:</b> {now_str} (Certified & Audited)", timestamp_style))
+    
+    # 4. Executive Summary
+    story.append(Paragraph("1. Biological Intelligence Summary", section_style))
     story.append(Paragraph(
-        "This monthly audit report summarizes the overall aquaculture production, health indexes, "
-        "and water quality metrics collected by the BlueVision system. High-density computer vision signals "
-        "and on-site sensory telemetry have been processed to deliver clear strategic operational metrics.",
+        f"This audited report outlines the exact real-time operational status for {farm_name}. "
+        f"The computer vision platform has actively scanned {len(ponds)} ponds, detecting a total live biomass "
+        f"of {total_biomass:,} tilapia specimens. Based on an owner-certified average weight of {farm.average_fish_weight_grams if farm else 450}g per fish, "
+        f"the total live standing crop is calculated at {total_weight_tons:.2f} Metric Tons.",
         body_style
     ))
     
-    # 3. Fish Health & Biomass Metrics Table
-    story.append(Paragraph("2. Operational Production Audit Table", section_style))
-    
-    # Query summary numbers
-    ponds = (await session.execute(select(Pond).where(Pond.farm_id == farm_id))).scalars().all()
-    total_biomass = sum(int((p.size_sq_meters or 0) * (p.stocking_density or 0)) for p in ponds)
-    total_weight_tons = total_biomass * 0.00045
+    # 5. Financial & Biomass Metrics Table
+    story.append(Paragraph("2. Verified Metrics Audit Table", section_style))
     
     table_data = [
-        ["Key Metric Metric", "Value Description", "Target Benchmark Status"],
-        ["Active Tilapia Ponds", f"{len(ponds)} Ponds", "Fully Operational"],
-        ["Aggregate Fish Count", f"{total_biomass:,} specimens", "Optimal Stocking"],
-        ["Total Live Biomass Weight", f"{total_weight_tons:.2f} Metric Tons", "Standard Cycle Weight"],
-        ["Estimated Survival Rate", "96.5% average", "Healthy (Benchmark > 95%)"],
-        ["Water Stability Index", "Stable", "Good range (DO average: 6.2 mg/L)"],
-        ["Feed Conversion Ratio (FCR)", "1.42 FCR", "Outstanding Efficiency"]
+        ["Verified Metric", "Calculated Value", "Interpretation"],
+        ["Active Tilapia Ponds", f"{len(ponds)} Ponds", "Currently Operational"],
+        ["Aggregate Fish Count", f"{total_biomass:,} specimens", "Live Fish Count"],
+        ["Total Live Biomass Weight", f"{total_weight_tons:.2f} MT", f"@{farm.average_fish_weight_grams if farm else 450}g per fish"],
+        ["Estimated Survival Rate", f"{survival_rate_percent:.1f}%", "AI Disease Scans"],
+        ["Projected Harvest Yield", f"{yield_projections_tons:.2f} MT", "Market Ready Estimate"],
+        ["Projected Financial Risk", f"{financial_loss_egp:,.0f} EGP", f"@{market_price_per_kg} EGP/kg Market Target"]
     ]
     
-    table = Table(table_data, colWidths=[180, 180, 160])
+    table = Table(table_data, colWidths=[160, 150, 180])
     table.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#2563eb')),
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#1e40af')),
         ('TEXTCOLOR', (0,0), (-1,0), colors.white),
         ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-        ('BOTTOMPADDING', (0,0), (-1,0), 6),
-        ('BACKGROUND', (0,1), (-1,-1), colors.HexColor('#f8fafc')),
-        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#e2e8f0')),
-        ('FONTSIZE', (0,0), (-1,-1), 9),
+        ('BOTTOMPADDING', (0,0), (-1,0), 8),
+        ('TOPPADDING', (0,0), (-1,0), 8),
+        ('BACKGROUND', (0,1), (-1,-1), colors.HexColor('#f1f5f9')),
+        ('GRID', (0,0), (-1,-1), 1, colors.HexColor('#cbd5e1')),
+        ('FONTSIZE', (0,0), (-1,-1), 10),
         ('ALIGN', (0,0), (-1,-1), 'LEFT'),
-        ('PADDING', (0,0), (-1,-1), 6)
+        ('PADDING', (0,0), (-1,-1), 8),
+        # Row striping
+        ('BACKGROUND', (0,2), (-1,2), colors.white),
+        ('BACKGROUND', (0,4), (-1,4), colors.white),
+        ('BACKGROUND', (0,6), (-1,6), colors.white),
     ]))
     
     story.append(table)
-    story.append(Spacer(1, 15))
-    
-    # 4. Water Quality Stability trends
-    story.append(Paragraph("3. Water Quality & Telemetry Audit", section_style))
-    story.append(Paragraph(
-        "Real-time sensor logs across all managed ponds indicate stable water parameters: "
-        "Dissolved Oxygen levels remained above the critical threshold (> 5.0 mg/L) for 98.4% of active cycle hours. "
-        "Temperature values tracked steadily between 25.8°C and 27.2°C, aligning cleanly with optimal biological "
-        "metabolism parameters for Nile Tilapia in semi-intensive ponds.",
-        body_style
-    ))
-    
-    # 5. Strategic Recommendations
-    story.append(Paragraph("4. Strategic Action Recommendations", section_style))
-    story.append(Paragraph(
-        "• <b>Pond Aeration:</b> Maintain scheduled early-morning mechanical aeration during solar radiation valleys.<br/>"
-        "• <b>FCR Monitoring:</b> Audit feeding ratios in Ponds utilizing concrete structures to minimize waste.<br/>"
-        "• <b>Biosecurity:</b> Continue strict quarantine protocols upon any high-probability AI detection flags.",
-        body_style
-    ))
-    
     story.append(Spacer(1, 20))
-    story.append(Paragraph("<i>End of BlueVision Executive Production Report. Audited and certified.</i>", ParagraphStyle('F', parent=body_style, fontName='Helvetica-Oblique', alignment=1)))
+    
+    # 6. Strategic Recommendations
+    story.append(Paragraph("3. AI-Driven Action Recommendations", section_style))
+    story.append(Paragraph(
+        "• <b>Harvest Timing:</b> Ensure market price stability before beginning extraction of the projected yield.<br/>"
+        "• <b>Biosecurity:</b> Continue strict quarantine protocols for ponds showing infection risks.<br/>"
+        "• <b>Auditing:</b> Regularly update the average fish weight parameter in the dashboard as the cycle grows.",
+        body_style
+    ))
+    
+    story.append(Spacer(1, 30))
+    story.append(Paragraph("<i>End of BlueVision Executive Production Report. No mocked telemetry data is presented in this document.</i>", ParagraphStyle('F', parent=body_style, fontName='Helvetica-Oblique', alignment=1, textColor=colors.HexColor('#64748b'))))
     
     doc.build(story)
     pdf_bytes = buffer.getvalue()

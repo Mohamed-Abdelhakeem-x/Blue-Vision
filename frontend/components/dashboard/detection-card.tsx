@@ -114,6 +114,7 @@ export function DetectionCard({ token, onDetected, onPondSelected, triggerReload
           confidence_score: 0.95, // mock high confidence
           treatment_recommendations: response.prediction === "Abnormal" ? "Immediate isolation required." : "No action needed.",
           domain: "video",
+          fish_count: response.fish_count,
           analysis_note: `Tracked ${response.healthy_tracks} healthy fish and ${response.abnormal_tracks} abnormal fish across the video.`,
           is_low_confidence: false
         };
@@ -380,6 +381,23 @@ export function DetectionCard({ token, onDetected, onPondSelected, triggerReload
                   {formatBoostedConfidence(result.confidence_score, 1)}
                 </span>
               </div>
+
+              {/* Fish Count Badge */}
+              {result.fish_count !== undefined && result.fish_count > 0 && (
+                <div className="flex items-center gap-2 rounded-2xl border border-blue-500/20 bg-blue-500/5 dark:bg-blue-950/10 px-4 py-3">
+                  <div className="text-blue-500">
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-tertiary)]">Population Count</p>
+                    <p className="text-sm font-semibold text-[var(--text-primary)]">
+                      {result.fish_count} Fish Detected
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* DYNAMIC ALERT & ISOLATION PROTOCOLS CARD */}
               {!isHealthy && (

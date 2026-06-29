@@ -1,4 +1,4 @@
-from fastapi import APIRouter, File, UploadFile, HTTPException, Depends, Form
+from fastapi import APIRouter, File, UploadFile, HTTPException, Depends, Form, Request
 from fastapi.responses import JSONResponse
 import tempfile
 import os
@@ -27,6 +27,7 @@ router = APIRouter(prefix="/behavior-anomaly", tags=["Behavior Anomaly Detection
 
 @router.post("/predict")
 async def predict_anomaly(
+    request: Request,
     file: UploadFile = File(...),
     pond_id: str = Form(...),
     session: AsyncSession = Depends(get_session),
@@ -62,6 +63,7 @@ async def predict_anomaly(
 
         # Extract first frame for History Tab thumbnail
         file_hash = "video_behavior_scan"
+        fish_count = 0
         try:
             cap = cv2.VideoCapture(in_path)
             ret, frame = cap.read()
@@ -73,6 +75,12 @@ async def predict_anomaly(
                     digest = hashlib.sha256(frame_bytes).hexdigest()
                     persist_scan_image(image_sha256=digest, image_bytes=frame_bytes)
                     file_hash = digest
+                    
+                    # Run the YOLO fish count on the first frame!
+                    ai_service = getattr(request.app.state, "ai_service", None)
+                    if ai_service:
+                        fish_detection = ai_service.detect_fish(frame_bytes)
+                        fish_count = fish_detection.get("fish_count", 0)
         except Exception:
             pass # Fallback to default if frame extraction fails
 
@@ -98,6 +106,7 @@ async def predict_anomaly(
             upload_id=upload.id,
             suitability_score=0.95,
             risk_level="high" if is_abnormal else "low",
+            fish_count=fish_count,
         )
         session.add(analysis)
         await session.flush()
@@ -138,6 +147,7 @@ async def predict_anomaly(
             "prediction": result["prediction"],
             "healthy_tracks": result["healthy_tracks"],
             "abnormal_tracks": result["abnormal_tracks"],
+            "fish_count": fish_count,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { TrendingDown, Coins, Percent, FileText, ArrowRight, Waves, Loader2, Sparkles, Info, Edit2, Check, X } from "lucide-react";
-import { getBiAnalytics, downloadTreasureReport, updateMarketPrice } from "@/lib/api";
+import { TrendingDown, Percent, FileText, ArrowRight, Waves, Loader2, Sparkles, Info, Coins, Check, X, Edit2 } from "lucide-react";
+import { getBiAnalytics, downloadTreasureReport, updateFarmMetrics } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 
 interface BiData {
@@ -13,17 +13,20 @@ interface BiData {
   mortality_rate_percent: number;
   financial_loss_egp: number;
   yield_projections_tons: number;
-  disease_trends: Array<{ disease: string; loss_egp: number }>;
   market_price_egp: number;
+  average_fish_weight_grams: number;
+  disease_trends: Array<{ disease: string; loss_egp: number }>;
 }
 
 export function OwnerBiDashboard() {
   const [data, setData] = useState<BiData | null>(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
-  const [isEditingPrice, setIsEditingPrice] = useState(false);
+  const [isEditingMetrics, setIsEditingMetrics] = useState(false);
   const [newPrice, setNewPrice] = useState("");
-  const [updatingPrice, setUpdatingPrice] = useState(false);
+  const [newWeight, setNewWeight] = useState("");
+  const [updatingMetrics, setUpdatingMetrics] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const loadBiDetails = async () => {
     try {
@@ -52,19 +55,31 @@ export function OwnerBiDashboard() {
     }
   };
 
-  const handleUpdatePrice = async () => {
+  const handleUpdateMetrics = async () => {
     try {
-      if (!newPrice || isNaN(Number(newPrice)) || Number(newPrice) < 0) return;
-      setUpdatingPrice(true);
-      await updateMarketPrice(Number(newPrice));
-      setIsEditingPrice(false);
+      const price = Number(newPrice);
+      const weight = Number(newWeight);
+      if (isNaN(price) || price < 10 || price > 2000) {
+        setErrorMsg("Price must be between 10 and 2,000 EGP/kg");
+        return;
+      }
+      if (isNaN(weight) || weight < 1 || weight > 5000) {
+        setErrorMsg("Weight must be between 1g and 5,000g");
+        return;
+      }
+      
+      setErrorMsg("");
+      setUpdatingMetrics(true);
+      await updateFarmMetrics(price, weight);
+      setIsEditingMetrics(false);
       await loadBiDetails(); // Reload data to get new projections
     } catch (err) {
-      console.error("Error updating price:", err);
+      console.error("Error updating farm metrics:", err);
     } finally {
-      setUpdatingPrice(false);
+      setUpdatingMetrics(false);
     }
   };
+
 
   if (loading && !data) {
     return (
@@ -81,10 +96,11 @@ export function OwnerBiDashboard() {
     mortality_rate_percent: 3.5,
     financial_loss_egp: 54000,
     yield_projections_tons: 15.6,
+    market_price_egp: 95,
+    average_fish_weight_grams: 450,
     disease_trends: [
       { disease: "Sick / Infected Biomass", loss_egp: 54000 }
-    ],
-    market_price_egp: 95
+    ]
   };
 
   const infectedCount = Math.floor(d.total_biomass_count * (d.mortality_rate_percent / 100));
@@ -155,6 +171,8 @@ export function OwnerBiDashboard() {
 
         </div>
 
+
+
         {/* Financial Revenue Loss */}
         <div className="rounded-2xl border border-red-500/20 bg-[var(--card-bg)] p-5 relative flex flex-col justify-between">
           <div className="flex items-start justify-between gap-4">
@@ -175,45 +193,70 @@ export function OwnerBiDashboard() {
             </div>
           </div>
           <div className="mt-3 flex items-center justify-between border-t border-black/5 dark:border-white/5 pt-2.5">
-            <span className="text-[10px] text-zinc-500">Market Target:</span>
-            {isEditingPrice ? (
-              <div className="flex items-center gap-1.5">
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  className="w-16 h-6 px-1.5 text-xs font-bold text-zinc-800 dark:text-zinc-200 bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded focus:outline-none focus:border-blue-500"
-                  value={newPrice}
-                  onChange={(e) => setNewPrice(e.target.value)}
-                  disabled={updatingPrice}
-                  autoFocus
-                />
-                {updatingPrice ? (
-                  <Loader2 className="h-3 w-3 animate-spin text-zinc-400" />
-                ) : (
-                  <>
-                    <button onClick={handleUpdatePrice} className="p-1 rounded bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20">
-                      <Check className="h-3 w-3" />
-                    </button>
-                    <button onClick={() => setIsEditingPrice(false)} className="p-1 rounded bg-red-500/10 text-red-500 hover:bg-red-500/20">
-                      <X className="h-3 w-3" />
-                    </button>
-                  </>
-                )}
+            {isEditingMetrics ? (
+              <div className="flex flex-col gap-2 w-full">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-zinc-500">Market Price (EGP/kg):</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    className="w-16 h-6 px-1.5 text-xs font-bold text-zinc-800 dark:text-zinc-200 bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded focus:outline-none focus:border-blue-500"
+                    value={newPrice}
+                    onChange={(e) => setNewPrice(e.target.value)}
+                    disabled={updatingMetrics}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-zinc-500">Avg Fish Weight (g):</span>
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    className="w-16 h-6 px-1.5 text-xs font-bold text-zinc-800 dark:text-zinc-200 bg-black/5 dark:bg-white/10 border border-black/10 dark:border-white/10 rounded focus:outline-none focus:border-blue-500"
+                    value={newWeight}
+                    onChange={(e) => setNewWeight(e.target.value)}
+                    disabled={updatingMetrics}
+                  />
+                </div>
+                <div className="flex flex-col gap-2 w-full">
+                  {errorMsg && (
+                    <div className="text-[10px] text-red-500 font-bold bg-red-500/10 p-1.5 rounded text-center">
+                      {errorMsg}
+                    </div>
+                  )}
+                  <div className="flex justify-end gap-1.5 mt-1">
+                    {updatingMetrics ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-zinc-400" />
+                    ) : (
+                      <>
+                        <button onClick={handleUpdateMetrics} className="p-1 rounded bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20">
+                          <Check className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => { setIsEditingMetrics(false); setErrorMsg(""); }} className="p-1 rounded bg-red-500/10 text-red-500 hover:bg-red-500/20">
+                          <X className="h-4 w-4" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold text-red-400">
-                  ~{d.market_price_egp} EGP / kg
-                </span>
+              <>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] text-zinc-500">Metrics Target:</span>
+                  <span className="text-xs font-bold text-red-400">
+                    ~{d.market_price_egp} EGP/kg @ {d.average_fish_weight_grams}g
+                  </span>
+                </div>
                 <button 
-                  onClick={() => { setIsEditingPrice(true); setNewPrice(d.market_price_egp.toString()); }}
-                  className="p-1 rounded bg-amber-500/10 text-amber-600 dark:text-amber-500 hover:bg-amber-500/20 transition-colors flex items-center justify-center border border-amber-500/20 shadow-sm"
-                  title="Edit Market Price"
+                  onClick={() => { setIsEditingMetrics(true); setNewPrice(d.market_price_egp.toString()); setNewWeight(d.average_fish_weight_grams.toString()); setErrorMsg(""); }}
+                  className="p-1.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-500 hover:bg-amber-500/20 transition-colors flex items-center justify-center border border-amber-500/20 shadow-sm self-end"
+                  title="Edit Market Price & Fish Weight"
                 >
                   <Edit2 className="h-3 w-3" />
                 </button>
-              </div>
+              </>
             )}
           </div>
         </div>
@@ -267,6 +310,7 @@ export function OwnerBiDashboard() {
             <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">{d.total_ponds} active</span>
           </div>
         </div>
+
       </div>
 
       <div className="mt-6">
