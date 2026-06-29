@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, EmailStr, field_validator
 
-UserRole = Literal["Owner", "Farm Manager", "AI Admin", "farmer", "expert", "admin", "developer"]
+UserRole = Literal["Owner", "Farm Manager", "farmer", "expert"]
 
 
 class UserResponse(BaseModel):
@@ -23,7 +23,6 @@ class UserResponse(BaseModel):
             # Map legacy roles to new RBAC roles
             if "Owner" in name or "farmer" in name.lower(): return "Owner"
             if "Expert" in name or "Manager" in name or "expert" in name.lower(): return "Farm Manager"
-            if "Development" in name or "Admin" in name or "admin" in name.lower(): return "AI Admin"
             return name
         return v
 
@@ -34,9 +33,6 @@ class UserRoleUpdateRequest(BaseModel):
     role: UserRole
 
 
-class RoleCodeUpdateRequest(BaseModel):
-    code: str
-    role: UserRole
 
 
 class UserProfilePostResponse(BaseModel):
@@ -68,8 +64,6 @@ class UserProfileDetailResponse(BaseModel):
             name = v.role_name
             if "Farmer" in name or "Manager" in name: return "farmer"
             if "Expert" in name: return "expert"
-            if "Admin" in name: return "admin"
-            if "Development" in name: return "developer"
             return name.lower()
         return v
 

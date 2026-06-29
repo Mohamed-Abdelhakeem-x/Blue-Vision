@@ -19,7 +19,6 @@ from app.models.user import User
 from app.models.role import Role
 from app.models.fish_farm import FishFarm
 from app.schemas.user import (
-    RoleCodeUpdateRequest,
     UserProfileDetailResponse,
     UserProfilePostResponse,
     UserResponse,
@@ -242,8 +241,6 @@ async def create_personal_farm(
 
 @router.get("", response_model=list[UserResponse])
 async def list_users(
-    # Mocking admin requirement for now until role permissions are fully established with new DB models
-    # _: User = Depends(require_roles("admin", "developer")), 
     session: AsyncSession = Depends(get_session),
 ) -> list[UserResponse]:
     result = await session.execute(select(User).order_by(User.created_at.desc()))
@@ -268,7 +265,6 @@ async def update_user_role(
     user_id: str,
     payload: UserRoleUpdateRequest,
     request: Request,
-    # current_user: User = Depends(require_roles("admin", "developer")),
     session: AsyncSession = Depends(get_session),
 ) -> UserResponse:
     result = await session.execute(select(User).where(User.id == user_id))
@@ -297,58 +293,4 @@ async def update_user_role(
     )
 
 
-@router.post("/self/role/by-code", response_model=UserResponse)
-async def update_own_role_by_code(
-    payload: RoleCodeUpdateRequest,
-    request: Request,
-    current_user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
-) -> UserResponse:
-    role_elevation_code = settings.role_elevation_code.strip()
-    if not role_elevation_code:
-        audit_event(
-            event="users.role_elevation",
-            outcome="denied",
-            request=request,
-            user_id=current_user.id,
-            reason="role_elevation_disabled",
-        )
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Role elevation is disabled")
 
-    if payload.code != role_elevation_code:
-        audit_event(
-            event="users.role_elevation",
-            outcome="denied",
-            request=request,
-            user_id=current_user.id,
-            reason="invalid_code",
-        )
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid authorization code")
-
-    # Fetch target role from database
-    role_stmt = select(Role).where(Role.role_name == payload.role)
-    target_role = (await session.execute(role_stmt)).scalar_one_or_none()
-    if not target_role:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Role '{payload.role}' not found"
-        )
-
-    current_user.role_id = target_role.id
-    session.add(current_user)
-    await session.commit()
-    await session.refresh(current_user)
-    audit_event(
-        event="users.role_elevation",
-        outcome="success",
-        request=request,
-        user_id=current_user.id,
-    )
-    return UserResponse(
-        id=current_user.id,
-        email=current_user.email,
-        full_name=current_user.full_name,
-        role=payload.role,
-        avatar_b64=load_profile_image_b64(current_user.avatar_sha256),
-        created_at=current_user.created_at,
-    )

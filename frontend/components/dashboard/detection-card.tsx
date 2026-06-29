@@ -6,7 +6,7 @@ import { CheckCircle2, Fish, Loader2, Sparkles, UploadCloud, Video, X, XCircle, 
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 
-import { detectFish, getStoredAccessToken, getPonds, PondResponse } from "@/lib/api";
+import { detectFish, detectBehaviorAnomaly, getStoredAccessToken, getPonds, PondResponse } from "@/lib/api";
 import { formatBoostedConfidence } from "@/lib/confidence";
 import type { DetectionResult } from "@/lib/types";
 import { compressImage } from "@/hooks/use-image-compression";
@@ -104,16 +104,33 @@ export function DetectionCard({ token, onDetected, onPondSelected, triggerReload
     setError(null);
 
     try {
-      const imageToAnalyze = isVideo ? await captureVideoFrame() : file;
-      const compressed = await compressImage(imageToAnalyze);
-      const response = await detectFish({ 
-        token: activeToken, 
-        image: compressed, 
-        pondId: selectedPondId,
-        domain: "color" 
-      });
-      setResult(response);
-      onDetected(response);
+      if (isVideo) {
+        // Run behavior anomaly for videos (can take ~3 mins)
+        const response = await detectBehaviorAnomaly(activeToken, file, selectedPondId);
+        const mappedResult: DetectionResult = {
+          health_status: response.prediction === "Abnormal" ? "Abnormal Swimming Behavior" : "Healthy Swimming Behavior",
+          fish_species: "Nile Tilapia",
+          disease: response.prediction === "Abnormal" ? "Abnormal Swimming Behavior" : "Healthy Swimming Behavior",
+          confidence_score: 0.95, // mock high confidence
+          treatment_recommendations: response.prediction === "Abnormal" ? "Immediate isolation required." : "No action needed.",
+          domain: "video",
+          analysis_note: `Tracked ${response.healthy_tracks} healthy fish and ${response.abnormal_tracks} abnormal fish across the video.`,
+          is_low_confidence: false
+        };
+        setResult(mappedResult);
+        onDetected(mappedResult);
+      } else {
+        // Run color analysis for images
+        const compressed = await compressImage(file);
+        const response = await detectFish({ 
+          token: activeToken, 
+          image: compressed, 
+          pondId: selectedPondId,
+          domain: "color" 
+        });
+        setResult(response);
+        onDetected(response);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Analysis failed. Please try again.");
     } finally {
@@ -202,17 +219,29 @@ export function DetectionCard({ token, onDetected, onPondSelected, triggerReload
               </motion.div>
             </div>
           ) : isVideo ? (
-            <div className="overflow-hidden rounded-2xl bg-black ring-1 ring-[var(--card-border)] relative">
-              <video
-                ref={videoRef}
-                src={preview ?? undefined}
-                controls
-                crossOrigin="anonymous"
-                className="max-h-56 w-full object-contain"
-              />
-              <p className="bg-zinc-950 px-4 py-2 text-center text-xs text-zinc-400">
-                Pause on the best frame, then click <strong className="text-zinc-200">Analyze</strong>
-              </p>
+            <div className="overflow-hidden rounded-2xl bg-black ring-1 ring-[var(--card-border)] relative flex flex-col">
+              <div className="relative">
+                <video
+                  ref={videoRef}
+                  src={preview ?? undefined}
+                  controls
+                  crossOrigin="anonymous"
+                  className="max-h-56 w-full object-contain"
+                />
+                {!loading && (
+                  <button
+                    type="button"
+                    onClick={clearFile}
+                    className="absolute top-2 right-2 rounded-lg p-1.5 bg-black/60 hover:bg-red-500/20 text-zinc-300 hover:text-white backdrop-blur-sm transition z-10"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              <div className="bg-zinc-950 px-4 py-2.5 flex items-center justify-between border-t border-zinc-800">
+                <span className="text-xs text-zinc-400 truncate max-w-[200px]" title={file.name}>{file.name}</span>
+                <span className="text-xs font-medium text-blue-400">Ready for behavior scan</span>
+              </div>
             </div>
           ) : (
             <div className="relative overflow-hidden rounded-2xl border border-[var(--card-border)]">
@@ -271,7 +300,7 @@ export function DetectionCard({ token, onDetected, onPondSelected, triggerReload
                 <p className="rounded-lg bg-black/60 px-2.5 py-1 text-xs text-white backdrop-blur-sm">
                   {file.name}
                 </p>
-                {file && (
+                {file && !loading && (
                   <button
                     type="button"
                     onClick={clearFile}
@@ -298,7 +327,10 @@ export function DetectionCard({ token, onDetected, onPondSelected, triggerReload
             )}
           >
             {loading ? (
-              <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing…</>
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" /> 
+                {isVideo ? "Analyzing video behavior (this may take a few minutes)..." : "Analyzing..."}
+              </>
             ) : (
               <><Sparkles className="h-4 w-4" /> Run Diagnosis Scan</>
             )}

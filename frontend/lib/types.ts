@@ -181,7 +181,7 @@ export interface ConversationData {
   messages: DirectMessage[];
 }
 
-export type UserRole = "Owner" | "Farm Manager" | "AI Admin";
+export type UserRole = "Owner" | "Farm Manager" | "farmer" | "expert";
 
 export interface AuthTokens {
   access_token: string;
@@ -193,7 +193,3 @@ export interface UserRoleUpdatePayload {
   role: UserRole;
 }
 
-export interface RoleCodeUpdatePayload {
-  code: string;
-  role: UserRole;
-}

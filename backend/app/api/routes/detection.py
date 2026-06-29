@@ -142,10 +142,11 @@ async def detect(
 
     is_healthy = "healthy" in health_status.lower()
     if not is_healthy:
+        pond_display = pond.name if pond.name else f"ID {pond.id[:8]}"
         alert = Alert(
             user_id=current_user.id,
             alert_type="AI Diagnostic anomaly",
-            message=f"High risk of {health_status} detected in Pond {pond.type} (ID: {pond.id[:8]}). Please trigger isolation protocols immediately."
+            message=f"High risk of {health_status} detected in Pond '{pond_display}'. Please trigger isolation protocols immediately."
         )
         session.add(alert)
 

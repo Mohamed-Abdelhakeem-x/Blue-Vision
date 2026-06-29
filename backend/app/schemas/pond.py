@@ -28,3 +28,8 @@ class PondResponse(PondBase):
     farm_id: str
 
     model_config = {"from_attributes": True}
+
+class EnvironmentalDataCreate(BaseModel):
+    dissolved_oxygen: float = Field(..., ge=0.0, le=20.0, description="DO in mg/L, realistically 0-20")
+    temperature: float = Field(..., ge=0.0, le=50.0, description="Temp in Celsius, realistically 0-50")
+    ph_level: float = Field(..., ge=0.0, le=14.0, description="pH level is 0-14")

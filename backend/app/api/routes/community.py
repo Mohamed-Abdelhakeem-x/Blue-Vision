@@ -16,6 +16,7 @@ from app.models.analysis_history import AnalysisHistory
 from app.models.biological_health import BiologicalHealth
 from app.models.species_identification import SpeciesIdentification
 from app.models.user import User
+from app.models.role import Role
 from app.schemas.community import (
     CommunityCommentCreate,
     CommunityCommentResponse,
@@ -286,11 +287,12 @@ async def get_post_details(
     comments_stmt = (
         select(CommunityComment, User.full_name.label("user_name"))
         .add_columns(
-            User.role.label("user_role"),
+            func.coalesce(Role.role_name, "farmer").label("user_role"),
             func.coalesce(comment_likes_subquery.c.likes_count, 0).label("likes_count"),
             case((comment_liked_subquery.c.comment_id.is_not(None), True), else_=False).label("liked_by_current_user"),
         )
         .join(User, User.id == CommunityComment.user_id)
+        .outerjoin(Role, Role.id == User.role_id)
         .outerjoin(comment_likes_subquery, comment_likes_subquery.c.comment_id == CommunityComment.id)
         .outerjoin(comment_liked_subquery, comment_liked_subquery.c.comment_id == CommunityComment.id)
         .where(CommunityComment.upload_id == post_id)

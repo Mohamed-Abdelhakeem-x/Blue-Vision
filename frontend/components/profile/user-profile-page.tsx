@@ -9,7 +9,7 @@ import {DashboardShell} from "@/components/dashboard/dashboard-shell";
 import {type DashboardNavItem} from "@/components/dashboard/dashboard-sidebar";
 import {Button} from "@/components/ui/button";
 import {useAuthSession} from "@/hooks/use-auth-session";
-import {fetchMyProfileDetail, updateMyProfile, elevateRole, storeUserRole, deleteMyAccount, logoutCurrentSession} from "@/lib/api";
+import {fetchMyProfileDetail, updateMyProfile, deleteMyAccount, logoutCurrentSession} from "@/lib/api";
 import {formatBoostedConfidence} from "@/lib/confidence";
 import {cn} from "@/lib/utils";
 import {getDashboardCopy} from "@/lib/dashboard-copy";
@@ -26,9 +26,7 @@ export function UserProfilePage() {
   const {token} = useAuthSession();
   const navItems = useMemo<DashboardNavItem[]>(() => [], []);
   const [fullName, setFullName] = useState("");
-  const [elevationCode, setElevationCode] = useState("");
-  const [elevationLoading, setElevationLoading] = useState(false);
-  const [elevationMessage, setElevationMessage] = useState<{ text: string; type: "error" | "success" } | null>(null);
+
   const [avatar, setAvatar] = useState<File | null>(null);
   const [isEditingName, setIsEditingName] = useState(false);
 
@@ -43,7 +41,7 @@ export function UserProfilePage() {
       updateMyProfile({
         token: token ?? "",
         fullName: fullName.trim() || profileQuery.data?.full_name || "",
-        role: (profileQuery.data?.role === "Owner" || profileQuery.data?.role === "Farm Manager" ? "farmer" : "expert") as any,
+        role: profileQuery.data?.role === "Owner" || profileQuery.data?.role === "Farm Manager" ? profileQuery.data?.role : "farmer",
         avatar
       }),
     onSuccess: async () => {
@@ -64,24 +62,7 @@ export function UserProfilePage() {
   const profile = profileQuery.data;
   const previewSrc = avatar ? URL.createObjectURL(avatar) : imageSrc(profile?.avatar_b64);
 
-  const handleElevate = async () => {
-    if (!elevationCode) return;
-    try {
-      setElevationLoading(true);
-      setElevationMessage(null);
-      const updatedProfile = await elevateRole(elevationCode, "AI Admin");
-      storeUserRole(updatedProfile.role);
-      setElevationMessage({ text: "Successfully elevated to AI Admin!", type: "success" });
-      setElevationCode("");
-      await queryClient.invalidateQueries({queryKey: ["my-profile"]});
-      // Force refresh to update navigation
-      window.location.reload();
-    } catch {
-      setElevationMessage({ text: "Invalid elevation code.", type: "error" });
-    } finally {
-      setElevationLoading(false);
-    }
-  };
+
 
   return (
     <DashboardShell
@@ -183,34 +164,7 @@ export function UserProfilePage() {
               </Button>
             </div>
 
-            {profile.role !== "AI Admin" && (
-              <div className="mt-8 pt-8 border-t border-[var(--card-border)] space-y-4">
-                <div>
-                  <h3 className="text-sm font-semibold text-[var(--text-primary)]">Elevate to Admin</h3>
-                  <p className="mt-1 text-xs text-[var(--text-secondary)]">
-                    If you are a Blue-Vision developer or database administrator, enter your role elevation code here to gain AI Admin access.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-3">
-                  <input
-                    type="password"
-                    value={elevationCode}
-                    onChange={(e) => setElevationCode(e.target.value)}
-                    placeholder="Enter elevation code..."
-                    className="w-full rounded-2xl border border-[var(--card-border)] bg-[var(--bg-secondary)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none focus:border-blue-600/40"
-                  />
-                  <Button type="button" onClick={handleElevate} disabled={elevationLoading || !elevationCode} className="w-full rounded-2xl bg-zinc-800 text-white hover:bg-zinc-700 dark:bg-zinc-200 dark:text-zinc-900 dark:hover:bg-zinc-300">
-                    {elevationLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                    Elevate Role
-                  </Button>
-                  {elevationMessage && (
-                    <div className={`rounded-lg px-3 py-2 text-sm mt-2 ${elevationMessage.type === "success" ? "bg-green-50 text-green-700 dark:bg-green-950/30 dark:text-green-400" : "bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-400"}`}>
-                      {elevationMessage.text}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+
 
             <div className="mt-8 pt-8 border-t border-red-500/20">
               <h3 className="text-sm font-semibold text-red-600 dark:text-red-400 mb-4">Danger Zone</h3>
@@ -243,22 +197,9 @@ export function UserProfilePage() {
               ) : (
                 profile.posts.map((post) => (
                   <div key={post.id} className="overflow-hidden rounded-[1.5rem] border border-[var(--card-border)] bg-[var(--bg-secondary)]">
-                    {post.image_b64 ? <img src={imageSrc(post.image_b64) ?? ""} alt={post.ai_fish_species} className="h-52 w-full object-cover" /> : null}
+                    {post.image_b64 ? <img src={imageSrc(post.image_b64) ?? ""} alt={post.ai_fish_species || "Post image"} className="h-52 w-full object-cover" /> : null}
                     <div className="space-y-3 p-4">
-                      <div className="grid gap-2 sm:grid-cols-3">
-                        <div>
-                          <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-tertiary)]">{copy.plant}</p>
-                          <p className="mt-1 font-semibold text-[var(--text-primary)]">{post.ai_fish_species}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-tertiary)]">{copy.disease}</p>
-                          <p className="mt-1 font-semibold text-[var(--text-primary)]">{post.ai_health_status}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs uppercase tracking-[0.14em] text-[var(--text-tertiary)]">{copy.confidence}</p>
-                          <p className="mt-1 font-semibold text-[var(--text-primary)]">{formatBoostedConfidence(post.ai_confidence_score)}</p>
-                        </div>
-                      </div>
+
                       <p className="text-sm leading-6 text-[var(--text-primary)]">{post.post_text}</p>
                       <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--text-secondary)]">
                         <span suppressHydrationWarning>{new Date(post.created_at.endsWith("Z") ? post.created_at : post.created_at + "Z").toLocaleString()}</span>

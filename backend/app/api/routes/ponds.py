@@ -10,7 +10,9 @@ from app.models.pond import Pond
 from app.models.fish_farm import FishFarm
 from app.models.farm_member import FarmMember
 from app.models.environmental_data import EnvironmentalData
-from app.schemas.pond import PondCreate, PondUpdate, PondResponse
+from app.models.alert import Alert
+from app.schemas.pond import PondCreate, PondUpdate, PondResponse, EnvironmentalDataCreate
+from app.services.water_quality import water_quality_analyzer
 
 router = APIRouter(prefix="/ponds", tags=["ponds"])
 
@@ -164,3 +166,52 @@ async def delete_pond(
     await session.delete(pond)
     await session.commit()
     return
+
+@router.post("/{pond_id}/telemetry", response_model=dict, status_code=status.HTTP_201_CREATED)
+async def post_telemetry(
+    pond_id: str,
+    payload: EnvironmentalDataCreate,
+    current_user: User = Depends(require_roles("Farm Manager")),
+    session: AsyncSession = Depends(get_session)
+):
+    farm_id = await get_user_farm_id(current_user, session)
+    
+    # Verify the pond exists and belongs to the farm manager's farm
+    pond = (await session.execute(
+        select(Pond).where(Pond.id == pond_id, Pond.farm_id == farm_id)
+    )).scalar_one_or_none()
+    
+    if not pond:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Pond not found or access denied."
+        )
+        
+    new_telemetry = EnvironmentalData(
+        pond_id=pond.id,
+        dissolved_oxygen=payload.dissolved_oxygen,
+        temperature=payload.temperature,
+        ph_level=payload.ph_level
+    )
+    session.add(new_telemetry)
+    
+    # Run AI Water Quality Analysis
+    status = water_quality_analyzer.analyze(
+        do=payload.dissolved_oxygen,
+        temp=payload.temperature,
+        ph=payload.ph_level
+    )
+    
+    # If the AI predicts the pond is 'At Risk', generate an alert for the manager
+    if status == "At Risk":
+        pond_display = pond.name if pond.name else f"ID {pond.id[:8]}"
+        alert = Alert(
+            user_id=current_user.id,
+            alert_type="AI Water Quality Anomaly",
+            message=f"Pond '{pond_display}' is at risk based on the latest water quality metrics. Please inspect immediately."
+        )
+        session.add(alert)
+
+    await session.commit()
+    
+    return {"status": "success", "message": "Telemetry updated successfully.", "ai_status": status}

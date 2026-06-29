@@ -9,14 +9,12 @@ import type {UserProfile, UserRole} from "@/lib/types";
 import {
   clearStoredTokens,
   fetchProfile,
-  fetchUsers,
   getStoredAccessToken,
   getStoredProfile,
   getStoredRole,
   logoutCurrentSession,
   storeUserRole,
   storeUserProfile,
-  updateUserRole,
   createFarm
 } from "@/lib/api";
 import {Button} from "@/components/ui/button";
@@ -28,7 +26,7 @@ import {type DashboardNavItem} from "@/components/dashboard/dashboard-sidebar";
 
 // New high-end dashboards and widgets
 import {OwnerBiDashboard} from "@/components/dashboard/owner-bi-dashboard";
-import {AdminMloPsDashboard} from "@/components/dashboard/admin-mlops-dashboard";
+
 import {PondManagement} from "@/components/farmer/pond-management";
 import {LiveTelemetry} from "@/components/farmer/live-telemetry";
 import {IncidentCenter} from "@/components/farmer/incident-center";
@@ -363,28 +361,7 @@ function ExpertPanel({copy}: {copy: (typeof ROLE_DASHBOARD_COPY)[AppLocale]}) {
   );
 }
 
-function AdminPanel({copy}: {copy: (typeof ROLE_DASHBOARD_COPY)[AppLocale]}) {
-  return (
-    <section id="admin-overview" data-dashboard-section className="mx-auto grid w-full max-w-7xl gap-4 px-4 py-6 md:grid-cols-4 scroll-mt-6">
-      <article className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-        <p className="text-xs uppercase tracking-[0.15em] text-zinc-500 dark:text-zinc-400">{copy.activeUsers}</p>
-        <p className="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-100">1,284</p>
-      </article>
-      <article className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-        <p className="text-xs uppercase tracking-[0.15em] text-zinc-500 dark:text-zinc-400">{copy.organizations}</p>
-        <p className="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-100">37</p>
-      </article>
-      <article className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-        <p className="text-xs uppercase tracking-[0.15em] text-zinc-500 dark:text-zinc-400">{copy.apiSuccess}</p>
-        <p className="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-100">99.97%</p>
-      </article>
-      <article className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-        <p className="text-xs uppercase tracking-[0.15em] text-zinc-500 dark:text-zinc-400">{copy.supportSla}</p>
-        <p className="mt-3 text-3xl font-semibold text-zinc-900 dark:text-zinc-100">94%</p>
-      </article>
-    </section>
-  );
-}
+
 
 function DeveloperPanel({user, copy}: {user: UserProfile | null; copy: (typeof ROLE_DASHBOARD_COPY)[AppLocale]}) {
   return (
@@ -414,58 +391,7 @@ function DeveloperPanel({user, copy}: {user: UserProfile | null; copy: (typeof R
   );
 }
 
-function RoleManager({
-  users,
-  currentUser,
-  onUpdate,
-  copy
-}: {
-  users: UserProfile[];
-  currentUser: UserProfile | null;
-  onUpdate: (userId: string, role: UserRole) => Promise<void>;
-  copy: (typeof ROLE_DASHBOARD_COPY)[AppLocale];
-}) {
-  return (
-    <section id="role-management" data-dashboard-section className="mx-auto mb-6 w-full max-w-7xl px-4 scroll-mt-6">
-      <article className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
-        <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">{copy.roleManagement}</h3>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">{copy.roleManagementDescription}</p>
 
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[680px] border-collapse text-left text-sm">
-            <thead>
-              <tr className="border-b border-zinc-200 dark:border-zinc-800">
-                <th className="pb-2 font-medium text-zinc-500 dark:text-zinc-400">{copy.userColumn}</th>
-                <th className="pb-2 font-medium text-zinc-500 dark:text-zinc-400">{copy.emailColumn}</th>
-                <th className="pb-2 font-medium text-zinc-500 dark:text-zinc-400">{copy.roleColumn}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.id} className="border-b border-zinc-100 last:border-b-0 dark:border-zinc-800/80">
-                  <td className="py-3 text-zinc-900 dark:text-zinc-100">{u.full_name}</td>
-                  <td className="py-3 text-zinc-600 dark:text-zinc-300">{u.email}</td>
-                  <td className="py-3">
-                    <select
-                      className="rounded-lg border border-zinc-300 bg-white px-2 py-1 text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
-                      value={u.role}
-                      onChange={(event) => void onUpdate(u.id, event.target.value as UserRole)}
-                      disabled={currentUser?.id === u.id}
-                    >
-                      <option value="Owner">Owner</option>
-                      <option value="Farm Manager">Farm Manager</option>
-                      <option value="AI Admin">AI Admin</option>
-                    </select>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </article>
-    </section>
-  );
-}
 
 export function RoleDashboard() {
   const locale = useLocale() as AppLocale;
@@ -476,7 +402,7 @@ export function RoleDashboard() {
   const [redirecting, setRedirecting] = useState<boolean>(false);
   const [role, setRole] = useState<UserRole | null>(null);
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [users, setUsers] = useState<UserProfile[]>([]);
+
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showBootLoader, setShowBootLoader] = useState(false);
@@ -515,12 +441,7 @@ export function RoleDashboard() {
       ];
     }
 
-    if (role === "AI Admin") {
-      return [
-        {id: "admin-overview", label: copy.navOperationsOverview, icon: "activity"},
-        {id: "role-management", label: copy.roleManagement, icon: "users"}
-      ];
-    }
+
 
     return [];
   }, [copy, role, t]);
@@ -622,12 +543,7 @@ export function RoleDashboard() {
         storeUserRole(profile.role);
         storeUserProfile(profile);
 
-        if (profile.role === "AI Admin") {
-          const allUsers = await fetchUsers(accessToken);
-          if (!cancelled) {
-            setUsers(allUsers);
-          }
-        }
+
 
         if (!cancelled) {
           setLoading(false);
@@ -660,27 +576,7 @@ export function RoleDashboard() {
     };
   }, []);
 
-  const updateRole = async (userId: string, nextRole: UserRole) => {
-    if (!token) return;
-    try {
-      const updated = await updateUserRole({
-        token,
-        userId,
-        payload: {role: nextRole}
-      });
 
-      setUsers((prev) => prev.map((entry) => (entry.id === updated.id ? updated : entry)));
-
-      if (user?.id === updated.id) {
-        setUser(updated);
-        setRole(updated.role);
-        storeUserRole(updated.role);
-      }
-      pushNotice("success", copy.roleUpdated.replace("{role}", updated.role));
-    } catch (err) {
-      pushNotice("error", err instanceof Error ? err.message : copy.failedToUpdateRole);
-    }
-  };
 
   // Redirect in progress — render nothing so no content flashes before navigation.
   if (redirecting) return null;
@@ -825,7 +721,7 @@ export function RoleDashboard() {
                 />
               </div>
               <div className="space-y-6">
-                <LiveTelemetry pondId={activeTelemetryPondId} />
+                <LiveTelemetry pondId={activeTelemetryPondId} onUpdated={() => setReloadIncidents(prev => !prev)} />
                 <IncidentCenter triggerReload={reloadIncidents} />
               </div>
             </div>
@@ -842,13 +738,7 @@ export function RoleDashboard() {
           </section>
         ) : null}
 
-        {/* AI ADMIN VIEW: Infrastructure calibration and weights Hot-Swaps */}
-        {role === "AI Admin" ? (
-          <section className="mx-auto w-full max-w-7xl px-4 py-6 space-y-6">
-            <AdminMloPsDashboard />
-            <RoleManager users={users} currentUser={user} onUpdate={updateRole} copy={copy} />
-          </section>
-        ) : null}
+
       </DashboardShell>
     </>
   );

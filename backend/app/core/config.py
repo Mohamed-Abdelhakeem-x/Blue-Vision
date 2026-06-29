@@ -57,7 +57,7 @@ class Settings(BaseSettings):
     cors_allow_methods: str = "GET,POST,PUT,PATCH,DELETE,OPTIONS"
     cors_allow_headers: str = "Authorization,Content-Type,Accept,Origin,X-Request-ID"
     role_elevation_code: str = ""
-    security_csp: str = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+    security_csp: str = "default-src 'self'; script-src 'self' 'unsafe-inline' cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' cdn.jsdelivr.net; img-src 'self' data: fastapi.tiangolo.com; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'"
     security_hsts_max_age_seconds: int = 31536000
     sqlite_journal_mode: str = "WAL"
     sqlite_synchronous: str = "NORMAL"

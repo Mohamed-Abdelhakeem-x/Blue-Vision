@@ -31,12 +31,6 @@ export function IncidentCenter({ triggerReload }: { triggerReload?: boolean }) {
 
   useEffect(() => {
     loadIncidents();
-    // Pull active incidents every 6 seconds
-    const timer = setInterval(() => {
-      loadIncidents();
-    }, 6000);
-
-    return () => clearInterval(timer);
   }, [triggerReload]);
 
   const handleResolve = async (id: string) => {

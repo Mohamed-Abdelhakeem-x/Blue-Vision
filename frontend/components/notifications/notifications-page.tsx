@@ -30,6 +30,7 @@ export function NotificationsPage() {
     mutationFn: async (notificationId: string) => markNotificationRead({token: token ?? "", notificationId}),
     onSuccess: async () => {
       await queryClient.invalidateQueries({queryKey: ["notifications"]});
+      await queryClient.invalidateQueries({queryKey: ["sidebar-notifications"]});
     }
   });
 

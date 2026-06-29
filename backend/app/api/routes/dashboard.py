@@ -31,10 +31,7 @@ from reportlab.lib import colors
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
-# Simulated global Admin Calibration Threshold setting
-ADMIN_SETTINGS = {
-    "sensitivity_threshold": 75.0  # Default 75%
-}
+
 
 async def get_user_farm_id(user: User, session: AsyncSession) -> str:
     """Helper to resolve farm ID."""
@@ -92,7 +89,7 @@ async def history(
                 disease=health_status,
                 confidence_score=confidence_score,
                 recommendation="",
-                domain="color",
+                domain="video" if upload.file_type == "video" else "color",
                 created_at=analysis.analysis_date,
                 before_image_b64=load_scan_image_b64(upload.file_path),
             )
@@ -369,57 +366,6 @@ async def treasure_report(
         headers={"Content-Disposition": "attachment; filename=the_treasure_monthly_report.pdf"}
     )
 
-@router.get("/admin-analytics")
-async def admin_analytics(
-    session: AsyncSession = Depends(get_session),
-    current_user: User = Depends(require_roles("AI Admin")),
-) -> Dict[str, Any]:
-    """Provides model accuracy, confusion matrix data, and sensitivity levels."""
-    # Global metrics
-    active_users = 1284
-    organizations = 37
-    api_success_rate = 99.97
-    support_sla = 94
-    
-    # Confusion matrix values
-    confusion_matrix = {
-        "true_healthy": 952,
-        "false_infected": 18,  # False Positives
-        "true_infected": 314,
-        "false_healthy": 8     # False Negatives
-    }
-    
-    total_predictions = sum(confusion_matrix.values())
-    accuracy = (confusion_matrix["true_healthy"] + confusion_matrix["true_infected"]) / total_predictions if total_predictions > 0 else 0.985
-    false_positive_rate = confusion_matrix["false_infected"] / (confusion_matrix["true_healthy"] + confusion_matrix["false_infected"]) if (confusion_matrix["true_healthy"] + confusion_matrix["false_infected"]) > 0 else 0.018
-
-    return {
-        "active_users": active_users,
-        "organizations": organizations,
-        "api_success_rate": api_success_rate,
-        "support_sla": support_sla,
-        "model_accuracy_percent": round(accuracy * 100, 2),
-        "false_positive_rate_percent": round(false_positive_rate * 100, 2),
-        "confusion_matrix": confusion_matrix,
-        "current_sensitivity_threshold": ADMIN_SETTINGS["sensitivity_threshold"]
-    }
-
-@router.get("/admin-settings")
-async def get_admin_settings(
-    current_user: User = Depends(require_roles("AI Admin"))
-) -> Dict[str, Any]:
-    return ADMIN_SETTINGS
-
-@router.put("/admin-settings")
-async def update_admin_settings(
-    payload: Dict[str, float],
-    current_user: User = Depends(require_roles("AI Admin"))
-) -> Dict[str, Any]:
-    threshold = payload.get("sensitivity_threshold")
-    if threshold is None or not (0.0 <= threshold <= 100.0):
-        raise HTTPException(status_code=400, detail="Threshold must be between 0 and 100.")
-    ADMIN_SETTINGS["sensitivity_threshold"] = threshold
-    return {"status": "ok", "settings": ADMIN_SETTINGS}
 
 @router.get("/telemetry")
 async def get_telemetry(
@@ -427,10 +373,8 @@ async def get_telemetry(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(require_roles("Farm Manager")),
 ) -> Dict[str, Any]:
-    """Generates dynamically fluctuating environmental metrics for gauges."""
-    import random
+    """Fetches the latest environmental metrics for the pond gauges."""
     
-    # Try fetching real data first
     real_data = (await session.execute(
         select(EnvironmentalData)
         .where(EnvironmentalData.pond_id == pond_id)
@@ -447,19 +391,14 @@ async def get_telemetry(
         base_temp = 26.5
         base_ph = 7.4
         
-    # Introduce small realistic organic fluctuations (-0.15 to +0.15)
-    do_val = max(1.5, min(14.0, base_do + random.uniform(-0.2, 0.2)))
-    temp_val = max(10.0, min(42.0, base_temp + random.uniform(-0.15, 0.15)))
-    ph_val = max(4.0, min(11.0, base_ph + random.uniform(-0.1, 0.1)))
-    
     return {
-        "dissolved_oxygen": round(do_val, 2),
-        "temperature": round(temp_val, 1),
-        "ph_level": round(ph_val, 2),
+        "dissolved_oxygen": round(base_do, 2),
+        "temperature": round(base_temp, 2),
+        "ph_level": round(base_ph, 2),
         "limits": {
             "do_optimal_min": 5.0,
             "do_optimal_max": 8.0,
-            "temp_optimal_min": 24.0,
+            "temp_optimal_min": 25.0,
             "temp_optimal_max": 30.0,
             "ph_optimal_min": 6.5,
             "ph_optimal_max": 8.5
@@ -506,21 +445,6 @@ async def resolve_incident(
     await session.commit()
     return {"status": "ok", "message": "Incident marked as resolved successfully."}
 
-@router.post("/mlops/retrain")
-async def trigger_mlops_retrain(
-    current_user: User = Depends(require_roles("AI Admin"))
-) -> Dict[str, Any]:
-    """Simulates starting an MLOps automated model retraining pipeline."""
-    return {"status": "ok", "message": "MLOps automated retraining pipeline triggered successfully."}
-
-@router.post("/mlops/hotswap")
-async def hotswap_model_weights(
-    payload: Dict[str, str],
-    current_user: User = Depends(require_roles("AI Admin"))
-) -> Dict[str, Any]:
-    """Simulates hot-swapping deployed weights (.onnx/.pt file)."""
-    version = payload.get("version", "v1.2.0-rc")
-    return {"status": "ok", "message": f"Successfully hot-swapped active model weights to version {version}."}
 
 @router.get("/tips")
 async def tips() -> list[str]:

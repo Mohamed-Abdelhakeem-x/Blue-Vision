@@ -10,7 +10,6 @@ import type {
   DetectionResult,
   DirectMessage,
   FriendRequest,
-  RoleCodeUpdatePayload,
   ScanHistory,
   SocialOverview,
   UserProfileDetail,
@@ -70,7 +69,7 @@ export function clearStoredTokens(): void {
 
 export function getStoredRole(): UserRole | null {
   const value = window.localStorage.getItem(ROLE_KEY);
-  if (value === "Owner" || value === "Farm Manager" || value === "AI Admin") {
+  if (value === "Owner" || value === "Farm Manager") {
     return value as UserRole;
   }
   return null;
@@ -96,7 +95,7 @@ export function getStoredProfile(): UserProfile | null {
       typeof parsed.id === "string" &&
       typeof parsed.email === "string" &&
       typeof parsed.full_name === "string" &&
-      (parsed.role === "Owner" || parsed.role === "Farm Manager" || parsed.role === "AI Admin") &&
+      (parsed.role === "Owner" || parsed.role === "Farm Manager") &&
       typeof parsed.created_at === "string"
     ) {
       return parsed as UserProfile;
@@ -207,7 +206,7 @@ async function sleep(ms: number): Promise<void> {
   });
 }
 
-function timeoutSignal(timeoutMs: number, externalSignal?: AbortSignal): AbortSignal {
+function timeoutSignal(timeoutMs: number, externalSignal?: AbortSignal): { signal: AbortSignal, clear: () => void } {
   const controller = new AbortController();
   const timeoutId = globalThis.setTimeout(() => controller.abort(new DOMException("Request timeout", "TimeoutError")), timeoutMs);
 
@@ -233,7 +232,7 @@ function timeoutSignal(timeoutMs: number, externalSignal?: AbortSignal): AbortSi
     {once: true}
   );
 
-  return controller.signal;
+  return { signal: controller.signal, clear: () => globalThis.clearTimeout(timeoutId) };
 }
 
 function getApiBaseCandidates(originalBase: string): string[] {
@@ -292,14 +291,14 @@ function rememberWorkingApiBase(base: string): void {
   setPersistedApiBase(base);
 }
 
-async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+async function apiFetch(input: RequestInfo | URL, init?: RequestInit & { customTimeoutMs?: number }): Promise<Response> {
   const headers = new Headers(init?.headers);
   if (!headers.has("X-Request-ID")) {
     headers.set("X-Request-ID", generateRequestId());
   }
 
   const fetchWithPolicies = async (target: RequestInfo | URL): Promise<Response> => {
-    const signal = timeoutSignal(REQUEST_TIMEOUT_MS, init?.signal ?? undefined);
+    const { signal, clear } = timeoutSignal(init?.customTimeoutMs ?? REQUEST_TIMEOUT_MS, init?.signal ?? undefined);
     const requestInit: RequestInit = {
       ...init,
       headers,
@@ -307,12 +306,16 @@ async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Promise<R
       cache: init?.cache ?? "no-store"
     };
 
-    let response = await fetch(target, requestInit);
-    if (RETRYABLE_STATUS.has(response.status) && (init?.method ?? "GET").toUpperCase() === "GET") {
-      await sleep(250);
-      response = await fetch(target, requestInit);
+    try {
+      let response = await fetch(target, requestInit);
+      if (RETRYABLE_STATUS.has(response.status) && (init?.method ?? "GET").toUpperCase() === "GET") {
+        await sleep(250);
+        response = await fetch(target, requestInit);
+      }
+      return response;
+    } finally {
+      clear();
     }
-    return response;
   };
 
   const originalUrl = toUrlString(input);
@@ -593,7 +596,7 @@ export async function fetchMyProfileDetail(token: string): Promise<UserProfileDe
 export async function updateMyProfile(input: {
   token: string;
   fullName: string;
-  role: "farmer" | "expert";
+  role: UserRole;
   avatar?: File | null;
 }): Promise<UserProfile> {
   const formData = new FormData();
@@ -650,30 +653,7 @@ export async function updateUserRole(input: {
   return profile;
 }
 
-export async function redeemRoleByCode(input: {
-  token: string;
-  payload: RoleCodeUpdatePayload;
-}): Promise<UserProfile> {
-  const res = await authFetch(async (authToken) =>
-    apiFetch(`${API_BASE}/users/self/role/by-code`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...authHeaders(authToken)
-      },
-      body: JSON.stringify(input.payload)
-    }),
-    input.token
-  );
 
-  if (!res.ok) {
-    await handleApiError(res, "users/role/by-code", "Failed to apply role code");
-  }
-
-  const profile = (await res.json()) as UserProfile;
-  storeUserProfile(profile);
-  return profile;
-}
 
 export async function fetchHistory(token: string): Promise<ScanHistory[]> {
   const res = await authFetch(async (authToken) =>
@@ -1317,20 +1297,7 @@ export async function removeTeamMember(memberId: string) {
   }
 }
 
-export async function elevateRole(code: string, role: string = "AI Admin") {
-  const res = await authFetch((token) =>
-    apiFetch(`${API_BASE}/users/self/role/by-code`, {
-      method: "POST",
-      headers: { ...authHeaders(token), "Content-Type": "application/json" },
-      body: JSON.stringify({ code, role })
-    })
-  );
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(json.detail || "Failed to update role");
-  }
-  return json as UserProfile;
-}
+
 
 export async function createFarm(token: string): Promise<void> {
   const res = await fetch(`${API_BASE}/users/me/create-farm`, {
@@ -1471,51 +1438,7 @@ export async function downloadTreasureReport() {
   a.remove();
 }
 
-export async function getAdminAnalytics() {
-  const res = await authFetch((token) =>
-    apiFetch(`${API_BASE}/dashboard/admin-analytics`, {
-      method: "GET",
-      headers: authHeaders(token)
-    })
-  );
 
-  if (!res.ok) {
-    await handleApiError(res, "dashboard/admin-analytics", "Failed to load admin metrics");
-  }
-
-  return res.json();
-}
-
-export async function getAdminSettings() {
-  const res = await authFetch((token) =>
-    apiFetch(`${API_BASE}/dashboard/admin-settings`, {
-      method: "GET",
-      headers: authHeaders(token)
-    })
-  );
-
-  if (!res.ok) {
-    await handleApiError(res, "dashboard/admin-settings", "Failed to load admin settings");
-  }
-
-  return res.json() as Promise<{ sensitivity_threshold: number }>;
-}
-
-export async function updateAdminSettings(threshold: number) {
-  const res = await authFetch((token) =>
-    apiFetch(`${API_BASE}/dashboard/admin-settings`, {
-      method: "PUT",
-      headers: { ...authHeaders(token), "Content-Type": "application/json" },
-      body: JSON.stringify({ sensitivity_threshold: threshold })
-    })
-  );
-
-  if (!res.ok) {
-    await handleApiError(res, "dashboard/admin-settings", "Failed to update admin settings");
-  }
-
-  return res.json();
-}
 
 export async function getTelemetry(pondId: string) {
   const res = await authFetch((token) =>
@@ -1527,6 +1450,25 @@ export async function getTelemetry(pondId: string) {
 
   if (!res.ok) {
     await handleApiError(res, "dashboard/telemetry", "Failed to load telemetry sensor data");
+  }
+
+  return res.json();
+}
+
+export async function postTelemetry(pondId: string, data: { dissolved_oxygen: number; temperature: number; ph_level: number }) {
+  const res = await authFetch((token) =>
+    apiFetch(`${API_BASE}/ponds/${pondId}/telemetry`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...authHeaders(token)
+      },
+      body: JSON.stringify(data)
+    })
+  );
+
+  if (!res.ok) {
+    await handleApiError(res, "ponds/telemetry", "Failed to update telemetry sensor data");
   }
 
   return res.json();
@@ -1547,6 +1489,34 @@ export async function getIncidents() {
   return res.json() as Promise<Array<{ id: string; alert_type: string; message: string; created_at: string }>>;
 }
 
+export async function detectBehaviorAnomaly(token: string, file: File, pondId: string) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("pond_id", pondId);
+
+  const res = await apiFetch(`${API_BASE}/behavior-anomaly/predict`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${token}`
+      // Note: Do not set Content-Type to application/json, browser will set multipart/form-data
+    },
+    body: formData,
+    customTimeoutMs: 300000 // 5 minutes for video analysis
+  });
+
+  if (!res.ok) {
+    await handleApiError(res, "behavior-anomaly/predict", "Failed to analyze video behavior");
+  }
+
+  return res.json() as Promise<{
+    status: string;
+    filename: string;
+    prediction: string;
+    healthy_tracks: number;
+    abnormal_tracks: number;
+  }>;
+}
+
 export async function resolveIncident(alertId: string) {
   const res = await authFetch((token) =>
     apiFetch(`${API_BASE}/dashboard/incidents/${alertId}/resolve`, {
@@ -1562,36 +1532,7 @@ export async function resolveIncident(alertId: string) {
   return res.json();
 }
 
-export async function triggerMlopsRetrain() {
-  const res = await authFetch((token) =>
-    apiFetch(`${API_BASE}/dashboard/mlops/retrain`, {
-      method: "POST",
-      headers: authHeaders(token)
-    })
-  );
 
-  if (!res.ok) {
-    await handleApiError(res, "dashboard/mlops/retrain", "Failed to trigger MLOps retraining");
-  }
-
-  return res.json();
-}
-
-export async function hotswapModelWeights(version: string) {
-  const res = await authFetch((token) =>
-    apiFetch(`${API_BASE}/dashboard/mlops/hotswap`, {
-      method: "POST",
-      headers: { ...authHeaders(token), "Content-Type": "application/json" },
-      body: JSON.stringify({ version })
-    })
-  );
-
-  if (!res.ok) {
-    await handleApiError(res, "dashboard/mlops/hotswap", "Failed to hotswap weights");
-  }
-
-  return res.json();
-}
 
 export async function getChatSessions(token: string) {
   const res = await authFetch(async (authToken) =>

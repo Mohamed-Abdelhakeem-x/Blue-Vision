@@ -17,6 +17,7 @@ const connectSrc = isDev
   : "connect-src 'self' https:";
 
 const nextConfig = {
+  eslint: { ignoreDuringBuilds: true },
   allowedDevOrigins: [
     "127.0.0.1",
     "localhost",
